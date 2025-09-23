@@ -58,25 +58,23 @@ export default function CAIAdminDashboard() {
           <DashboardSection
             title="Solicitudes de Grupo"
             buttonText="Ver Todas"
-            onButtonClick={() => console.log("Ver todas las solicitudes")}
+            href="/Admin/Groups"
           >
             <div className="space-y-4">
               <GroupRequestCard
                 title="Club de Fotografía UC"
                 subtitle="Solicitado hace 2 días"
-                onReview={() => console.log("Revisar Club de Fotografía")}
+                id="1"
               />
               <GroupRequestCard
                 title="Comité de Sustentabilidad"
                 subtitle="Solicitado hace 1 semana"
-                onReview={() =>
-                  console.log("Revisar Comité de Sustentabilidad")
-                }
+                id="2"
               />
               <GroupRequestCard
-                title="Comité de Deportes"
+                title="Grupo de Debate UC"
                 subtitle="Solicitado hace 2 semanas"
-                onReview={() => console.log("Revisar Comité de Deportes")}
+                id="3"
               />
             </div>
           </DashboardSection>
@@ -84,7 +82,7 @@ export default function CAIAdminDashboard() {
           <DashboardSection
             title="Actividad Reciente"
             buttonText="Ver Historial"
-            onButtonClick={() => console.log("Ver historial completo")}
+            href="/Admin/History"
           >
             <div className="space-y-3">
               <ActivityCard
