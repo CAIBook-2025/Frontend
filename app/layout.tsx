@@ -45,6 +45,12 @@ export default function RootLayout({
                 >
                   Iniciar Sesión
                 </Link>
+                <Link
+                  href="/Admin"
+                  className="hidden md:block font-medium text-slate-600 hover:text-brand-primary transition-colors duration-300"
+                >
+                  Admin
+                </Link>
               </div>
             </nav>
           </header>
