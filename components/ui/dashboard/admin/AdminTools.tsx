@@ -27,7 +27,7 @@ export const AdminToolsCard = () => {
           </button>
         </Link>
 
-        <Link href="/admin/strikes" className="w-full">
+        <Link href="/Admin/Strikes" className="w-full">
           <button className="flex w-full items-center rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600">
             <AlertTriangle className="mr-2 h-4 w-4" />
             Sistema de Strikes

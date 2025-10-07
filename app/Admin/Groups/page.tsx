@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { TabNavigation } from "@/components/ui/tab-navigation"
-import { SearchBar } from "@/components/ui/admin/groups/search-bar"
+import { SearchBar } from "@/components/ui/search-bar"
 import { GroupRequestsTable, type GroupRequest } from "@/components/ui/admin/groups/group-requests-table"
 import { PageHeader } from "@/components/ui/page-header"
 import { GroupDetailsModal } from "@/components/ui/admin/groups/group-details-modal"
