@@ -1,7 +1,9 @@
 "use client"
 
 import { useMemo, useState } from "react";
-import { Search, MapPin, Layers, Users, CheckCircle2, Gauge, CalendarDays } from "lucide-react";
+import { MapPin, Layers, Users, CheckCircle2, Gauge, CalendarDays } from "lucide-react";
+
+import { SearchInput } from "@/components/ui/shared/search-input";
 import type { Room } from "@/types/room";
 
 export type RoomFilters = {
@@ -54,29 +56,29 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
   };
 
   return (
-    <div className={`bg-white p-4 sm:p-5 rounded-lg shadow-md ${className ?? ""}`}>
-      <h2 className="text-lg font-semibold mb-4">Filtros de salas</h2>
+    <div className={`rounded-xl border border-slate-200 bg-white p-6 shadow-sm ${className ?? ""}`}>
+      <h2 className="mb-4 text-lg font-semibold text-gray-800">Filtros de salas</h2>
 
       <div className="grid gap-4 md:grid-cols-3">
         {/* Búsqueda por nombre/ubicación */}
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-500" />
-          <input
-            type="text"
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+        <div>
+          <SearchInput
             placeholder="Buscar por sala o ubicación…"
             value={filters.query}
-            onChange={(e) => update("query", e.target.value)}
+            onChange={(value) => update("query", value)}
+            wrapperClassName="w-full"
+            inputClassName="py-2 text-sm"
+            iconClassName="text-slate-400"
           />
         </div>
 
         {/* Ubicación */}
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-500 shrink-0" />
+          <MapPin className="h-4 w-4 text-slate-500 shrink-0" />
           <select
             value={filters.location}
             onChange={(e) => update("location", e.target.value)}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todas las ubicaciones</option>
             {options.locations.map((loc) => (
@@ -87,11 +89,11 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
         {/* Piso */}
         <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-gray-500 shrink-0" />
+          <Layers className="h-4 w-4 text-slate-500 shrink-0" />
           <select
             value={filters.floor}
             onChange={(e) => update("floor", e.target.value)}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todos los pisos</option>
             {options.floors.map((f) => (
@@ -102,12 +104,12 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
         {/* Capacidad mínima */}
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-gray-500 shrink-0" />
+          <Users className="h-4 w-4 text-slate-500 shrink-0" />
           <input
             type="number"
             min={0}
             inputMode="numeric"
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="Capacidad mínima"
             value={filters.capacityMin}
             onChange={(e) =>
@@ -118,11 +120,11 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
         {/* Estado (status) */}
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-gray-500 shrink-0" />
+          <CheckCircle2 className="h-4 w-4 text-slate-500 shrink-0" />
           <select
             value={filters.status}
             onChange={(e) => update("status", e.target.value as RoomFilters["status"])}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todos los estados</option>
             <option value="Activa">Activa</option>
@@ -133,13 +135,13 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
         {/* Utilización mínima (%) */}
         <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-gray-500 shrink-0" />
+          <Gauge className="h-4 w-4 text-slate-500 shrink-0" />
           <input
             type="number"
             min={0}
             max={100}
             inputMode="numeric"
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="Utilización mínima (%)"
             value={filters.utilizationMin}
             onChange={(e) =>
@@ -150,12 +152,12 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
         {/* Reservas de hoy (mínimo) */}
         <div className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-gray-500 shrink-0" />
+          <CalendarDays className="h-4 w-4 text-slate-500 shrink-0" />
           <input
             type="number"
             min={0}
             inputMode="numeric"
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             placeholder="Mín. reservas hoy"
             value={filters.reservationsTodayMin}
             onChange={(e) =>
@@ -173,8 +175,8 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
               return (
                 <label
                   key={feat}
-                  className={`cursor-pointer select-none border rounded-full px-3 py-1 text-xs
-                    ${checked ? "bg-blue-50 border-blue-400 text-blue-700" : "bg-white border-gray-300 text-gray-700"}`}
+                className={`cursor-pointer select-none rounded-full border px-3 py-1 text-xs
+                    ${checked ? "bg-blue-50 border-blue-400 text-blue-700" : "bg-white border-slate-200 text-slate-700"}`}
                 >
                   <input
                     type="checkbox"

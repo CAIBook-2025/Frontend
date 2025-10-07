@@ -1,9 +1,10 @@
 "use client"
 
-import { CalendarDays, CheckCircle2, Users, Percent } from "lucide-react";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { EventHistoryTable, Event } from "@/components/ui/admin/history/events-history-table";
+import { CalendarDays, CheckCircle2, Percent, Users } from "lucide-react"
 
+import { StatCard } from "@/components/ui/dashboard/QuickStatCard"
+import { EventHistoryTable } from "@/components/ui/admin/history/events-history-table"
+import type { Event } from "@/types/history"
 
 export const events: Event[] = [
   {
@@ -27,7 +28,7 @@ export const events: Event[] = [
     timeRange: "15:00–16:30",
     registered: 60,
     attendees: 0,
-    status: "Activo", // aún no comienza / en curso según tu lógica
+    status: "Activo",
   },
   {
     id: "EVT-20251003-003",
@@ -146,52 +147,49 @@ export const events: Event[] = [
     attendees: 0,
     status: "Cancelada",
   },
-];
+]
 
-
-const totalEventos = events.length;
-const totalCompletados = events.filter(e => e.status === "Completada").length;
-const totalInscritos = events.reduce((acc, e) => acc + e.registered, 0);
-const totalAsistentes = events.reduce((acc, e) => acc + e.attendees, 0);
-const tasaAsistencia = Math.round((totalAsistentes * 100) / Math.max(1, totalInscritos));
+const totalEventos = events.length
+const totalCompletados = events.filter((event) => event.status === "Completada").length
+const totalInscritos = events.reduce((acc, event) => acc + event.registered, 0)
+const totalAsistentes = events.reduce((acc, event) => acc + event.attendees, 0)
+const tasaAsistencia = Math.round((totalAsistentes * 100) / Math.max(1, totalInscritos))
 
 export function EventSection() {
   return (
-    <>
-      <section>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            icon={<CalendarDays className="h-4 w-4" />}
-            value={totalEventos}
-            label="Eventos Totales"
-            footer="Este mes"
-            variant="blue"
-          />
-          <StatCard
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            value={totalCompletados}
-            label="Completados"
-            footer="Finalizados con éxito"
-            variant="yellow"
-          />
-          <StatCard
-            icon={<Users className="h-4 w-4" />}
-            value={totalInscritos}
-            label="Total Inscritos"
-            footer="Participantes"
-            variant="blue"
-          />
-          <StatCard
-            icon={<Percent className="h-4 w-4" />}
-            value={`${tasaAsistencia}%`}
-            label="Tasa de Asistencia"
-            footer="Efectividad"
-            variant="yellow"
-          />
-        </div>
+    <div className="space-y-8">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={<CalendarDays className="h-4 w-4" />}
+          value={totalEventos}
+          label="Eventos Totales"
+          footer="Este mes"
+          variant="blue"
+        />
+        <StatCard
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          value={totalCompletados}
+          label="Completados"
+          footer="Finalizados con éxito"
+          variant="yellow"
+        />
+        <StatCard
+          icon={<Users className="h-4 w-4" />}
+          value={totalInscritos}
+          label="Total Inscritos"
+          footer="Participantes"
+          variant="blue"
+        />
+        <StatCard
+          icon={<Percent className="h-4 w-4" />}
+          value={`${tasaAsistencia}%`}
+          label="Tasa de Asistencia"
+          footer="Efectividad"
+          variant="yellow"
+        />
       </section>
 
       <EventHistoryTable events={events} />
-    </>
-  );
+    </div>
+  )
 }

@@ -32,7 +32,7 @@ export const StatCard = ({
   const colors = colorVariants[variant]
 
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-4">
         <div
           className={`${colors.iconBg} ${colors.iconText} rounded-full p-3 w-12 h-12 flex items-center justify-center flex-shrink-0`}
@@ -40,9 +40,9 @@ export const StatCard = ({
           {icon}
         </div>
         <div className="flex-1">
-          <div className="text-gray-500 text-sm">{label}</div>
-          <div className="text-3xl font-bold text-gray-800 mb-1">{value}</div>
-          <div className="text-gray-400 text-xs mt-2">{footer}</div>
+          <div className="text-sm text-slate-500">{label}</div>
+          <div className="mb-1 text-3xl font-bold text-gray-800">{value}</div>
+          <div className="mt-2 text-xs text-slate-400">{footer}</div>
         </div>
       </div>
     </div>

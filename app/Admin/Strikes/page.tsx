@@ -1,40 +1,16 @@
 "use client";
 
-import { PageHeader } from "@/components/ui/page-header";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { Users, Ban, AlertTriangle, Flag, Plus } from "lucide-react";  // Añadimos Plus para el icono
-import { SearchBar } from "@/components/ui/search-bar";
 import { useState } from "react";
+import { Users, Ban, AlertTriangle, Flag, Plus } from "lucide-react";  // Añadimos Plus para el icono
+
 import { UserStrikesTable } from "@/components/ui/admin/strikes/strikes-table";
+import { ApplyStrikeModal } from "@/components/ui/admin/strikes/apply-strikes-modal";
 import { StrikeHistoryTable } from "@/components/ui/admin/strikes/strikes-history-table";
 import { UserStrikesHistoryModal } from "@/components/ui/admin/strikes/strikes-modal";
-import { ApplyStrikeModal } from "@/components/ui/admin/strikes/apply-strikes-modal";
-
-// Definimos el tipo de strike como una unión de los diferentes tipos de strike.
-type StrikeType = "No-show" | "Misuse" | "Late-cancellation";
-
-export interface Strike {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  type: StrikeType;
-  reason: string;
-  appliedBy: string;
-  date: string;
-}
-
-interface UserStrike {
-  id: string;
-  name: string;
-  email: string;
-  strikes: number;
-  maxStrikes: number;
-  lastStrike: string;
-  status: "Activo" | "Advertencia" | "Suspendido";
-  suspendedUntil?: string;
-  strikesHistory: Strike[]; // Cada usuario tiene su propio historial de strikes
-}
+import { PageHeader } from "@/components/ui/page-header";
+import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
+import { SearchBar } from "@/components/ui/search-bar";
+import type { Strike, UserStrike } from "@/types/strikes";
 
 const usersWithStrikes: UserStrike[] = [
   {
@@ -104,11 +80,8 @@ const usersWithStrikes: UserStrike[] = [
 ];
 
 const pageHeader = {
-  title: "Gestión de Strikes",
-  subtitle: "Administra y monitorea los strikes de usuarios",
-};
-
-export default function StrikesPage() {
+  title: "Gestiexport default function StrikesPage() {
+  const [searchQuery, setSearchQuery] = us   export default function StrikesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserStrike | null>(null);
 
@@ -138,7 +111,7 @@ export default function StrikesPage() {
   );
 
   // Abrir modal de historial de strikes
-  const handleViewHistory = (user: any) => {
+  const handleViewHistory = (user: UserStrike) => {
     setSelectedUser(user);
     setIsUserStrikesHistoryModalOpen(true);
   };
@@ -222,10 +195,10 @@ export default function StrikesPage() {
         />
 
         <ApplyStrikeModal
-          isOpen={isApplyStrikeModalOpen}
+       isOpen={isApplyStrikeModalOpen}
           onClose={() => setIsApplyStrikeModalOpen(false)}
-          onApply={(email, type, description) => {
-            console.log("Aplicar Strike:", email, type, description);
+          onApply={(payload) => {
+            console.log("Aplicar Strike:", payload.email, payload.type, payload.description);
             setIsApplyStrikeModalOpen(false);
           }}
         />

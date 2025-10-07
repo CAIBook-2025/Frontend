@@ -1,9 +1,10 @@
 "use client"
 
-import { Building2, CheckCircle2, UserX, Gauge } from "lucide-react";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { ReservationHistoryTable, Reservation } from "@/components/ui/admin/history/reservation-history-table";
+import { Building2, CheckCircle2, Gauge, UserX } from "lucide-react"
 
+import { StatCard } from "@/components/ui/dashboard/QuickStatCard"
+import { ReservationHistoryTable } from "@/components/ui/admin/history/reservation-history-table"
+import type { Reservation } from "@/types/history"
 
 const reservations: Reservation[] = [
   {
@@ -101,45 +102,48 @@ const reservations: Reservation[] = [
     checkInTime: "08:57",
     status: "Completada",
   },
-];
+]
+
+const totalReservas = reservations.length
+const totalCompletadas = reservations.filter((reservation) => reservation.status === "Completada").length
+const totalNoShow = reservations.filter((reservation) => reservation.status === "No Show").length
+const tasaUso = Math.round((totalCompletadas * 100) / Math.max(1, totalReservas))
 
 export function ReservationSection() {
   return (
-    <>
-      <section>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            icon={<Building2 className="h-4 w-4" />}
-            value={1}
-            label="Reservas Totales"
-            footer="Este mes"
-            variant="blue"
-          />
-          <StatCard
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            value={1}
-            label="Completadas"
-            footer="Check-ins exitosos"
-            variant="yellow"
-          />
-          <StatCard
-            icon={<UserX className="h-4 w-4" />}
-            value={1}
-            label="No Show"
-            footer="Sin presentarse"
-            variant="red"
-          />
-          <StatCard
-            icon={<Gauge className="h-4 w-4" />}
-            value={1}
-            label="Tasa de Uso"
-            footer="Efectividad"
-            variant="yellow"
-          />
-        </div>
+    <div className="space-y-8">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={<Building2 className="h-4 w-4" />}
+          value={totalReservas}
+          label="Reservas Totales"
+          footer="Este mes"
+          variant="blue"
+        />
+        <StatCard
+          icon={<CheckCircle2 className="h-4 w-4" />}
+          value={totalCompletadas}
+          label="Completadas"
+          footer="Check-ins exitosos"
+          variant="yellow"
+        />
+        <StatCard
+          icon={<UserX className="h-4 w-4" />}
+          value={totalNoShow}
+          label="No Show"
+          footer="Sin presentarse"
+          variant="red"
+        />
+        <StatCard
+          icon={<Gauge className="h-4 w-4" />}
+          value={`${tasaUso}%`}
+          label="Tasa de Uso"
+          footer="Efectividad"
+          variant="yellow"
+        />
       </section>
 
       <ReservationHistoryTable reservations={reservations} />
-    </>
-  );
+    </div>
+  )
 }

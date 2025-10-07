@@ -11,19 +11,22 @@ interface TabNavigationProps {
 
 export const TabNavigation = ({ tabs, onTabChange }: TabNavigationProps) => {
   return (
-    <div className="flex gap-6 border-b border-gray-200 mb-6">
-      {tabs.map((tab, index) => (
-        <button
-          key={index}
-          onClick={() => onTabChange(index)}
-          className={`pb-3 px-1 text-sm font-medium transition-colors ${
-            tab.active ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          {tab.label}
-          {typeof tab.count === "number" && ` (${tab.count})`}
-        </button>
-      ))}
+    <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+      <div className="inline-flex rounded-full bg-slate-100 p-1">
+        {tabs.map((tab, index) => (
+          <button
+            key={index}
+            onClick={() => onTabChange(index)}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+              tab.active ? "bg-white shadow text-blue-600" : "text-slate-600 hover:text-blue-600"
+            }`}
+          >
+            {tab.label}
+            {typeof tab.count === "number" && ` (${tab.count})`}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
+

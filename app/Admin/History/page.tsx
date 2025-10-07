@@ -20,15 +20,19 @@ export default function HistoryPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main className="min-h-screen bg-slate-50">
+      <div className="container mx-auto px-4 py-8 md:py-12 space-y-10">
         <PageHeader title={pageHeader.title} subtitle={pageHeader.subtitle} />
         <TabNavigation tabs={tabs} onTabChange={setActiveTab} />
-        
-        <FilterComponent />
 
-        {activeTab === 0 ? <ReservationSection /> : <EventSection />}
+        <section>
+          <FilterComponent />
+        </section>
+
+        <section>
+          {activeTab === 0 ? <ReservationSection /> : <EventSection />}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

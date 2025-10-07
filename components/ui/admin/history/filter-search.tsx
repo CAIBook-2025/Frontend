@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { SearchInput } from "@/components/ui/shared/search-input";
 
 export const FilterComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -7,19 +7,19 @@ export const FilterComponent = () => {
   const [dateFilter, setDateFilter] = useState("all");
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold mb-4">Filtros</h2>
+    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="mb-4 text-lg font-semibold text-gray-800">Filtros</h2>
 
       <div className="grid gap-4 md:grid-cols-3">
         {/* Campo de búsqueda */}
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-500" />
-          <input
-            type="text"
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+        <div>
+          <SearchInput
             placeholder="Buscar..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={setSearchTerm}
+            wrapperClassName="w-full"
+            inputClassName="py-2 text-sm"
+            iconClassName="text-slate-400"
           />
         </div>
 
@@ -28,7 +28,7 @@ export const FilterComponent = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todos los estados</option>
             <option value="completed">Completado</option>
@@ -43,7 +43,7 @@ export const FilterComponent = () => {
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
+            className="w-full rounded-lg border border-slate-200 p-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="all">Todo el tiempo</option>
             <option value="today">Hoy</option>
