@@ -1,88 +1,89 @@
 "use client"
 
-export interface Event {
-  id: string
-  eventName: string
-  group: string
-  room: string
-  date: string
-  timeRange: string
-  registered: number
-  attendees: number
-  checkInTime?: string
-  status: "Completada" | "Activo" | "Cancelada"
-}
+import {
+  Table,
+  TableCard,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  TableScrollArea,
+} from "@/components/ui/shared/table"
+import type { Event } from "@/types/history"
 
 interface EventHistoryTableProps {
   events: Event[]
 }
 
+const EVENT_STATUS_STYLES: Record<Event["status"], string> = {
+  Completada: "bg-blue-500 text-white",
+  Activo: "bg-yellow-500 text-white",
+  Cancelada: "bg-red-500 text-white",
+}
+
+const formatAttendancePercentage = (event: Event) => {
+  if (!event.registered) return "0% de asistencia"
+  const pct = Math.round((event.attendees * 100) / event.registered)
+  const clamped = Math.min(100, Math.max(0, pct))
+  return `${clamped}% de asistencia`
+}
+
 export const EventHistoryTable = ({ events }: EventHistoryTableProps) => {
-  const getStatusBadge = (status: Event["status"]) => {
-    const statusStyles = {
-      Completada: "bg-blue-500 text-white",
-      Activo: "bg-yellow-500 text-white",
-      Cancelada: "bg-red-500 text-white",
-    }
-
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
-  }
-
+  const renderStatusBadge = (status: Event["status"]) => (
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${EVENT_STATUS_STYLES[status]}`}>{status}</span>
+  )
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <TableCard>
       <div className="p-6 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Historial de Eventos</h2>
         <p className="text-sm text-gray-600 mt-1">Registro completo de todos los eventos realizados</p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+      <TableScrollArea>
+        <Table>
+          <TableHead>
             <tr>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Evento</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Sala</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Fecha</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Inscritos</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Asistencia</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Estado</th>
+              <TableHeaderCell>Evento</TableHeaderCell>
+              <TableHeaderCell>Sala</TableHeaderCell>
+              <TableHeaderCell>Fecha</TableHeaderCell>
+              <TableHeaderCell>Inscritos</TableHeaderCell>
+              <TableHeaderCell>Asistencia</TableHeaderCell>
+              <TableHeaderCell>Estado</TableHeaderCell>
             </tr>
-          </thead>
+          </TableHead>
           <tbody>
             {events.map((event) => (
-              <tr key={event.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-4 px-4">
+              <TableRow key={event.id}>
+                <TableCell>
                   <div>
                     <p className="font-medium text-gray-900 text-sm">{event.eventName}</p>
                     <p className="text-gray-600 text-xs mt-1">{event.group}</p>
                   </div>
-                </td>
-                <td className="py-4 px-4 text-sm text-gray-700">{event.room}</td>
-                <td className="py-4 px-4">
+                </TableCell>
+                <TableCell>{event.room}</TableCell>
+                <TableCell>
                   <div>
                     <p className="text-sm text-gray-900">{event.date}</p>
                     <p className="text-xs text-gray-500 mt-1">{event.timeRange}</p>
                   </div>
-                </td>
-                <td className="py-4 px-4 text-sm text-gray-700">{event.attendees} / {event.registered}</td>
-                <td className="py-4 px-4">
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-700">
+                    {event.attendees} / {event.registered}
+                  </span>
+                </TableCell>
+                <TableCell>
                   <div>
                     <p className="text-sm text-gray-900">{event.attendees}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                    {(() => {
-                        if (!event.registered) return "0% de asistencia";
-                        const pct = Math.round((event.attendees * 100) / event.registered);
-                        const clamped = Math.min(100, Math.max(0, pct));
-                        return `${clamped}% de asistencia`;
-                    })()}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{formatAttendancePercentage(event)}</p>
                   </div>
-                </td>
-                <td className="py-4 px-4">{getStatusBadge(event.status)}</td>
-              </tr>
+                </TableCell>
+                <TableCell>{renderStatusBadge(event.status)}</TableCell>
+              </TableRow>
             ))}
           </tbody>
-        </table>
-      </div>
-    </div>
+        </Table>
+      </TableScrollArea>
+    </TableCard>
   )
 }

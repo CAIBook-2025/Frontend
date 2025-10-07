@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Users, Ban, AlertTriangle, Flag, Plus } from "lucide-react";  // Añadimos Plus para el icono
+import { useState } from "react"
+import { Users, Ban, AlertTriangle, Flag, Plus } from "lucide-react"
 
-import { UserStrikesTable } from "@/components/ui/admin/strikes/strikes-table";
-import { ApplyStrikeModal } from "@/components/ui/admin/strikes/apply-strikes-modal";
-import { StrikeHistoryTable } from "@/components/ui/admin/strikes/strikes-history-table";
-import { UserStrikesHistoryModal } from "@/components/ui/admin/strikes/strikes-modal";
-import { PageHeader } from "@/components/ui/page-header";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { SearchBar } from "@/components/ui/search-bar";
-import type { Strike, UserStrike } from "@/types/strikes";
+import { UserStrikesTable } from "@/components/ui/admin/strikes/strikes-table"
+import { ApplyStrikeModal } from "@/components/ui/admin/strikes/apply-strikes-modal"
+import { StrikeHistoryTable } from "@/components/ui/admin/strikes/strikes-history-table"
+import { UserStrikesHistoryModal } from "@/components/ui/admin/strikes/strikes-modal"
+import { PageHeader } from "@/components/ui/page-header"
+import { StatCard } from "@/components/ui/dashboard/QuickStatCard"
+import { SearchBar } from "@/components/ui/search-bar"
+import type { UserStrike } from "@/types/strikes"
 
 const usersWithStrikes: UserStrike[] = [
   {
@@ -20,7 +20,7 @@ const usersWithStrikes: UserStrike[] = [
     strikes: 2,
     maxStrikes: 3,
     lastStrike: "10/12/2024",
-    status: "Advertencia" as const,
+    status: "Advertencia",
     strikesHistory: [
       {
         id: "1",
@@ -31,8 +31,8 @@ const usersWithStrikes: UserStrike[] = [
         reason: "No se presentó a reserva de sala confirmada",
         appliedBy: "Admin CAI",
         date: "10/12/2024",
-      }
-    ]
+      },
+    ],
   },
   {
     id: "2",
@@ -41,7 +41,7 @@ const usersWithStrikes: UserStrike[] = [
     strikes: 3,
     maxStrikes: 3,
     lastStrike: "08/12/2024",
-    status: "Suspendido" as const,
+    status: "Suspendido",
     suspendedUntil: "15/12/2024",
     strikesHistory: [
       {
@@ -53,8 +53,8 @@ const usersWithStrikes: UserStrike[] = [
         reason: "Uso inadecuado de sala de estudio (ruido excesivo)",
         appliedBy: "Admin CAI",
         date: "08/12/2024",
-      }
-    ]
+      },
+    ],
   },
   {
     id: "3",
@@ -63,7 +63,7 @@ const usersWithStrikes: UserStrike[] = [
     strikes: 1,
     maxStrikes: 3,
     lastStrike: "05/12/2024",
-    status: "Activo" as const,
+    status: "Activo",
     strikesHistory: [
       {
         id: "3",
@@ -74,68 +74,58 @@ const usersWithStrikes: UserStrike[] = [
         reason: "Cancelación tardía de reserva (menos de 2 horas)",
         appliedBy: "Admin CAI",
         date: "05/12/2024",
-      }
-    ]
-  }
-];
+      },
+    ],
+  },
+]
 
 const pageHeader = {
-  title: "Gestiexport default function StrikesPage() {
-  const [searchQuery, setSearchQuery] = us   export default function StrikesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserStrike | null>(null);
+  title: "Gestión de Strikes",
+  subtitle: "Administra y monitorea los strikes de usuarios",
+}
 
-  // Estado separado para cada modal
-  const [isUserStrikesHistoryModalOpen, setIsUserStrikesHistoryModalOpen] = useState(false);
-  const [isApplyStrikeModalOpen, setIsApplyStrikeModalOpen] = useState(false);
+export default function StrikesPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedUser, setSelectedUser] = useState<UserStrike | null>(null)
+  const [isUserStrikesHistoryModalOpen, setIsUserStrikesHistoryModalOpen] = useState(false)
+  const [isApplyStrikeModalOpen, setIsApplyStrikeModalOpen] = useState(false)
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    console.log("Buscar:", value);
-  };
-
-  // Filtrado de usuarios basado en la búsqueda
   const filteredUsers = usersWithStrikes.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
-  // Filtrado de historial de strikes basado en la búsqueda
   const filteredStrikes = usersWithStrikes.flatMap((user) =>
     user.strikesHistory.filter(
       (strike) =>
         strike.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        strike.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+        strike.userEmail.toLowerCase().includes(searchQuery.toLowerCase()),
+    ),
+  )
 
-  // Abrir modal de historial de strikes
   const handleViewHistory = (user: UserStrike) => {
-    setSelectedUser(user);
-    setIsUserStrikesHistoryModalOpen(true);
-  };
-
-  // Abrir modal de aplicar strike
-  const handleOpenApplyStrikeModal = () => {
-    setIsApplyStrikeModalOpen(true);
-  };
+    setSelectedUser(user)
+    setIsUserStrikesHistoryModalOpen(true)
+  }
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="min-h-screen bg-slate-50">
+        <div className="container mx-auto space-y-10 px-4 py-8 md:py-12">
           <PageHeader title={pageHeader.title} subtitle={pageHeader.subtitle} />
 
-          {/* Botón azul redondo para abrir el modal de aplicar strike */}
-          <button
-            onClick={handleOpenApplyStrikeModal}
-            className="fixed bottom-8 right-8 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="h-6 w-6" />
-          </button>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsApplyStrikeModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition-colors hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4" />
+              Aplicar strike
+            </button>
+          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               icon={<Users className="h-4 w-4" />}
               value={filteredUsers.length}
@@ -164,45 +154,49 @@ const pageHeader = {
               footer="Este mes"
               variant="blue"
             />
-          </div>
-          <SearchBar
-            placeholder="Buscar por nombre de usuario..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          <UserStrikesTable
-            users={filteredUsers}
-            onViewHistory={handleViewHistory} // Pasamos el handler al componente de la tabla
-          />
+          </section>
 
-          <div className="my-8">
-            <h3 className="text-lg font-semibold">Historial de Strikes</h3>
-            <p className="text-sm text-muted-foreground">A continuación se muestra el historial completo de strikes para cada usuario.</p>
-          </div>
-          <StrikeHistoryTable strikes={filteredStrikes} />
+          <section className="space-y-4">
+            <SearchBar
+              placeholder="Buscar por nombre de usuario..."
+              value={searchQuery}
+              onChange={setSearchQuery}
+              className="mb-0"
+            />
+            <UserStrikesTable users={filteredUsers} onViewHistory={handleViewHistory} />
+          </section>
+
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Historial de Strikes</h2>
+              <p className="text-sm text-slate-500">
+                A continuación se muestra el historial completo de strikes para cada usuario.
+              </p>
+            </div>
+            <StrikeHistoryTable strikes={filteredStrikes} />
+          </section>
         </div>
+      </main>
 
-        {/* Modales */}
-        <UserStrikesHistoryModal
-          isOpen={isUserStrikesHistoryModalOpen}
-          onClose={() => setIsUserStrikesHistoryModalOpen(false)}
-          userName={selectedUser?.name || ""}
-          userEmail={selectedUser?.email || ""}
-          currentStrikes={selectedUser?.strikes || 0}
-          maxStrikes={selectedUser?.maxStrikes || 0}
-          status={selectedUser?.status || "Activo"}
-          strikes={selectedUser?.strikesHistory || []}
-        />
+      <UserStrikesHistoryModal
+        isOpen={isUserStrikesHistoryModalOpen}
+        onClose={() => setIsUserStrikesHistoryModalOpen(false)}
+        userName={selectedUser?.name || ""}
+        userEmail={selectedUser?.email || ""}
+        currentStrikes={selectedUser?.strikes || 0}
+        maxStrikes={selectedUser?.maxStrikes || 0}
+        status={selectedUser?.status || "Activo"}
+        strikes={selectedUser?.strikesHistory || []}
+      />
 
-        <ApplyStrikeModal
-       isOpen={isApplyStrikeModalOpen}
-          onClose={() => setIsApplyStrikeModalOpen(false)}
-          onApply={(payload) => {
-            console.log("Aplicar Strike:", payload.email, payload.type, payload.description);
-            setIsApplyStrikeModalOpen(false);
-          }}
-        />
-      </div>
+      <ApplyStrikeModal
+        isOpen={isApplyStrikeModalOpen}
+        onClose={() => setIsApplyStrikeModalOpen(false)}
+        onApply={(payload) => {
+          console.log("Aplicar Strike:", payload.email, payload.type, payload.description)
+          setIsApplyStrikeModalOpen(false)
+        }}
+      />
     </>
-  );
+  )
 }

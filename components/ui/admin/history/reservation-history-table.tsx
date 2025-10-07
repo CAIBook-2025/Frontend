@@ -1,31 +1,34 @@
 "use client"
+
 import { Check } from "lucide-react"
 
-export interface Reservation {
-  id: string
-  userName: string
-  userEmail: string
-  room: string
-  date: string
-  timeRange: string
-  checkInTime?: string
-  status: "Completada" | "No Show" | "Cancelada"
-}
+import {
+  Table,
+  TableCard,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  TableScrollArea,
+} from "@/components/ui/shared/table"
+import type { Reservation } from "@/types/history"
 
 interface ReservationHistoryTableProps {
   reservations: Reservation[]
 }
 
-export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTableProps) => {
-  const getStatusBadge = (status: Reservation["status"]) => {
-    const statusStyles = {
-      Completada: "bg-blue-500 text-white",
-      "No Show": "bg-red-500 text-white",
-      Cancelada: "bg-yellow-500 text-white",
-    }
+const RESERVATION_STATUS_STYLES: Record<Reservation["status"], string> = {
+  Completada: "bg-blue-500 text-white",
+  "No Show": "bg-red-500 text-white",
+  Cancelada: "bg-yellow-500 text-white",
+}
 
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
-  }
+export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTableProps) => {
+  const renderStatusBadge = (status: Reservation["status"]) => (
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${RESERVATION_STATUS_STYLES[status]}`}>
+      {status}
+    </span>
+  )
 
   const renderCheckIn = (checkInTime?: string) => {
     if (!checkInTime) {
@@ -41,45 +44,45 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <TableCard>
       <div className="p-6 border-b border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900">Historial de Reservas</h2>
         <p className="text-sm text-gray-600 mt-1">Registro completo de todas las reservas de salas</p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+      <TableScrollArea>
+        <Table>
+          <TableHead>
             <tr>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Usuario</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Sala</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Fecha y Hora</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Check-in</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Estado</th>
+              <TableHeaderCell>Usuario</TableHeaderCell>
+              <TableHeaderCell>Sala</TableHeaderCell>
+              <TableHeaderCell>Fecha y Hora</TableHeaderCell>
+              <TableHeaderCell>Check-in</TableHeaderCell>
+              <TableHeaderCell>Estado</TableHeaderCell>
             </tr>
-          </thead>
+          </TableHead>
           <tbody>
             {reservations.map((reservation) => (
-              <tr key={reservation.id} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-4 px-4">
+              <TableRow key={reservation.id}>
+                <TableCell>
                   <div>
                     <p className="font-medium text-gray-900 text-sm">{reservation.userName}</p>
                     <p className="text-gray-600 text-xs mt-1">{reservation.userEmail}</p>
                   </div>
-                </td>
-                <td className="py-4 px-4 text-sm text-gray-700">{reservation.room}</td>
-                <td className="py-4 px-4">
+                </TableCell>
+                <TableCell>{reservation.room}</TableCell>
+                <TableCell>
                   <div>
                     <p className="text-sm text-gray-900">{reservation.date}</p>
                     <p className="text-xs text-gray-500 mt-1">{reservation.timeRange}</p>
                   </div>
-                </td>
-                <td className="py-4 px-4">{renderCheckIn(reservation.checkInTime)}</td>
-                <td className="py-4 px-4">{getStatusBadge(reservation.status)}</td>
-              </tr>
+                </TableCell>
+                <TableCell>{renderCheckIn(reservation.checkInTime)}</TableCell>
+                <TableCell>{renderStatusBadge(reservation.status)}</TableCell>
+              </TableRow>
             ))}
           </tbody>
-        </table>
-      </div>
-    </div>
+        </Table>
+      </TableScrollArea>
+    </TableCard>
   )
 }

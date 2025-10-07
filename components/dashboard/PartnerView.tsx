@@ -15,6 +15,13 @@ import {
   User,
   Shield
 } from 'lucide-react';
+import {
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalFooter,
+  ModalHeader,
+} from '@/components/ui/shared/modal';
 
 // --- Tipos ---
 interface GroupDetails {
@@ -357,35 +364,40 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
         </div>
       </section>
 
-      {/* Modal de Confirmación para Abandonar Grupo */}
-      {showLeaveConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-              <h3 className="text-lg font-bold text-gray-800">Confirmar Salida</h3>
-            </div>
-            <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas abandonar el grupo &quot;{groupDetails.name}&quot;? 
-              Perderás acceso a todos los eventos y contenido del grupo.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowLeaveConfirm(false)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleLeaveGroup}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Abandonar Grupo
-              </button>
-            </div>
+      <Modal
+        isOpen={showLeaveConfirm}
+        onClose={() => setShowLeaveConfirm(false)}
+        contentClassName="max-w-md w-full"
+      >
+        <ModalHeader
+          title="Confirmar Salida"
+          actions={<ModalCloseButton onClose={() => setShowLeaveConfirm(false)} aria-label="Cerrar confirmación" />}
+        />
+        <ModalBody className="space-y-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-500" />
+            <h3 className="text-lg font-bold text-gray-800">¿Abandonar grupo?</h3>
           </div>
-        </div>
-      )}
+          <p className="text-slate-600">
+            ¿Estás seguro de que deseas abandonar el grupo &quot;{groupDetails.name}&quot;? Perderás acceso a todos los
+            eventos y contenido del grupo.
+          </p>
+        </ModalBody>
+        <ModalFooter className="justify-end gap-3">
+          <button
+            onClick={() => setShowLeaveConfirm(false)}
+            className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleLeaveGroup}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Abandonar Grupo
+          </button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };

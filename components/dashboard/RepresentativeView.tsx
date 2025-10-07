@@ -17,6 +17,13 @@ import {
   UserCheck,
   AlertTriangle
 } from 'lucide-react';
+import {
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalFooter,
+  ModalHeader,
+} from '@/components/ui/shared/modal';
 
 // --- Tipos ---
 interface GroupDetails {
@@ -325,35 +332,40 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
         </div>
       </section>
 
-      {/* Modal de Confirmación para Eliminar */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-              <h3 className="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
-            </div>
-            <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.name}&quot;? 
-              Esta acción no se puede deshacer y se perderán todos los datos del grupo.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteGroup}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                Eliminar Grupo
-              </button>
-            </div>
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        contentClassName="max-w-md w-full"
+      >
+        <ModalHeader
+          title="Confirmar Eliminación"
+          actions={<ModalCloseButton onClose={() => setShowDeleteConfirm(false)} aria-label="Cerrar confirmación" />}
+        />
+        <ModalBody className="space-y-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-6 w-6 text-red-500" />
+            <h3 className="text-lg font-bold text-gray-800">¿Eliminar grupo?</h3>
           </div>
-        </div>
-      )}
+          <p className="text-slate-600">
+            ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.name}&quot;? Esta acción no se puede
+            deshacer y se perderán todos los datos del grupo.
+          </p>
+        </ModalBody>
+        <ModalFooter className="justify-end gap-3">
+          <button
+            onClick={() => setShowDeleteConfirm(false)}
+            className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleDeleteGroup}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Eliminar Grupo
+          </button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };

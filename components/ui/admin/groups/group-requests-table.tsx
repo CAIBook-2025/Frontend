@@ -2,38 +2,21 @@
 
 import { Eye } from "lucide-react"
 
-interface BaseGroupRequest {
-  id: string
-  groupName: string
-  description: string
-  date: string
-}
-
-interface PendingRequest extends BaseGroupRequest {
-  type: "pending"
-  applicantName: string
-  applicantEmail: string
-  status: "Pendiente"
-}
-
-interface ApprovedRequest extends BaseGroupRequest {
-  type: "approved"
-  responsibleName: string
-  responsibleEmail: string
-  approvalDate: string
-  members: number
-  events: number
-}
-
-interface RejectedRequest extends BaseGroupRequest {
-  type: "rejected"
-  applicantName: string
-  applicantEmail: string
-  rejectionDate: string
-  reason: string
-}
-
-type GroupRequest = PendingRequest | ApprovedRequest | RejectedRequest
+import {
+  Table,
+  TableCard,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  TableScrollArea,
+} from "@/components/ui/shared/table"
+import type {
+  ApprovedGroupRequest,
+  GroupRequest,
+  PendingGroupRequest,
+  RejectedGroupRequest,
+} from "@/types/groups"
 
 interface GroupRequestsTableProps {
   requests: GroupRequest[]
@@ -44,6 +27,12 @@ interface GroupRequestsTableProps {
   onManage?: (id: string) => void
 }
 
+const STATUS_STYLES = {
+  Pendiente: "bg-orange-100 text-orange-800",
+  Aprobado: "bg-green-100 text-green-800",
+  Rechazado: "bg-red-100 text-red-800",
+} as const
+
 export const GroupRequestsTable = ({
   requests,
   tableType,
@@ -52,21 +41,9 @@ export const GroupRequestsTable = ({
   onReject,
   onManage,
 }: GroupRequestsTableProps) => {
-  const getStatusBadge = (status: string) => {
-    const statusStyles = {
-      Pendiente: "bg-orange-100 text-orange-800",
-      Aprobado: "bg-green-100 text-green-800",
-      Rechazado: "bg-red-100 text-red-800",
-    }
-
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status as keyof typeof statusStyles]}`}
-      >
-        {status}
-      </span>
-    )
-  }
+  const getStatusBadge = (status: keyof typeof STATUS_STYLES) => (
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[status]}`}>{status}</span>
+  )
 
   const getTableHeaders = () => {
     switch (tableType) {
@@ -81,123 +58,129 @@ export const GroupRequestsTable = ({
     }
   }
 
+  const renderPendingRow = (request: PendingGroupRequest) => (
+    <TableRow key={request.id}>
+      <TableCell>
+        <div>
+          <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
+          <p className="text-gray-500 text-xs mt-1">{request.description}</p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div>
+          <p className="font-medium text-gray-900 text-sm">{request.applicantName}</p>
+          <p className="text-blue-600 text-xs mt-1">{request.applicantEmail}</p>
+        </div>
+      </TableCell>
+      <TableCell>{request.date}</TableCell>
+      <TableCell>{getStatusBadge(request.status)}</TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onView(request.id)}
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Ver detalles"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onApprove?.(request.id)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          >
+            Aprobar
+          </button>
+          <button
+            onClick={() => onReject?.(request.id)}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          >
+            Rechazar
+          </button>
+        </div>
+      </TableCell>
+    </TableRow>
+  )
+
+  const renderApprovedRow = (request: ApprovedGroupRequest) => (
+    <TableRow key={request.id}>
+      <TableCell>
+        <div>
+          <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
+          <p className="text-gray-500 text-xs mt-1">{request.description}</p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div>
+          <p className="font-medium text-gray-900 text-sm">{request.responsibleName}</p>
+          <p className="text-blue-600 text-xs mt-1">{request.responsibleEmail}</p>
+        </div>
+      </TableCell>
+      <TableCell>{request.approvalDate}</TableCell>
+      <TableCell>{request.members}</TableCell>
+      <TableCell>{request.events}</TableCell>
+      <TableCell>
+        <button
+          onClick={() => onManage?.(request.id)}
+          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+        >
+          Gestionar
+        </button>
+      </TableCell>
+    </TableRow>
+  )
+
+  const renderRejectedRow = (request: RejectedGroupRequest) => (
+    <TableRow key={request.id}>
+      <TableCell>
+        <div>
+          <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
+          <p className="text-gray-500 text-xs mt-1">{request.description}</p>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div>
+          <p className="font-medium text-gray-900 text-sm">{request.applicantName}</p>
+          <p className="text-blue-600 text-xs mt-1">{request.applicantEmail}</p>
+        </div>
+      </TableCell>
+      <TableCell>{request.rejectionDate}</TableCell>
+      <TableCell>{request.reason}</TableCell>
+    </TableRow>
+  )
+
   const renderTableRow = (request: GroupRequest) => {
     switch (request.type) {
       case "pending":
-        return (
-          <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-            <td className="py-4 px-4">
-              <div>
-                <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
-                <p className="text-gray-500 text-xs mt-1">{request.description}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4">
-              <div>
-                <p className="font-medium text-gray-900 text-sm">{request.applicantName}</p>
-                <p className="text-blue-600 text-xs mt-1">{request.applicantEmail}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.date}</td>
-            <td className="py-4 px-4">{getStatusBadge(request.status)}</td>
-            <td className="py-4 px-4">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onView(request.id)}
-                  className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="Ver detalles"
-                >
-                  <Eye className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onApprove?.(request.id)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                >
-                  Aprobar
-                </button>
-                <button
-                  onClick={() => onReject?.(request.id)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                >
-                  Rechazar
-                </button>
-              </div>
-            </td>
-          </tr>
-        )
-
+        return renderPendingRow(request)
       case "approved":
-        return (
-          <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-            <td className="py-4 px-4">
-              <div>
-                <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
-                <p className="text-gray-500 text-xs mt-1">{request.description}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4">
-              <div>
-                <p className="font-medium text-gray-900 text-sm">{request.responsibleName}</p>
-                <p className="text-blue-600 text-xs mt-1">{request.responsibleEmail}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.approvalDate}</td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.members}</td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.events}</td>
-            <td className="py-4 px-4">
-              <button
-                onClick={() => onManage?.(request.id)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              >
-                Gestionar
-              </button>
-            </td>
-          </tr>
-        )
-
+        return renderApprovedRow(request)
       case "rejected":
-        return (
-          <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
-            <td className="py-4 px-4">
-              <div>
-                <h4 className="font-medium text-gray-900 text-sm">{request.groupName}</h4>
-                <p className="text-gray-500 text-xs mt-1">{request.description}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4">
-              <div>
-                <p className="font-medium text-gray-900 text-sm">{request.applicantName}</p>
-                <p className="text-blue-600 text-xs mt-1">{request.applicantEmail}</p>
-              </div>
-            </td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.rejectionDate}</td>
-            <td className="py-4 px-4 text-sm text-gray-700">{request.reason}</td>
-          </tr>
-        )
-
+        return renderRejectedRow(request)
       default:
         return null
     }
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+    <TableCard>
+      <TableScrollArea>
+        <Table>
+          <TableHead>
             <tr>
               {getTableHeaders().map((header) => (
-                <th key={header} className="text-left py-3 px-4 font-medium text-gray-700 text-sm">
-                  {header}
-                </th>
+                <TableHeaderCell key={header}>{header}</TableHeaderCell>
               ))}
             </tr>
-          </thead>
+          </TableHead>
           <tbody>{requests.map((request) => renderTableRow(request))}</tbody>
-        </table>
-      </div>
-    </div>
+        </Table>
+      </TableScrollArea>
+    </TableCard>
   )
 }
 
-export type { GroupRequest, PendingRequest, ApprovedRequest, RejectedRequest }
+export type {
+  GroupRequest,
+  PendingGroupRequest as PendingRequest,
+  ApprovedGroupRequest as ApprovedRequest,
+  RejectedGroupRequest as RejectedRequest,
+} from "@/types/groups"
