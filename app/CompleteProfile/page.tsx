@@ -7,6 +7,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
 import { School } from 'lucide-react';
+import { useUser } from '@auth0/nextjs-auth0';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import React, { useEffect, useState } from 'react';
+
+
+const userDummy = {
+  auth0_id: '',
+  email: 'dummy@uc.cl',
+  hashed_password: '',
+  first_name: 'nombre',
+  last_name: 'apellido',
+  role: 'STUDENT',
+  is_representative: false,
+  is_moderator: false,
+  strikes: 0
+};
+
 
 // 1. ESQUEMA DE VALIDACIÓN CON ZOD
 const registerSchema = z.object({
@@ -49,8 +66,10 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    // resolver: zodResolver(registerSchema),
   });
+  const { user, error, isLoading } = useUser();
+  const [token, setToken] = useState<string | null>(null);
   
   const emailValue = watch('email');
   const confirmEmailValue = watch('confirmEmail');
@@ -60,9 +79,29 @@ export default function RegisterPage() {
   const confirmPasswordValue = watch('confirmPassword');
   const passwordsMatch = passwordValue === confirmPasswordValue && (confirmPasswordValue?.length ?? 0) > 0;
 
-  const onSubmit: SubmitHandler<RegisterFormData> = (data) => {
-    console.log("Formulario válido, enviando datos:", data);
-    alert('¡Registro exitoso! Revisa la consola para ver los datos.');
+  const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+    console.log("Formulario válido, enviando datos:", userDummy);
+    try {
+      userDummy.email = user?.email || '';
+      userDummy.auth0_id = user?.sub || '';
+      const response = await fetch('http://localhost:3003/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userDummy)
+      });
+      if (response.ok) {
+        alert('¡Registro exitoso! Revisa la consola para ver los datos.');
+        window.location.href = '/ProfileSSR';
+      } else {
+        console.error('Error en la respuesta del servidor:', response.statusText);
+      }
+    } catch (error) {
+      console.error("Error al enviar los datos:", error);
+    }
+    
   };
 
   const preventCopyPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
@@ -80,6 +119,19 @@ export default function RegisterPage() {
     if (['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End', '+'].includes(e.key)) return;
     if (!/\d/.test(e.key)) e.preventDefault();
   };
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const accessToken = await getAccessToken();
+        setToken(accessToken);
+        console.log('Access Token obtenido:', accessToken);
+      } catch (err) {
+        console.error('Error obteniendo el token de acceso:', err);
+      }
+    }
+    fetchToken();
+  }, []);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-brand-light p-4 py-12">
