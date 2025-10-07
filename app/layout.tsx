@@ -40,10 +40,16 @@ export default function RootLayout({
                   Sobre Nosotros
                 </Link>
                 <Link
-                  href="/LogIn"
+                  href="/auth/login"
                   className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
                 >
                   Iniciar Sesión
+                </Link>
+                <Link
+                  href="/Admin"
+                  className="hidden md:block font-medium text-slate-600 hover:text-brand-primary transition-colors duration-300"
+                >
+                  Admin
                 </Link>
               </div>
             </nav>
