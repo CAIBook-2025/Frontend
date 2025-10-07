@@ -1,12 +1,13 @@
-// app/login/page.tsx
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
-import { School } from 'lucide-react';
+import { School, Loader2 } from 'lucide-react'; // Importamos un ícono de carga
 
 // Aunque es un componente de cliente, podemos exportar metadata estática
 // (Esta es una característica más avanzada, pero es bueno saberla)
@@ -31,15 +32,65 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+// 2. FUNCIÓN DE SIMULACIÓN DE API
+// Esta función simula una llamada a tu backend.
+const fakeApiLogin = (data: LoginFormData): Promise<{ token: string; role: string }> => {
+  return new Promise((resolve, reject) => {
+    // Simulamos un retraso de red de 1.5 segundos
+    setTimeout(() => {
+      // Simulamos un 70% de probabilidad de éxito
+      if (Math.random() < 0.7) {
+        // Éxito: devolvemos un token falso y un rol
+        resolve({
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp1YW4gUGVyZXoiLCJpYXQiOjE1MTYyMzkwMjJ9.fake_jwt_signature",
+          role: "student", // Podría ser 'student' o 'admin'
+        });
+      } else {
+        // Fracaso: rechazamos la promesa con un mensaje de error
+        reject(new Error("Credenciales inválidas"));
+      }
+    }, 1500);
+  });
+};
+
+
+
+
 export default function LoginPage() {
+
+  const router = useRouter();
+  // 3. ESTADOS PARA MANEJAR LA UI
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit: SubmitHandler<LoginFormData> = (data) => {
-    console.log("Intento de login con:", data);
-    // Aquí iría la lógica para enviar los datos al backend para autenticar al usuario
-    alert('Intento de login. Revisa la consola para ver los datos.');
+  // 4. LÓGICA DE ENVÍO ACTUALIZADA
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    setIsLoading(true); // Ponemos el botón en estado de carga
+    setApiError(null);  // Reseteamos cualquier error anterior
+
+    try {
+      // Llamamos a nuestra función de simulación
+      const response = await fakeApiLogin(data);
+      
+      console.log("Login exitoso:", response);
+      // Aquí guardarías el token (ej. en cookies o en el estado global)
+      
+      // Redirigimos al Dashboard
+      router.push('/Student');
+
+    } catch (error) {
+      // Si la promesa fue rechazada (login fallido)
+      console.error("Error en el login:", error);
+      setApiError("El correo o la contraseña son incorrectos. Por favor, intenta de nuevo.");
+    
+    } finally {
+      // Esto se ejecuta siempre, tanto en éxito como en fracaso
+      setIsLoading(false); // Quitamos el estado de carga del botón
+    }
   };
 
   return (
@@ -58,6 +109,14 @@ export default function LoginPage() {
             Ingresa tus credenciales para acceder a la plataforma.
           </p>
         </div>
+
+        {/* Mensaje de error de la API */}
+        {apiError && (
+          <div className="mt-4 rounded-md border border-red-300 bg-red-50 p-3 text-center text-sm text-red-800">
+            {apiError}
+          </div>
+        )}
+
 
         {/* Formulario de Login */}
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
@@ -91,11 +150,17 @@ export default function LoginPage() {
           </div>
 
           <div>
+            {/* 5. BOTÓN INTELIGENTE */}
             <button
               type="submit"
-              className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-opacity hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+              disabled={isLoading} // Deshabilitamos el botón mientras carga
+              className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-all duration-300 hover:bg-opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              Iniciar Sesión
+              {isLoading ? (
+                <Loader2 className="h-6 w-6 animate-spin" /> // Mostramos el ícono girando
+              ) : (
+                'Iniciar Sesión' // Mostramos el texto normal
+              )}
             </button>
           </div>
         </form>
