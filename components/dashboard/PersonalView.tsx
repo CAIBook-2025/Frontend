@@ -54,7 +54,7 @@ export const PersonalView = () => {
           description="Busca y asegura un espacio de estudio para ti o tu grupo."
         />
         <ActionCard
-          href="Student/StudyRoomBooker"
+          href="Reservations"
           icon={<BookMarked className="h-6 w-6 text-blue-500" />}
           title="Ver mis reservas"
           description="Revisa tus reservas de salas, no se te vaya a olvidar!."
