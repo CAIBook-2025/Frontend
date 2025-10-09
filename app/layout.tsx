@@ -6,6 +6,7 @@ import Link from 'next/link'; // Importamos el componente Link
 import { School } from "lucide-react";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { auth0 } from "@/lib/auth0";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,11 +15,15 @@ export const metadata: Metadata = {
   description: "Plataforma para la reserva de salas y eventos de Ingeniería UC.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await auth0.getSession();
+  const user = session?.user || null;
+
   return (
     <html lang="es">
       <body className={inter.className}>
@@ -39,12 +44,21 @@ export default function RootLayout({
                 <Link href="/About" className="hidden md:block font-medium text-slate-600 hover:text-brand-primary transition-colors duration-300">
                   Sobre Nosotros
                 </Link>
-                <Link
-                  href="/auth/login?returnTo=/Callback-check"
-                  className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
-                >
-                  Iniciar Sesión
-                </Link>
+                {user ? (
+                  <Link
+                    href="/Profile"
+                    className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-opacity-90 transition-colors duration-300"
+                  >
+                    Perfil
+                  </Link>
+                ) : (
+                  <Link
+                    href="/auth/login?returnTo=/Callback-check"
+                    className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
+                  >
+                    Iniciar Sesión
+                  </Link>
+                )}
                 <Link
                   href="/Admin"
                   className="hidden md:block font-medium text-slate-600 hover:text-brand-primary transition-colors duration-300"

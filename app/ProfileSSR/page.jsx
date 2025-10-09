@@ -8,7 +8,7 @@ export default async function UserInfo() {
     if (user) {
         try {
             console.log('Fetching user data with access token:', session.tokenSet.accessToken);
-            const res = await fetch('http://localhost:3003/users/profile', {
+            const res = await fetch('http://localhost:3003/api/users/profile', {
                 headers: {
                     Authorization: `Bearer ${session.tokenSet.accessToken}`
                 }
@@ -18,14 +18,19 @@ export default async function UserInfo() {
             console.error('Error fetching user data:', error);
         }
     }
+    console.log('User data:', userData);
 
     return (
         <div>
             {user ? (
                 <>
-                    <p>Welcome, {user.name}!</p>
-                    <p>access token: {session.tokenSet.accessToken}</p>
-                    <p>Id token: {session.tokenSet.idToken}</p>
+                    <p>Welcome, {userData.first_name} {userData.last_name}!</p>
+                    <p>Your email: {userData.email}</p>
+                    <p>Your career: {userData.career}</p>
+                    <p>Your phone: {userData.phone}</p>
+                    <p>Your student number: {userData.student_number}</p>
+                    <p>Your role: {userData.role}</p>
+                    <p>Auth0 ID: {userData.auth0_id}</p>
                     <a href="/auth/logout">Logout</a>
                 </>
             ) : (

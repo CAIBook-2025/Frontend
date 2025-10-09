@@ -10,7 +10,7 @@ export default async function CallbackCheck() {
 
     const accessToken = session.tokenSet.accessToken;
     
-    const res = await fetch('http://localhost:3003/users/check', {
+    const res = await fetch('http://localhost:3003/api/users/check', {
         headers: {
             Authorization: `Bearer ${accessToken}`
         },
