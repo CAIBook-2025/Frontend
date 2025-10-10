@@ -1,39 +1,39 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
+import { useState } from 'react';
 
 interface ApplyStrikeModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onApply: (email: string, type: string, description: string) => void
+  isOpen: boolean;
+  onClose: () => void;
+  onApply: (email: string, type: string, description: string) => void;
 }
 
 export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalProps) {
-  const [email, setEmail] = useState("")
-  const [infractionType, setInfractionType] = useState("")
-  const [description, setDescription] = useState("")
+  const [email, setEmail] = useState('');
+  const [infractionType, setInfractionType] = useState('');
+  const [description, setDescription] = useState('');
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (email && infractionType && description) {
-      onApply(email, infractionType, description)
+      onApply(email, infractionType, description);
       // Reset form
-      setEmail("")
-      setInfractionType("")
-      setDescription("")
+      setEmail('');
+      setInfractionType('');
+      setDescription('');
     }
-  }
+  };
 
   const handleClose = () => {
-    setEmail("")
-    setInfractionType("")
-    setDescription("")
-    onClose()
-  }
+    setEmail('');
+    setInfractionType('');
+    setDescription('');
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -145,5 +145,5 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
         </form>
       </div>
     </div>
-  )
+  );
 }

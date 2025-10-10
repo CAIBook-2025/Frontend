@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import { Search } from "lucide-react"
+import { Search } from 'lucide-react';
 
 interface SearchBarProps {
-  placeholder: string
-  value: string
-  onChange: (value: string) => void
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export const SearchBar = ({ placeholder, value, onChange }: SearchBarProps) => {
@@ -20,5 +20,5 @@ export const SearchBar = ({ placeholder, value, onChange }: SearchBarProps) => {
         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
     </div>
-  )
-}
+  );
+};

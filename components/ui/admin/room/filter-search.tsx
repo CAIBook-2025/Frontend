@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { useMemo, useState } from "react";
-import { Search, MapPin, Layers, Users, CheckCircle2, Gauge, CalendarDays } from "lucide-react";
-import type { Room } from "@/types/room";
+import { useMemo, useState } from 'react';
+import { Search, MapPin, Layers, Users, CheckCircle2, Gauge, CalendarDays } from 'lucide-react';
+import type { Room } from '@/types/room';
 
 export type RoomFilters = {
-  query: string;                         // nombre o ubicación
-  location: string;                      // ubicación exacta o "all"
-  floor: string;                         // piso exacto o "all"
-  capacityMin: number | "";              // capacidad mínima
-  features: string[];                    // debe incluir todas las seleccionadas
-  status: "all" | "Activa" | "Mantenimiento" | "Deshabilitada";
-  utilizationMin: number | "";           // % mínimo de utilización (0–100)
-  reservationsTodayMin: number | "";     // mínimo de reservas hoy
+  query: string; // nombre o ubicación
+  location: string; // ubicación exacta o "all"
+  floor: string; // piso exacto o "all"
+  capacityMin: number | ''; // capacidad mínima
+  features: string[]; // debe incluir todas las seleccionadas
+  status: 'all' | 'Activa' | 'Mantenimiento' | 'Deshabilitada';
+  utilizationMin: number | ''; // % mínimo de utilización (0–100)
+  reservationsTodayMin: number | ''; // mínimo de reservas hoy
 };
 
 type Props = {
@@ -23,21 +23,21 @@ type Props = {
 
 export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) => {
   const [filters, setFilters] = useState<RoomFilters>({
-    query: "",
-    location: "all",
-    floor: "all",
-    capacityMin: "",
+    query: '',
+    location: 'all',
+    floor: 'all',
+    capacityMin: '',
     features: [],
-    status: "all",
-    utilizationMin: "",
-    reservationsTodayMin: "",
+    status: 'all',
+    utilizationMin: '',
+    reservationsTodayMin: '',
   });
 
   // Opciones derivadas desde la data (si viene)
   const options = useMemo(() => {
-    const locations = Array.from(new Set(rooms.map(r => r.location))).sort();
-    const floors = Array.from(new Set(rooms.map(r => r.floor))).sort();
-    const features = Array.from(new Set(rooms.flatMap(r => r.features))).sort();
+    const locations = Array.from(new Set(rooms.map((r) => r.location))).sort();
+    const floors = Array.from(new Set(rooms.map((r) => r.floor))).sort();
+    const features = Array.from(new Set(rooms.flatMap((r) => r.features))).sort();
     return { locations, floors, features };
   }, [rooms]);
 
@@ -49,12 +49,16 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
 
   const toggleFeature = (item: string) => {
     const set = new Set(filters.features);
-    set.has(item) ? set.delete(item) : set.add(item);
-    update("features", Array.from(set));
+    if (set.has(item)) {
+      set.delete(item);
+    } else {
+      set.add(item);
+    }
+    update('features', Array.from(set));
   };
 
   return (
-    <div className={`bg-white p-4 sm:p-5 rounded-lg shadow-md ${className ?? ""}`}>
+    <div className={`bg-white p-4 sm:p-5 rounded-lg shadow-md ${className ?? ''}`}>
       <h2 className="text-lg font-semibold mb-4">Filtros de salas</h2>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -66,7 +70,7 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
             placeholder="Buscar por sala o ubicación…"
             value={filters.query}
-            onChange={(e) => update("query", e.target.value)}
+            onChange={(e) => update('query', e.target.value)}
           />
         </div>
 
@@ -75,12 +79,14 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
           <MapPin className="h-4 w-4 text-gray-500 shrink-0" />
           <select
             value={filters.location}
-            onChange={(e) => update("location", e.target.value)}
+            onChange={(e) => update('location', e.target.value)}
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
           >
             <option value="all">Todas las ubicaciones</option>
             {options.locations.map((loc) => (
-              <option key={loc} value={loc}>{loc}</option>
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
             ))}
           </select>
         </div>
@@ -90,12 +96,14 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
           <Layers className="h-4 w-4 text-gray-500 shrink-0" />
           <select
             value={filters.floor}
-            onChange={(e) => update("floor", e.target.value)}
+            onChange={(e) => update('floor', e.target.value)}
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
           >
             <option value="all">Todos los pisos</option>
             {options.floors.map((f) => (
-              <option key={f} value={f}>{f}</option>
+              <option key={f} value={f}>
+                {f}
+              </option>
             ))}
           </select>
         </div>
@@ -110,9 +118,7 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
             placeholder="Capacidad mínima"
             value={filters.capacityMin}
-            onChange={(e) =>
-              update("capacityMin", e.target.value === "" ? "" : Number(e.target.value))
-            }
+            onChange={(e) => update('capacityMin', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
 
@@ -121,7 +127,7 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
           <CheckCircle2 className="h-4 w-4 text-gray-500 shrink-0" />
           <select
             value={filters.status}
-            onChange={(e) => update("status", e.target.value as RoomFilters["status"])}
+            onChange={(e) => update('status', e.target.value as RoomFilters['status'])}
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
           >
             <option value="all">Todos los estados</option>
@@ -142,9 +148,7 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
             placeholder="Utilización mínima (%)"
             value={filters.utilizationMin}
-            onChange={(e) =>
-              update("utilizationMin", e.target.value === "" ? "" : Number(e.target.value))
-            }
+            onChange={(e) => update('utilizationMin', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
 
@@ -158,9 +162,7 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
             placeholder="Mín. reservas hoy"
             value={filters.reservationsTodayMin}
-            onChange={(e) =>
-              update("reservationsTodayMin", e.target.value === "" ? "" : Number(e.target.value))
-            }
+            onChange={(e) => update('reservationsTodayMin', e.target.value === '' ? '' : Number(e.target.value))}
           />
         </div>
 
@@ -174,14 +176,9 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
                 <label
                   key={feat}
                   className={`cursor-pointer select-none border rounded-full px-3 py-1 text-xs
-                    ${checked ? "bg-blue-50 border-blue-400 text-blue-700" : "bg-white border-gray-300 text-gray-700"}`}
+                    ${checked ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-white border-gray-300 text-gray-700'}`}
                 >
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={checked}
-                    onChange={() => toggleFeature(feat)}
-                  />
+                  <input type="checkbox" className="sr-only" checked={checked} onChange={() => toggleFeature(feat)} />
                   {feat}
                 </label>
               );

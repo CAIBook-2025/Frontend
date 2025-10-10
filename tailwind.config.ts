@@ -1,5 +1,5 @@
 // tailwind.config.ts
-import type { Config } from 'tailwindcss'   
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
@@ -15,9 +15,9 @@ const config: Config = {
         'brand-accent': '#FFD100', // Amarillo/Dorado UC (aproximado)
         'brand-dark': '#2D3748', // Un gris oscuro para texto
         'brand-light': '#F7FAFC', // Un gris muy claro para fondos
-      }
+      },
     },
   },
   plugins: [],
-}
-export default config
+};
+export default config;

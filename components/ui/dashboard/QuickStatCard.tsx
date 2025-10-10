@@ -1,35 +1,35 @@
-import type React from "react"
-import { Calendar } from "lucide-react"
+import type React from 'react';
+import { Calendar } from 'lucide-react';
 
 export const StatCard = ({
   icon,
   value,
   label,
   footer,
-  variant = "blue",
+  variant = 'blue',
 }: {
-  icon: React.ReactNode
-  value: string | number
-  label: string
-  footer: string
-  variant?: "blue" | "yellow" | "red"
+  icon: React.ReactNode;
+  value: string | number;
+  label: string;
+  footer: string;
+  variant?: 'blue' | 'yellow' | 'red';
 }) => {
   const colorVariants = {
     blue: {
-      iconBg: "bg-blue-100",
-      iconText: "text-blue-600",
+      iconBg: 'bg-blue-100',
+      iconText: 'text-blue-600',
     },
     yellow: {
-      iconBg: "bg-yellow-100",
-      iconText: "text-yellow-600",
+      iconBg: 'bg-yellow-100',
+      iconText: 'text-yellow-600',
     },
     red: {
-      iconBg: "bg-red-100",
-      iconText: "text-red-600",
+      iconBg: 'bg-red-100',
+      iconText: 'text-red-600',
     },
-  }
+  };
 
-  const colors = colorVariants[variant]
+  const colors = colorVariants[variant];
 
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
@@ -46,5 +46,5 @@ export const StatCard = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

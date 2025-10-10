@@ -1,17 +1,17 @@
 export const ActivityCard = ({
   status,
   details,
-  variant = "green",
+  variant = 'green',
 }: {
-  status: string
-  details: string
-  variant?: "green" | "yellow" | "blue"
+  status: string;
+  details: string;
+  variant?: 'green' | 'yellow' | 'blue';
 }) => {
   const dotColors = {
-    green: "bg-green-500",
-    yellow: "bg-yellow-500",
-    blue: "bg-blue-500",
-  }
+    green: 'bg-green-500',
+    yellow: 'bg-yellow-500',
+    blue: 'bg-blue-500',
+  };
 
   return (
     <div className="flex items-start gap-3 py-2">
@@ -21,5 +21,5 @@ export const ActivityCard = ({
         <p className="text-gray-500 text-xs mt-1">{details}</p>
       </div>
     </div>
-  )
-}
+  );
+};

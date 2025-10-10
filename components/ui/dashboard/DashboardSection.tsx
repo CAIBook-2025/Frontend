@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import React from 'react'
-import Link from 'next/link'
+import React from 'react';
+import Link from 'next/link';
 
 export const DashboardSection = ({
   title,
@@ -9,10 +9,10 @@ export const DashboardSection = ({
   href,
   children,
 }: {
-  title: string
-  buttonText: string
-  href: string
-  children: React.ReactNode
+  title: string;
+  buttonText: string;
+  href: string;
+  children: React.ReactNode;
 }) => (
   <div className={`bg-white rounded-2xl p-6 border border-gray-200 shadow-sm border-l-blue-400 border-l-4`}>
     <div className="flex items-center justify-between mb-6">
@@ -26,4 +26,4 @@ export const DashboardSection = ({
     </div>
     <div className="space-y-4">{children}</div>
   </div>
-)
+);

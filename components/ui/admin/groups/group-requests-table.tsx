@@ -1,47 +1,47 @@
-"use client"
+'use client';
 
-import { Eye } from "lucide-react"
+import { Eye } from 'lucide-react';
 
 interface BaseGroupRequest {
-  id: string
-  groupName: string
-  description: string
-  date: string
+  id: string;
+  groupName: string;
+  description: string;
+  date: string;
 }
 
 interface PendingRequest extends BaseGroupRequest {
-  type: "pending"
-  applicantName: string
-  applicantEmail: string
-  status: "Pendiente"
+  type: 'pending';
+  applicantName: string;
+  applicantEmail: string;
+  status: 'Pendiente';
 }
 
 interface ApprovedRequest extends BaseGroupRequest {
-  type: "approved"
-  responsibleName: string
-  responsibleEmail: string
-  approvalDate: string
-  members: number
-  events: number
+  type: 'approved';
+  responsibleName: string;
+  responsibleEmail: string;
+  approvalDate: string;
+  members: number;
+  events: number;
 }
 
 interface RejectedRequest extends BaseGroupRequest {
-  type: "rejected"
-  applicantName: string
-  applicantEmail: string
-  rejectionDate: string
-  reason: string
+  type: 'rejected';
+  applicantName: string;
+  applicantEmail: string;
+  rejectionDate: string;
+  reason: string;
 }
 
-type GroupRequest = PendingRequest | ApprovedRequest | RejectedRequest
+type GroupRequest = PendingRequest | ApprovedRequest | RejectedRequest;
 
 interface GroupRequestsTableProps {
-  requests: GroupRequest[]
-  tableType: "pending" | "approved" | "rejected"
-  onView: (id: string) => void
-  onApprove?: (id: string) => void
-  onReject?: (id: string) => void
-  onManage?: (id: string) => void
+  requests: GroupRequest[];
+  tableType: 'pending' | 'approved' | 'rejected';
+  onView: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onManage?: (id: string) => void;
 }
 
 export const GroupRequestsTable = ({
@@ -54,10 +54,10 @@ export const GroupRequestsTable = ({
 }: GroupRequestsTableProps) => {
   const getStatusBadge = (status: string) => {
     const statusStyles = {
-      Pendiente: "bg-orange-100 text-orange-800",
-      Aprobado: "bg-green-100 text-green-800",
-      Rechazado: "bg-red-100 text-red-800",
-    }
+      Pendiente: 'bg-orange-100 text-orange-800',
+      Aprobado: 'bg-green-100 text-green-800',
+      Rechazado: 'bg-red-100 text-red-800',
+    };
 
     return (
       <span
@@ -65,25 +65,25 @@ export const GroupRequestsTable = ({
       >
         {status}
       </span>
-    )
-  }
+    );
+  };
 
   const getTableHeaders = () => {
     switch (tableType) {
-      case "pending":
-        return ["Grupo", "Solicitante", "Fecha", "Estado", "Acciones"]
-      case "approved":
-        return ["Grupo", "Responsable", "Fecha Aprobación", "Miembros", "Eventos", "Acciones"]
-      case "rejected":
-        return ["Grupo", "Solicitante", "Fecha Rechazo", "Razón"]
+      case 'pending':
+        return ['Grupo', 'Solicitante', 'Fecha', 'Estado', 'Acciones'];
+      case 'approved':
+        return ['Grupo', 'Responsable', 'Fecha Aprobación', 'Miembros', 'Eventos', 'Acciones'];
+      case 'rejected':
+        return ['Grupo', 'Solicitante', 'Fecha Rechazo', 'Razón'];
       default:
-        return []
+        return [];
     }
-  }
+  };
 
   const renderTableRow = (request: GroupRequest) => {
     switch (request.type) {
-      case "pending":
+      case 'pending':
         return (
           <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
             <td className="py-4 px-4">
@@ -124,9 +124,9 @@ export const GroupRequestsTable = ({
               </div>
             </td>
           </tr>
-        )
+        );
 
-      case "approved":
+      case 'approved':
         return (
           <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
             <td className="py-4 px-4">
@@ -153,9 +153,9 @@ export const GroupRequestsTable = ({
               </button>
             </td>
           </tr>
-        )
+        );
 
-      case "rejected":
+      case 'rejected':
         return (
           <tr key={request.id} className="border-b border-gray-100 hover:bg-gray-50">
             <td className="py-4 px-4">
@@ -173,12 +173,12 @@ export const GroupRequestsTable = ({
             <td className="py-4 px-4 text-sm text-gray-700">{request.rejectionDate}</td>
             <td className="py-4 px-4 text-sm text-gray-700">{request.reason}</td>
           </tr>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -197,7 +197,7 @@ export const GroupRequestsTable = ({
         </table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export type { GroupRequest, PendingRequest, ApprovedRequest, RejectedRequest }
+export type { GroupRequest, PendingRequest, ApprovedRequest, RejectedRequest };

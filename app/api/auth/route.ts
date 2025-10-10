@@ -3,3 +3,5 @@
 // const handler = handleAuth();
 
 // export { handler as GET, handler as POST };
+
+export {}

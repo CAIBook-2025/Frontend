@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { PageHeader } from "@/components/ui/page-header";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { Users, Ban, AlertTriangle, Flag, Plus } from "lucide-react";  // Añadimos Plus para el icono
-import { SearchBar } from "@/components/ui/search-bar";
-import { useState } from "react";
-import { UserStrikesTable } from "@/components/ui/admin/strikes/strikes-table";
-import { StrikeHistoryTable } from "@/components/ui/admin/strikes/strikes-history-table";
-import { UserStrikesHistoryModal } from "@/components/ui/admin/strikes/strikes-modal";
-import { ApplyStrikeModal } from "@/components/ui/admin/strikes/apply-strikes-modal";
+import { PageHeader } from '@/components/ui/page-header';
+import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
+import { Users, Ban, AlertTriangle, Flag, Plus } from 'lucide-react'; // Añadimos Plus para el icono
+import { SearchBar } from '@/components/ui/search-bar';
+import { useState } from 'react';
+import { UserStrikesTable } from '@/components/ui/admin/strikes/strikes-table';
+import { StrikeHistoryTable } from '@/components/ui/admin/strikes/strikes-history-table';
+import { UserStrikesHistoryModal } from '@/components/ui/admin/strikes/strikes-modal';
+import { ApplyStrikeModal } from '@/components/ui/admin/strikes/apply-strikes-modal';
 
 // Definimos el tipo de strike como una unión de los diferentes tipos de strike.
-type StrikeType = "No-show" | "Misuse" | "Late-cancellation";
+type StrikeType = 'No-show' | 'Misuse' | 'Late-cancellation';
 
 export interface Strike {
   id: string;
@@ -31,85 +31,85 @@ interface UserStrike {
   strikes: number;
   maxStrikes: number;
   lastStrike: string;
-  status: "Activo" | "Advertencia" | "Suspendido";
+  status: 'Activo' | 'Advertencia' | 'Suspendido';
   suspendedUntil?: string;
   strikesHistory: Strike[]; // Cada usuario tiene su propio historial de strikes
 }
 
 const usersWithStrikes: UserStrike[] = [
   {
-    id: "1",
-    name: "María González",
-    email: "maria.gonzalez@uc.cl",
+    id: '1',
+    name: 'María González',
+    email: 'maria.gonzalez@uc.cl',
     strikes: 2,
     maxStrikes: 3,
-    lastStrike: "10/12/2024",
-    status: "Advertencia" as const,
+    lastStrike: '10/12/2024',
+    status: 'Advertencia' as const,
     strikesHistory: [
       {
-        id: "1",
-        userId: "1",
-        userName: "María González",
-        userEmail: "maria.gonzalez@uc.cl",
-        type: "No-show",
-        reason: "No se presentó a reserva de sala confirmada",
-        appliedBy: "Admin CAI",
-        date: "10/12/2024",
-      }
-    ]
+        id: '1',
+        userId: '1',
+        userName: 'María González',
+        userEmail: 'maria.gonzalez@uc.cl',
+        type: 'No-show',
+        reason: 'No se presentó a reserva de sala confirmada',
+        appliedBy: 'Admin CAI',
+        date: '10/12/2024',
+      },
+    ],
   },
   {
-    id: "2",
-    name: "Pedro Silva",
-    email: "pedro.silva@uc.cl",
+    id: '2',
+    name: 'Pedro Silva',
+    email: 'pedro.silva@uc.cl',
     strikes: 3,
     maxStrikes: 3,
-    lastStrike: "08/12/2024",
-    status: "Suspendido" as const,
-    suspendedUntil: "15/12/2024",
+    lastStrike: '08/12/2024',
+    status: 'Suspendido' as const,
+    suspendedUntil: '15/12/2024',
     strikesHistory: [
       {
-        id: "2",
-        userId: "2",
-        userName: "Pedro Silva",
-        userEmail: "pedro.silva@uc.cl",
-        type: "Misuse",
-        reason: "Uso inadecuado de sala de estudio (ruido excesivo)",
-        appliedBy: "Admin CAI",
-        date: "08/12/2024",
-      }
-    ]
+        id: '2',
+        userId: '2',
+        userName: 'Pedro Silva',
+        userEmail: 'pedro.silva@uc.cl',
+        type: 'Misuse',
+        reason: 'Uso inadecuado de sala de estudio (ruido excesivo)',
+        appliedBy: 'Admin CAI',
+        date: '08/12/2024',
+      },
+    ],
   },
   {
-    id: "3",
-    name: "Ana García",
-    email: "ana.garcia@uc.cl",
+    id: '3',
+    name: 'Ana García',
+    email: 'ana.garcia@uc.cl',
     strikes: 1,
     maxStrikes: 3,
-    lastStrike: "05/12/2024",
-    status: "Activo" as const,
+    lastStrike: '05/12/2024',
+    status: 'Activo' as const,
     strikesHistory: [
       {
-        id: "3",
-        userId: "3",
-        userName: "Ana García",
-        userEmail: "ana.garcia@uc.cl",
-        type: "Late-cancellation",
-        reason: "Cancelación tardía de reserva (menos de 2 horas)",
-        appliedBy: "Admin CAI",
-        date: "05/12/2024",
-      }
-    ]
-  }
+        id: '3',
+        userId: '3',
+        userName: 'Ana García',
+        userEmail: 'ana.garcia@uc.cl',
+        type: 'Late-cancellation',
+        reason: 'Cancelación tardía de reserva (menos de 2 horas)',
+        appliedBy: 'Admin CAI',
+        date: '05/12/2024',
+      },
+    ],
+  },
 ];
 
 const pageHeader = {
-  title: "Gestión de Strikes",
-  subtitle: "Administra y monitorea los strikes de usuarios",
+  title: 'Gestión de Strikes',
+  subtitle: 'Administra y monitorea los strikes de usuarios',
 };
 
 export default function StrikesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserStrike | null>(null);
 
   // Estado separado para cada modal
@@ -118,7 +118,7 @@ export default function StrikesPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    console.log("Buscar:", value);
+    console.log('Buscar:', value);
   };
 
   // Filtrado de usuarios basado en la búsqueda
@@ -192,11 +192,7 @@ export default function StrikesPage() {
               variant="blue"
             />
           </div>
-          <SearchBar
-            placeholder="Buscar por nombre de usuario..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+          <SearchBar placeholder="Buscar por nombre de usuario..." value={searchQuery} onChange={handleSearchChange} />
           <UserStrikesTable
             users={filteredUsers}
             onViewHistory={handleViewHistory} // Pasamos el handler al componente de la tabla
@@ -204,7 +200,9 @@ export default function StrikesPage() {
 
           <div className="my-8">
             <h3 className="text-lg font-semibold">Historial de Strikes</h3>
-            <p className="text-sm text-muted-foreground">A continuación se muestra el historial completo de strikes para cada usuario.</p>
+            <p className="text-sm text-muted-foreground">
+              A continuación se muestra el historial completo de strikes para cada usuario.
+            </p>
           </div>
           <StrikeHistoryTable strikes={filteredStrikes} />
         </div>
@@ -213,11 +211,11 @@ export default function StrikesPage() {
         <UserStrikesHistoryModal
           isOpen={isUserStrikesHistoryModalOpen}
           onClose={() => setIsUserStrikesHistoryModalOpen(false)}
-          userName={selectedUser?.name || ""}
-          userEmail={selectedUser?.email || ""}
+          userName={selectedUser?.name || ''}
+          userEmail={selectedUser?.email || ''}
           currentStrikes={selectedUser?.strikes || 0}
           maxStrikes={selectedUser?.maxStrikes || 0}
-          status={selectedUser?.status || "Activo"}
+          status={selectedUser?.status || 'Activo'}
           strikes={selectedUser?.strikesHistory || []}
         />
 
@@ -225,7 +223,7 @@ export default function StrikesPage() {
           isOpen={isApplyStrikeModalOpen}
           onClose={() => setIsApplyStrikeModalOpen(false)}
           onApply={(email, type, description) => {
-            console.log("Aplicar Strike:", email, type, description);
+            console.log('Aplicar Strike:', email, type, description);
             setIsApplyStrikeModalOpen(false);
           }}
         />

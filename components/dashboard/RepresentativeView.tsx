@@ -3,19 +3,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Settings, 
-  Users, 
-  Crown, 
-  Shield, 
-  CalendarPlus, 
-  Trash2, 
-  ArrowRight, 
-  Star, 
+import {
+  Settings,
+  Users,
+  Crown,
+  Shield,
+  CalendarPlus,
+  Trash2,
+  ArrowRight,
+  Star,
   Loader2,
   Edit3,
   UserCheck,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 
 // --- Tipos ---
@@ -40,7 +40,7 @@ interface Member {
 
 // --- Simulación de API ---
 const fakeApiFetchGroupDetails = (groupId: string): Promise<GroupDetails> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         id: groupId,
@@ -49,61 +49,101 @@ const fakeApiFetchGroupDetails = (groupId: string): Promise<GroupDetails> => {
         reputation: 4.7,
         memberCount: 45,
         moderatorCount: 3,
-        createdAt: '2024-01-15'
+        createdAt: '2024-01-15',
       });
     }, 800);
   });
 };
 
 const fakeApiFetchMembers = (groupId: string): Promise<Member[]> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { id: '1', name: 'Ana García', email: 'ana.garcia@uc.cl', role: 'Moderador', joinedAt: '2024-01-20', reputation: 4.8 },
-        { id: '2', name: 'Carlos López', email: 'carlos.lopez@uc.cl', role: 'Moderador', joinedAt: '2024-02-10', reputation: 4.6 },
-        { id: '3', name: 'María Silva', email: 'maria.silva@uc.cl', role: 'Moderador', joinedAt: '2024-02-15', reputation: 4.9 },
-        { id: '4', name: 'Diego Ramírez', email: 'diego.ramirez@uc.cl', role: 'Miembro', joinedAt: '2024-03-01', reputation: 4.2 },
-        { id: '5', name: 'Sofía Torres', email: 'sofia.torres@uc.cl', role: 'Miembro', joinedAt: '2024-03-10', reputation: 4.5 },
+        {
+          id: '1',
+          name: 'Ana García',
+          email: 'ana.garcia@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-01-20',
+          reputation: 4.8,
+        },
+        {
+          id: '2',
+          name: 'Carlos López',
+          email: 'carlos.lopez@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-02-10',
+          reputation: 4.6,
+        },
+        {
+          id: '3',
+          name: 'María Silva',
+          email: 'maria.silva@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-02-15',
+          reputation: 4.9,
+        },
+        {
+          id: '4',
+          name: 'Diego Ramírez',
+          email: 'diego.ramirez@uc.cl',
+          role: 'Miembro',
+          joinedAt: '2024-03-01',
+          reputation: 4.2,
+        },
+        {
+          id: '5',
+          name: 'Sofía Torres',
+          email: 'sofia.torres@uc.cl',
+          role: 'Miembro',
+          joinedAt: '2024-03-10',
+          reputation: 4.5,
+        },
       ]);
     }, 600);
   });
 };
 
 // --- Componente para Tarjetas de Acción Principal ---
-const ActionCard = ({ 
-  href, 
-  icon, 
-  title, 
-  description, 
+const ActionCard = ({
+  href,
+  icon,
+  title,
+  description,
   variant = 'default',
-  onClick 
-}: { 
-  href?: string; 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
+  onClick,
+}: {
+  href?: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
   variant?: 'default' | 'danger';
   onClick?: () => void;
 }) => {
-  const baseClasses = "group block rounded-xl border p-6 shadow-md transition-all duration-300";
-  const variantClasses = variant === 'danger' 
-    ? "border-red-200 bg-red-50 hover:border-red-500 hover:shadow-lg"
-    : "border-slate-200 bg-white hover:border-blue-500 hover:shadow-lg";
-  
+  const baseClasses = 'group block rounded-xl border p-6 shadow-md transition-all duration-300';
+  const variantClasses =
+    variant === 'danger'
+      ? 'border-red-200 bg-red-50 hover:border-red-500 hover:shadow-lg'
+      : 'border-slate-200 bg-white hover:border-blue-500 hover:shadow-lg';
+
   const content = (
     <div className="flex items-start justify-between">
       <div>
-        <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-          variant === 'danger' ? 'bg-red-100' : 'bg-blue-100'
-        }`}>
+        <div
+          className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
+            variant === 'danger' ? 'bg-red-100' : 'bg-blue-100'
+          }`}
+        >
           {icon}
         </div>
         <h3 className="text-xl font-bold text-gray-800">{title}</h3>
         <p className="mt-1 text-slate-600">{description}</p>
       </div>
-      <ArrowRight className={`mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 ${
-        variant === 'danger' ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'
-      }`} />
+      <ArrowRight
+        className={`mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 ${
+          variant === 'danger' ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'
+        }`}
+      />
     </div>
   );
 
@@ -126,9 +166,7 @@ const ActionCard = ({
 const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
   <div className="rounded-lg bg-white p-4 shadow-sm border border-slate-200">
     <div className="flex items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        {icon}
-      </div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">{icon}</div>
       <div>
         <p className="text-2xl font-bold text-gray-800">{value}</p>
         <p className="text-sm text-slate-500">{label}</p>
@@ -153,18 +191,18 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
     const loadData = async () => {
       setIsLoadingGroup(true);
       setIsLoadingMembers(true);
-      
+
       const [groupData, membersData] = await Promise.all([
         fakeApiFetchGroupDetails(groupId),
-        fakeApiFetchMembers(groupId)
+        fakeApiFetchMembers(groupId),
       ]);
-      
+
       setGroupDetails(groupData);
       setMembers(membersData);
       setIsLoadingGroup(false);
       setIsLoadingMembers(false);
     };
-    
+
     loadData();
   }, [groupId]);
 
@@ -270,14 +308,14 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
       <section>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800">Miembros del Grupo</h2>
-          <Link 
+          <Link
             href={`/Student/Groups/Representative/${groupId}/members`}
             className="text-blue-600 hover:text-blue-800 font-semibold text-sm"
           >
             Ver todos →
           </Link>
         </div>
-        
+
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
           {isLoadingMembers ? (
             <div className="flex justify-center items-center py-8">
@@ -285,13 +323,16 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
             </div>
           ) : (
             <ul className="divide-y divide-slate-200">
-              {members.slice(0, 5).map(member => (
+              {members.slice(0, 5).map((member) => (
                 <li key={member.id} className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                         <span className="text-blue-600 font-semibold text-sm">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
                         </span>
                       </div>
                       <div>
@@ -305,15 +346,13 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                           <span className="text-sm text-slate-600">{member.reputation}</span>
                         </div>
-                        <p className="text-xs text-slate-500">
-                          {new Date(member.joinedAt).toLocaleDateString()}
-                        </p>
+                        <p className="text-xs text-slate-500">{new Date(member.joinedAt).toLocaleDateString()}</p>
                       </div>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        member.role === 'Moderador' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-slate-100 text-slate-700'
-                      }`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          member.role === 'Moderador' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
                         {member.role}
                       </span>
                     </div>
@@ -334,8 +373,8 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
               <h3 className="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.name}&quot;? 
-              Esta acción no se puede deshacer y se perderán todos los datos del grupo.
+              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.name}&quot;? Esta acción no se puede
+              deshacer y se perderán todos los datos del grupo.
             </p>
             <div className="flex gap-3 justify-end">
               <button

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Building2, Calendar, Users, AlertTriangle } from "lucide-react";
-import { StatCard } from "@/components/ui/dashboard/QuickStatCard";
-import { DashboardSection } from "@/components/ui/dashboard/DashboardSection";
-import { ActivityCard } from "@/components/ui/dashboard/admin/ActivityCard";
-import { GroupRequestCard } from "@/components/ui/dashboard/admin/GroupRequestCard";
-import { AdminToolsCard } from "@/components/ui/dashboard/admin/AdminTools";
+import React from 'react';
+import { Building2, Calendar, Users, AlertTriangle } from 'lucide-react';
+import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
+import { DashboardSection } from '@/components/ui/dashboard/DashboardSection';
+import { ActivityCard } from '@/components/ui/dashboard/admin/ActivityCard';
+import { GroupRequestCard } from '@/components/ui/dashboard/admin/GroupRequestCard';
+import { AdminToolsCard } from '@/components/ui/dashboard/admin/AdminTools';
 
 const adminStats = {
   totalReservations: 120,
@@ -55,61 +55,27 @@ export default function CAIAdminDashboard() {
       {/* Dos columnas iguales en altura */}
       <section>
         <div className="grid gap-6 lg:grid-cols-2">
-          <DashboardSection
-            title="Solicitudes de Grupo"
-            buttonText="Ver Todas"
-            href="/Admin/Groups"
-          >
+          <DashboardSection title="Solicitudes de Grupo" buttonText="Ver Todas" href="/Admin/Groups">
             <div className="space-y-4">
-              <GroupRequestCard
-                title="Club de Fotografía UC"
-                subtitle="Solicitado hace 2 días"
-                id="1"
-              />
-              <GroupRequestCard
-                title="Comité de Sustentabilidad"
-                subtitle="Solicitado hace 1 semana"
-                id="2"
-              />
-              <GroupRequestCard
-                title="Grupo de Debate UC"
-                subtitle="Solicitado hace 2 semanas"
-                id="3"
-              />
+              <GroupRequestCard title="Club de Fotografía UC" subtitle="Solicitado hace 2 días" id="1" />
+              <GroupRequestCard title="Comité de Sustentabilidad" subtitle="Solicitado hace 1 semana" id="2" />
+              <GroupRequestCard title="Grupo de Debate UC" subtitle="Solicitado hace 2 semanas" id="3" />
             </div>
           </DashboardSection>
 
-          <DashboardSection
-            title="Actividad Reciente"
-            buttonText="Ver Historial"
-            href="/Admin/History"
-          >
+          <DashboardSection title="Actividad Reciente" buttonText="Ver Historial" href="/Admin/History">
             <div className="space-y-3">
-              <ActivityCard
-                status="Reserva completada"
-                details="Sala A1 - Juan Pérez"
-                variant="green"
-              />
-              <ActivityCard
-                status="Strike aplicado"
-                details="No show - María González"
-                variant="yellow"
-              />
-              <ActivityCard
-                status="Evento creado"
-                details="Taller Python - Club Programación"
-                variant="blue"
-              />
+              <ActivityCard status="Reserva completada" details="Sala A1 - Juan Pérez" variant="green" />
+              <ActivityCard status="Strike aplicado" details="No show - María González" variant="yellow" />
+              <ActivityCard status="Evento creado" details="Taller Python - Club Programación" variant="blue" />
             </div>
           </DashboardSection>
         </div>
       </section>
 
       <div className="lg:col-span-2">
-          <AdminToolsCard />
+        <AdminToolsCard />
       </div>
-
-
     </div>
   );
 }

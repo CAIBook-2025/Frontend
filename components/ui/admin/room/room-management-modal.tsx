@@ -1,31 +1,30 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Room } from "@/types/room"
-import { XIcon, CheckCircleIcon, SettingsIcon, AlertTriangleIcon } from "lucide-react"
+import { useState } from 'react';
+import { Room } from '@/types/room';
+import { XIcon, CheckCircleIcon, SettingsIcon, AlertTriangleIcon } from 'lucide-react';
 
-type RoomStatus = "Activa" | "Mantenimiento" | "Deshabilitada"
-
+type RoomStatus = 'Activa' | 'Mantenimiento' | 'Deshabilitada';
 
 interface RoomManagementModalProps {
-  room: Room | null
-  isOpen: boolean
-  onClose: () => void
-  onSave: (id: string, status: RoomStatus, statusNote?: string) => void
+  room: Room | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (id: string, status: RoomStatus, statusNote?: string) => void;
 }
 
 export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManagementModalProps) {
-  const [selectedStatus, setSelectedStatus] = useState<RoomStatus>(room?.status || "Activa")
-  const [statusNote, setStatusNote] = useState<string>(room?.statusNote || "")
+  const [selectedStatus, setSelectedStatus] = useState<RoomStatus>(room?.status || 'Activa');
+  const [statusNote, setStatusNote] = useState<string>(room?.statusNote || '');
 
-  if (!isOpen || !room) return null
+  if (!isOpen || !room) return null;
 
   const handleSave = () => {
-    onSave(room.id, selectedStatus, selectedStatus !== "Activa" ? statusNote : undefined)
-    onClose()
-  }
+    onSave(room.id, selectedStatus, selectedStatus !== 'Activa' ? statusNote : undefined);
+    onClose();
+  };
 
-  const showReasonField = selectedStatus === "Mantenimiento" || selectedStatus === "Deshabilitada"
+  const showReasonField = selectedStatus === 'Mantenimiento' || selectedStatus === 'Deshabilitada';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -51,7 +50,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                 type="radio"
                 name="roomStatus"
                 value="Activa"
-                checked={selectedStatus === "Activa"}
+                checked={selectedStatus === 'Activa'}
                 onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
                 className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
@@ -71,7 +70,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                 type="radio"
                 name="roomStatus"
                 value="Mantenimiento"
-                checked={selectedStatus === "Mantenimiento"}
+                checked={selectedStatus === 'Mantenimiento'}
                 onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
                 className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
@@ -91,7 +90,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                 type="radio"
                 name="roomStatus"
                 value="Deshabilitada"
-                checked={selectedStatus === "Deshabilitada"}
+                checked={selectedStatus === 'Deshabilitada'}
                 onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
                 className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
@@ -140,5 +139,5 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
         </div>
       </div>
     </div>
-  )
+  );
 }

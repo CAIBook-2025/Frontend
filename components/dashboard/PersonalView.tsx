@@ -5,13 +5,24 @@ import Link from 'next/link';
 import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert } from 'lucide-react';
 
 // --- Componente para Tarjetas de Acción Principal ---
-const ActionCard = ({ href, icon, title, description }: { href: string; icon: React.ReactNode; title: string; description: string }) => (
-  <Link href={href} className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg">
+const ActionCard = ({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) => (
+  <Link
+    href={href}
+    className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg"
+  >
     <div className="flex items-start justify-between">
       <div>
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-          {icon}
-        </div>
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">{icon}</div>
         <h3 className="text-xl font-bold text-gray-800">{title}</h3>
         <p className="mt-1 text-slate-600">{description}</p>
       </div>
@@ -24,9 +35,7 @@ const ActionCard = ({ href, icon, title, description }: { href: string; icon: Re
 const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
   <div className="rounded-lg bg-white p-4 shadow-sm border border-slate-200">
     <div className="flex items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        {icon}
-      </div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">{icon}</div>
       <div>
         <p className="text-2xl font-bold text-gray-800">{value}</p>
         <p className="text-sm text-slate-500">{label}</p>
@@ -85,7 +94,9 @@ export const PersonalView = () => {
                 <p className="font-semibold text-gray-800">Sala Grupal C1</p>
                 <p className="text-sm text-slate-500">Viernes, 10:00 - 12:00</p>
               </div>
-              <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">Pendiente</span>
+              <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
+                Pendiente
+              </span>
             </li>
           </ul>
         </div>

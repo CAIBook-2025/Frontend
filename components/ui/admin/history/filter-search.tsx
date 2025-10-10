@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useState } from 'react';
+import { Search } from 'lucide-react';
 
 export const FilterComponent = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
@@ -54,4 +54,4 @@ export const FilterComponent = () => {
       </div>
     </div>
   );
-}
+};

@@ -18,10 +18,7 @@ export default function RepresentativePage({ params }: RepresentativePageProps) 
     <main className="container mx-auto px-4 py-8 md:py-12">
       {/* Breadcrumb/Navegación de regreso */}
       <section className="mb-6">
-        <Link 
-          href="/Student" 
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
-        >
+        <Link href="/Student" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium">
           <ArrowLeft className="h-4 w-4" />
           Volver
         </Link>

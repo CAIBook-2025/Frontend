@@ -1,38 +1,38 @@
-"use client"
+'use client';
 
-import { X, Check, XIcon } from "lucide-react"
+import { X, Check, XIcon } from 'lucide-react';
 
 interface GroupRequest {
-  id: string
-  groupName: string
-  description: string
-  applicantName: string
-  applicantEmail: string
-  date: string
-  status: "Pendiente" | "Aprobado" | "Rechazado"
-  objective?: string
+  id: string;
+  groupName: string;
+  description: string;
+  applicantName: string;
+  applicantEmail: string;
+  date: string;
+  status: 'Pendiente' | 'Aprobado' | 'Rechazado';
+  objective?: string;
 }
 
 interface GroupDetailsModalProps {
-  request: GroupRequest | null
-  isOpen: boolean
-  onClose: () => void
-  onApprove: (id: string) => void
-  onReject: (id: string) => void
+  request: GroupRequest | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
 }
 
 export const GroupDetailsModal = ({ request, isOpen, onClose, onApprove, onReject }: GroupDetailsModalProps) => {
-  if (!isOpen || !request) return null
+  if (!isOpen || !request) return null;
 
   const handleApprove = () => {
-    onApprove(request.id)
-    onClose()
-  }
+    onApprove(request.id);
+    onClose();
+  };
 
   const handleReject = () => {
-    onReject(request.id)
-    onClose()
-  }
+    onReject(request.id);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -58,7 +58,7 @@ export const GroupDetailsModal = ({ request, isOpen, onClose, onApprove, onRejec
           <div>
             <h3 className="text-sm font-medium text-gray-900 mb-2">Objetivo</h3>
             <p className="text-sm text-gray-700">
-              {request.objective || "Promover el arte fotográfico entre estudiantes y organizar exposiciones"}
+              {request.objective || 'Promover el arte fotográfico entre estudiantes y organizar exposiciones'}
             </p>
           </div>
 
@@ -72,17 +72,17 @@ export const GroupDetailsModal = ({ request, isOpen, onClose, onApprove, onRejec
           <div>
             <h3 className="text-sm font-medium text-gray-900 mb-2">Fecha de Solicitud</h3>
             <p className="text-sm text-gray-700">
-              {new Date(request.date.split("/").reverse().join("-")).toLocaleDateString("es-ES", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
+              {new Date(request.date.split('/').reverse().join('-')).toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
               })}
             </p>
           </div>
         </div>
 
         {/* Actions */}
-        {request.status === "Pendiente" && (
+        {request.status === 'Pendiente' && (
           <div className="p-6 border-t border-gray-200 flex gap-3">
             <button
               onClick={handleApprove}
@@ -102,5 +102,5 @@ export const GroupDetailsModal = ({ request, isOpen, onClose, onApprove, onRejec
         )}
       </div>
     </div>
-  )
-}
+  );
+};
