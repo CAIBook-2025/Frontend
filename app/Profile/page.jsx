@@ -3,6 +3,7 @@
 import { useUser } from '@auth0/nextjs-auth0';
 import { useEffect, useState } from 'react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
+import NotLoggedIn from '@/components/NotLoggedIn';
 
 export default function ProfilePage() {
     const { user, isLoading } = useUser();
@@ -51,8 +52,6 @@ export default function ProfilePage() {
         fetchUserData();
     }, [accessToken]);
 
-    if (!userData) return <div>Loading...</div>;
-
     return (
         <div>
             {userData ? (
@@ -67,7 +66,7 @@ export default function ProfilePage() {
                     <a href="/auth/logout">Logout</a>
                 </>
             ) : (
-                <p>Logged out</p>
+                <NotLoggedIn />
             )}
         </div>
     )

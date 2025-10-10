@@ -1,4 +1,5 @@
 import { auth0 } from "@/lib/auth0";
+import NotLoggedIn from '@/components/NotLoggedIn';
 
 export default async function UserInfo() {
     const session = await auth0.getSession();
@@ -7,18 +8,17 @@ export default async function UserInfo() {
     let userData = null;
     if (user) {
         try {
-            console.log('Fetching user data with access token:', session.tokenSet.accessToken);
             const res = await fetch('http://localhost:3003/api/users/profile', {
                 headers: {
-                    Authorization: `Bearer ${session.tokenSet.accessToken}`
+                    Authorization: `Bearer ${session.tokenSet?.accessToken}`
                 }
             })
             userData = await res.json();
+            console.log('Response:', res);
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
     }
-    console.log('User data:', userData);
 
     return (
         <div>
@@ -34,7 +34,7 @@ export default async function UserInfo() {
                     <a href="/auth/logout">Logout</a>
                 </>
             ) : (
-                <p>Logged out</p>
+                <NotLoggedIn />
             )}
         </div>
     )
