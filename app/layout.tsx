@@ -46,7 +46,7 @@ export default async function RootLayout({
                 </Link>
                 {user ? (
                   <Link
-                    href="/Profile"
+                    href="/Student"
                     className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-opacity-90 transition-colors duration-300"
                   >
                     Perfil

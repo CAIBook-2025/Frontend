@@ -4,6 +4,12 @@
 import Link from 'next/link';
 import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert } from 'lucide-react';
 
+type Stats = { 
+  reservasActivas: number; 
+  // eventosProximos: number; 
+  strikes: number 
+};
+
 // --- Componente para Tarjetas de Acción Principal ---
 const ActionCard = ({ href, icon, title, description }: { href: string; icon: React.ReactNode; title: string; description: string }) => (
   <Link href={href} className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg">
@@ -35,14 +41,15 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
   </div>
 );
 
-export const PersonalView = () => {
+export const PersonalView = ({stats}: {stats: Stats}) => {
   return (
     <>
       {/* 2. Resumen Rápido (Stats) */}
+      {console.log("stats: ", stats)}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard icon={<CalendarClock size={20} />} value="2" label="Reservas Activas" />
-        <StatCard icon={<PartyPopper size={20} />} value="1" label="Evento Próximo" />
-        <StatCard icon={<ShieldAlert size={20} />} value="0" label="Strikes" />
+        <StatCard icon={<CalendarClock size={20} />} value={stats.reservasActivas} label="Reservas Activas" />
+        <StatCard icon={<PartyPopper size={20} />} value={"4"} label="Evento Próximo" />
+        <StatCard icon={<ShieldAlert size={20} />} value={stats.strikes} label="Strikes" />
       </section>
 
       {/* 3. Acciones Principales */}

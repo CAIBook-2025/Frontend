@@ -29,6 +29,25 @@ const fakeApiFetchRooms = (): Promise<Room[]> => {
   });
 };
 
+function normalizeEquipment(equ: any): string[] {
+  try {
+    // puede venir como objeto, arreglo o string JSON
+    if (!equ) return [];
+    if (Array.isArray(equ)) return equ.filter(Boolean).map(String);
+    if (typeof equ === 'string') {
+      const parsed = JSON.parse(equ);
+      return normalizeEquipment(parsed);
+    }
+    if (typeof equ === 'object') {
+      // {"1":"Pizarra","2":"Borrador"} -> ["Pizarra","Borrador"]
+      return Object.values(equ).filter(Boolean).map(String);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 export default function BookRoomPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -39,9 +58,46 @@ export default function BookRoomPage() {
   useEffect(() => {
     const loadRooms = async () => {
       setIsLoading(true);
+      console.log('🔄 fetching schedules for', selectedDate);
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
-      const fetchedRooms = await fakeApiFetchRooms();
-      setRooms(fetchedRooms);
+
+      const API_BASE = "http://localhost:3003"
+      const params = new URLSearchParams({
+        day: selectedDate,   // "YYYY-MM-DD"
+        take: "30",
+        page: "1"
+      });
+
+      const res = await fetch(`${API_BASE}/api/srSchedule?${params.toString()}`, {
+        cache: "no-store"
+      });
+
+      console.log("EStá entrando aquí??")
+
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}`);
+      }
+
+      const data = await res.json(); // { page, take, total, items }
+
+      const roomsAdapted = (data.items ?? []).map((s: any) => {
+        const r = s.studyRoom ?? {};
+        return {
+          id: r.id ?? s.id,
+          name: r.name ?? `Sala ${s.sr_id}`,
+          location: r.location ?? '',
+          capacity: r.capacity ?? 0,
+          equipment: normalizeEquipment(r.equipment), // 👈 aquí
+          status: s.available === 'AVAILABLE' ? 'Disponible' : 'Ocupada',
+          nextAvailable: '—',
+          day: s.day,
+          module: s.module,
+        };
+      });
+
+      console.log("📦 Schedules recibidos:", data.items);
+
+      setRooms(roomsAdapted);
       setIsLoading(false);
     };
     loadRooms();
@@ -53,8 +109,8 @@ export default function BookRoomPage() {
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SearchInput 
-            id="search" 
+          <SearchInput
+            id="search"
             label="Buscar por nombre o edificio"
             placeholder="Ej: Biblioteca, Sala A1..."
           />
@@ -71,11 +127,11 @@ export default function BookRoomPage() {
           {/* --- REEMPLAZAMOS EL INPUT DE FECHA POR NUESTRO COMPONENTE --- */}
           {/* Ocupará una columna completa en pantallas pequeñas y una columna en medianas */}
           <div className="md:col-span-1">
-             {/* No es necesario un div extra, el componente ya tiene su label */}
+            {/* No es necesario un div extra, el componente ya tiene su label */}
           </div>
         </div>
         <div className="mt-4">
-            <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
         </div>
       </section>
 
@@ -94,9 +150,13 @@ export default function BookRoomPage() {
         ) : (
           viewMode === 'list' ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {rooms.map(room => (
-                <RoomCard key={room.id} room={room} />
-              ))}
+              {Array.isArray(rooms) && rooms.length > 0 ? (
+                rooms.map((room) => (
+                  <RoomCard key={room.id} room={room} />
+                ))
+              ) : (
+                <p>No hay salas disponibles.</p>
+              )}
             </div>
           ) : (
             <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">

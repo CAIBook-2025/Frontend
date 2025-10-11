@@ -55,7 +55,11 @@ export const DaySelector = ({ selectedDate, onDateChange }: DaySelectorProps) =>
         {availableDays.map((day) => (
           <button
             key={day.value}
-            onClick={() => onDateChange(day.value)}
+            type="button"
+            onClick={() => {
+              onDateChange(day.value)
+              console.log('👉 cambiando fecha a', day.value);
+            }}
             className={`flex flex-col items-center justify-center rounded-lg border px-4 py-2 text-center transition-colors duration-200 ${
               selectedDate === day.value
                 ? 'border-amber-700 bg-brand-primary text-blue shadow'
