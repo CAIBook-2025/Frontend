@@ -15,6 +15,7 @@ export interface Room {
   nextAvailable: string;
   status: RoomStatus;
   equipment: Equipment[];
+  module: number
 }
 
 export const RoomCard = ({ room }: { room: Room }) => {
@@ -38,7 +39,7 @@ export const RoomCard = ({ room }: { room: Room }) => {
             <Users size={16} /> {room.capacity} personas
           </div>
           <div className="flex items-center gap-2">
-            <Clock size={16} /> Próximo: {room.nextAvailable}
+            <Clock size={16} /> Módulo: {room.module}
           </div>
         </div>
 

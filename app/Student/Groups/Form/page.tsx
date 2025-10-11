@@ -1,10 +1,11 @@
-// app/groups/create/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -16,13 +17,23 @@ interface GroupFormData {
 
 export default function CreateGroupPage() {
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
     objective: '',
     logo: null,
   });
+  const params = useSearchParams();
+  const userId = Number(params.get('userId') ?? 0);
 
+  useEffect(() => {
+    // Esto sí debería aparecer siempre en la consola del navegador
+    console.log('Form mounted. userId =', userId);
+  }, [userId]);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003'
   const handleNext = () => {
     // TODO: Añadir validación antes de pasar al siguiente paso
     if (step < 3) setStep(step + 1);
@@ -31,12 +42,12 @@ export default function CreateGroupPage() {
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -48,7 +59,63 @@ export default function CreateGroupPage() {
   };
 
   // La función de envío ya no necesita el evento 'e'
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setErrorMsg(null);
+
+      if (!formData.name.trim() || !formData.description.trim() || !formData.objective.trim()) {
+        setErrorMsg('Por favor completa todos los campos obligatorios.');
+        setSubmitting(false);
+        return;
+      }
+
+      let response: Response;
+
+      if (formData.logo) {
+        // Enviar multipart/form-data
+        const fd = new FormData();
+        fd.append('name', formData.name.trim());
+        fd.append('goal', formData.objective.trim());
+        fd.append('description', formData.description.trim());
+        // fd.append('logo', formData.logo); // campo "logo" en el backend (multer)
+
+        response = await fetch(`${API_BASE}/api/group-requests`, {
+          method: 'POST',
+          body: fd,
+        });
+      } else {
+        // Enviar JSON
+        console.log("ENTRANDO AQUÍ");
+        console.log(formData.name.trim())
+        response = await fetch(`${API_BASE}/api/group-requests`, {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: userId,
+            name: formData.name.trim(),
+            goal: formData.objective.trim(),
+            description: formData.description.trim(),
+          }),
+        });
+      }
+
+      if (!response.ok) {
+        throw new Error('No se pudo crear la solicitud de grupo.');
+      }
+
+      const data = await response.json();
+      // opcional: redirigir a detalle, limpiar form, etc.
+      alert('¡Solicitud de grupo enviada con éxito!');
+      // reset
+      setFormData({ name: '', description: '', objective: '', logo: null });
+      setStep(1);
+
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
+    } finally {
+      setSubmitting(false);
+    }
+
     console.log("Enviando formulario:", formData);
     alert('¡Solicitud de grupo enviada! Revisa la consola.');
   };
@@ -73,15 +140,14 @@ export default function CreateGroupPage() {
 
       <div className="w-full lg:w-3/5  flex flex-col items-center h-full p-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">¡Felicidades! Estás dando el primer paso hacia tu comunidad</h1>
-        
+
         <div className="max-w-3xl w-full">
           <div className="mb-8 flex items-center justify-center gap-4">
             {[1, 2, 3].map((s) => (
               <div key={s} className="text-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
-                    step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}
                 >
                   {s}
                 </div>
@@ -96,7 +162,7 @@ export default function CreateGroupPage() {
 
           {/* El contenedor principal ahora es un <div> en lugar de <form> */}
           <div className="bg-white px-8 py-12 rounded-2xl shadow-lg">
-            
+
             {step === 1 && (
               <div className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Información General</h2>
@@ -126,12 +192,12 @@ export default function CreateGroupPage() {
                 </div>
               </div>
             )}
-            
+
             {step === 2 && (
               <div className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
                 <div className="space-y-8">
-                   <div>
+                  <div>
                     <label htmlFor="objective" className="block text-sm font-medium text-slate-700 mb-1">Objetivo Principal</label>
                     <textarea
                       id="objective"
@@ -162,7 +228,7 @@ export default function CreateGroupPage() {
                           className="relative cursor-pointer rounded-md bg-white font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
                         >
                           <span>Sube un archivo</span>
-                          <input id="logo-upload" name="logo" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg"/>
+                          <input id="logo-upload" name="logo" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg" />
                         </label>
                         <p className="pl-1">o arrástralo aquí</p>
                       </div>
@@ -173,7 +239,7 @@ export default function CreateGroupPage() {
                 </div>
               </div>
             )}
-            
+
             {/* Navegación del Carrusel */}
             <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
               <button
@@ -197,9 +263,12 @@ export default function CreateGroupPage() {
                 <button
                   type="button" // Cambiado de 'submit' a 'button'
                   onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
-                  className="flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                  disabled={submitting}
+                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
-                  Enviar Solicitud <Send size={16} />
+                  {submitting ? 'Enviando…' : <>Enviar Solicitud <Send size={16} /></>}
                 </button>
               )}
             </div>

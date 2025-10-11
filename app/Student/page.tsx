@@ -157,7 +157,7 @@ export default function StudentDashboardPage() {
         {viewMode === 'personal' ? (
           <PersonalView
             stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber }}
-          />) : <GroupsView />}
+          />) : <GroupsView userId={profile.user.id} />}
       </div>
 
       <Link

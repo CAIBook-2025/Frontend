@@ -11,23 +11,24 @@ import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
 
 // --- SIMULACIÓN DE API (sin cambios) ---
-const fakeApiFetchRooms = (): Promise<Room[]> => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
-      const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
-        id: i + 1,
-        name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
-        location: i % 2 === 0 ? `Biblioteca Central - Piso ${i % 4 + 1}` : `Centro de Estudiantes - Piso ${i % 2 + 1}`,
-        capacity: 2 + Math.floor(Math.random() * 8),
-        nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
-        status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
-        equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
-      }));
-      resolve(sampleRooms);
-    }, 1500);
-  });
-};
+// const fakeApiFetchRooms = (): Promise<Room[]> => {
+//   return new Promise(resolve => {
+//     setTimeout(() => {
+//       const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
+//       const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
+//         id: i + 1,
+//         name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
+//         location: i % 2 === 0 ? `Biblioteca Central - Piso ${i % 4 + 1}` : `Centro de Estudiantes - Piso ${i % 2 + 1}`,
+//         capacity: 2 + Math.floor(Math.random() * 8),
+//         nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
+//         status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
+//         equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
+//         module: 
+//       }));
+//       resolve(sampleRooms);
+//     }, 1500);
+//   });
+// };
 
 function normalizeEquipment(equ: any): string[] {
   try {
