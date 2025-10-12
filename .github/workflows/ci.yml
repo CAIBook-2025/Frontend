@@ -1,7 +1,6 @@
 name: Frontend CI Pipeline
 
 on:
-  # Ejecuta en push o PR hacia develop y main
   push:
     branches: [development]
   pull_request:
@@ -37,15 +36,19 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      # 5️⃣ Chequeo de tipos TypeScript
+      # 5️⃣ Formato (Prettier)
+      - name: Check code formatting with Prettier
+        run: npm run format:check
+
+      # 6️⃣ Chequeo de tipos TypeScript
       - name: TypeScript type check
         run: npx tsc --noEmit
 
-      # 6️⃣ Tests
+      # 7️⃣ Tests
       - name: Run tests
         run: npm run test
 
-      # 7️⃣ Build
+      # 8️⃣ Build
       - name: Build project
         run: npm run build
 
