@@ -1,19 +1,26 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { GroupsView } from '@/components/dashboard/GroupsView';
-import { PartnerView } from '@/components/dashboard/PartnerView';
-import { PersonalView } from '@/components/dashboard/PersonalView';
-import { RepresentativeView } from '@/components/dashboard/RepresentativeView';
+import { GroupsView } from '../components/dashboard/GroupsView';
+import { PartnerView } from '../components/dashboard/PartnerView';
+import { PersonalView } from '../components/dashboard/PersonalView';
+import { RepresentativeView } from '../components/dashboard/RepresentativeView';
 
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ href, children, ...props }: any) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-}));
+jest.mock('next/link', () => {
+  // compat con ESM/CJS si hace falta:
+  return ({ href, children, ...rest }) => {
+    const toHref = (h) => {
+      if (typeof h === 'string') return h;
+      if (!h || typeof h !== 'object') return '';
+      const qs = h.query ? `?${new URLSearchParams(h.query).toString()}` : '';
+      const base = h.pathname ?? '';
+      const hash = h.hash ? `#${h.hash}` : '';
+      return `${base}${qs}${hash}`;
+    };
+    return <a href={toHref(href)} {...rest}>{children}</a>;
+  };
+});
+
 
 describe('GroupsView', () => {
   beforeEach(() => {
@@ -24,15 +31,19 @@ describe('GroupsView', () => {
     jest.useRealTimers();
   });
 
-  // Checks the groups view exposes navigation to the group creation page
   it('muestra enlace para crear grupo tras cargar datos', async () => {
-    render(<GroupsView />);
+    const userId = 123;
+
+    render(<GroupsView userId={userId} />);
 
     await act(async () => {
       jest.runAllTimers();
     });
 
-    expect(screen.getByRole('link', { name: /Crear Grupo/i })).toHaveAttribute('href', 'Student/Groups/Form');
+    const link = await screen.findByRole('link', { name: /Crear Grupo/i });
+
+    expect(link).toHaveAttribute('href', `Student/Groups/Form?userId=${userId}`);
+
   });
 });
 
@@ -59,11 +70,13 @@ describe('PartnerView', () => {
 });
 
 describe('PersonalView', () => {
-  // Verifies the personal view keeps the shortcut to the booking page
   it('mantiene el enlace para reservar sala', () => {
-    render(<PersonalView />);
+    const stats = { reservasActivas: 2, strikes: 0, userId: 123 };
 
-    expect(screen.getByRole('link', { name: /Reservar una Sala/i })).toHaveAttribute('href', 'Student/StudyRoomBooker');
+    render(<PersonalView stats={stats} />);
+
+    const link = screen.getByRole('link', { name: /Reservar una Sala/i });
+    expect(link).toHaveAttribute('href', `/Student/StudyRoomBooker?userId=${stats.userId}`);
   });
 });
 
