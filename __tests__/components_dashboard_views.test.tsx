@@ -17,10 +17,13 @@ jest.mock('next/link', () => {
       const hash = h.hash ? `#${h.hash}` : '';
       return `${base}${qs}${hash}`;
     };
-    return <a href={toHref(href)} {...rest}>{children}</a>;
+    return (
+      <a href={toHref(href)} {...rest}>
+        {children}
+      </a>
+    );
   };
 });
-
 
 describe('GroupsView', () => {
   beforeEach(() => {
@@ -43,7 +46,6 @@ describe('GroupsView', () => {
     const link = await screen.findByRole('link', { name: /Crear Grupo/i });
 
     expect(link).toHaveAttribute('href', `Student/Groups/Form?userId=${userId}`);
-
   });
 });
 

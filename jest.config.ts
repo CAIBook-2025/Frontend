@@ -12,9 +12,7 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
-  transformIgnorePatterns: [
-    'node_modules[\\\\/](?!@auth0[\\\\/]nextjs-auth0[\\\\/])',
-  ],
+  transformIgnorePatterns: ['node_modules[\\\\/](?!@auth0[\\\\/]nextjs-auth0[\\\\/])'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
 };
 

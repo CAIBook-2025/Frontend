@@ -103,8 +103,7 @@ beforeAll(() => {
 beforeEach(() => {
   getAccessTokenMock.mockResolvedValue('fake-token');
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
-    const url =
-      typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
 
     if (url.includes('/api/users/profile')) {
       return {
