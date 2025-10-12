@@ -208,18 +208,15 @@ export const RepresentativeView = ({ groupId }: RepresentativeViewProps) => {
 
   const handleDeleteGroup = () => {
     // Aquí iría la lógica para eliminar el grupo
-    console.log('Eliminando grupo:', groupId);
     setShowDeleteConfirm(false);
   };
 
   const handlePromoteToModerator = (memberId: string) => {
     // Lógica para hacer moderador
-    console.log('Promoviendo a moderador:', memberId);
   };
 
   const handleTransferRepresentative = (moderatorId: string) => {
     // Lógica para ceder representatividad
-    console.log('Transfiriendo representatividad a:', moderatorId);
   };
 
   if (isLoadingGroup) {

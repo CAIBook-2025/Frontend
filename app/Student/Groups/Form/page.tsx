@@ -115,7 +115,13 @@ export default function CreateGroupPage() {
   return (
     <main className="flex min-h-screen bg-slate-50">
       <div className="hidden lg:block w-3/5 relative">
-        <Image src="/PeopleForm.png" alt="Estudiantes colaborando en un grupo" fill className="object-cover" />
+        <Image
+          src="/PeopleForm.png"
+          alt="Estudiantes colaborando en un grupo"
+          width={500}
+          height={500}
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-gray-900/40" />
         <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
           <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>

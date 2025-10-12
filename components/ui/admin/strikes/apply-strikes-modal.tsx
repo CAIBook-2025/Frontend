@@ -139,7 +139,7 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
               type="submit"
               className="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
             >
-              Aplicar Strike
+              Aplicar
             </button>
           </div>
         </form>

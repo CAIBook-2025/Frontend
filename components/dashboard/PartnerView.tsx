@@ -263,7 +263,6 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
 
   const handleLeaveGroup = () => {
     // Aquí iría la lógica para abandonar el grupo
-    console.log('Abandonando grupo:', groupId);
     setShowLeaveConfirm(false);
     // Redirigir al dashboard después de abandonar
   };
