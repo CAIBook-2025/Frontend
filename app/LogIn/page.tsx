@@ -75,7 +75,9 @@ export default function LoginPage() {
 
     try {
       // Llamamos a nuestra función de simulación
-      await fakeApiLogin(data);
+      const response = await fakeApiLogin(data);
+
+      console.log('Login exitoso:', response);
       // Aquí guardarías el token (ej. en cookies o en el estado global)
 
       // Redirigimos al Dashboard

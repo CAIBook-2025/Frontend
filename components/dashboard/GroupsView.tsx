@@ -14,6 +14,10 @@ interface Group {
   memberCount: number;
 }
 
+type GroupsViewProps = {
+  userId: number;
+};
+
 const fakeApiFetchGroups = (): Promise<Group[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -51,9 +55,11 @@ const fakeApiFetchGroups = (): Promise<Group[]> => {
   });
 };
 
-export const GroupsView = () => {
+export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log('user id: ', userId);
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -62,8 +68,8 @@ export const GroupsView = () => {
       setGroups(fetchedGroups);
       setIsLoading(false);
     };
-    loadGroups();
-  }, []);
+    if (userId) loadGroups();
+  }, [userId]);
 
   if (isLoading) {
     return (
@@ -78,7 +84,7 @@ export const GroupsView = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Mis Grupos</h2>
         <Link
-          href="Student/Groups/Form"
+          href={{ pathname: 'Student/Groups/Form', query: { userId } }}
           className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
         >
           <PlusCircle size={16} /> Crear Grupo

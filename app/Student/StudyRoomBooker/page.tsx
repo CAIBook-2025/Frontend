@@ -11,24 +11,43 @@ import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
 
 // --- SIMULACIÓN DE API (sin cambios) ---
-const fakeApiFetchRooms = (): Promise<Room[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
-      const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
-        id: i + 1,
-        name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
-        location:
-          i % 2 === 0 ? `Biblioteca Central - Piso ${(i % 4) + 1}` : `Centro de Estudiantes - Piso ${(i % 2) + 1}`,
-        capacity: 2 + Math.floor(Math.random() * 8),
-        nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
-        status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
-        equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
-      }));
-      resolve(sampleRooms);
-    }, 1500);
-  });
-};
+// const fakeApiFetchRooms = (): Promise<Room[]> => {
+//   return new Promise(resolve => {
+//     setTimeout(() => {
+//       const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
+//       const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
+//         id: i + 1,
+//         name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
+//         location: i % 2 === 0 ? `Biblioteca Central - Piso ${i % 4 + 1}` : `Centro de Estudiantes - Piso ${i % 2 + 1}`,
+//         capacity: 2 + Math.floor(Math.random() * 8),
+//         nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
+//         status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
+//         equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
+//         module:
+//       }));
+//       resolve(sampleRooms);
+//     }, 1500);
+//   });
+// };
+
+function normalizeEquipment(equ: any): string[] {
+  try {
+    // puede venir como objeto, arreglo o string JSON
+    if (!equ) return [];
+    if (Array.isArray(equ)) return equ.filter(Boolean).map(String);
+    if (typeof equ === 'string') {
+      const parsed = JSON.parse(equ);
+      return normalizeEquipment(parsed);
+    }
+    if (typeof equ === 'object') {
+      // {"1":"Pizarra","2":"Borrador"} -> ["Pizarra","Borrador"]
+      return Object.values(equ).filter(Boolean).map(String);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
 
 export default function BookRoomPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -40,9 +59,45 @@ export default function BookRoomPage() {
   useEffect(() => {
     const loadRooms = async () => {
       setIsLoading(true);
+      console.log('🔄 fetching schedules for', selectedDate);
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
-      const fetchedRooms = await fakeApiFetchRooms();
-      setRooms(fetchedRooms);
+
+      const params = new URLSearchParams({
+        day: selectedDate, // "YYYY-MM-DD"
+        take: '30',
+        page: '1',
+      });
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule?${params.toString()}`, {
+        cache: 'no-store',
+      });
+
+      console.log('EStá entrando aquí??');
+
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}`);
+      }
+
+      const data = await res.json(); // { page, take, total, items }
+
+      const roomsAdapted = (data.items ?? []).map((s: any) => {
+        const r = s.studyRoom ?? {};
+        return {
+          id: s.id ?? r.id,
+          name: r.name ?? `Sala ${s.sr_id}`,
+          location: r.location ?? '',
+          capacity: r.capacity ?? 0,
+          equipment: normalizeEquipment(r.equipment), // 👈 aquí
+          status: s.available === 'AVAILABLE' ? 'Disponible' : 'Ocupada',
+          nextAvailable: '—',
+          day: s.day,
+          module: s.module,
+        };
+      });
+
+      console.log('📦 Schedules recibidos:', data.items);
+      console.log(roomsAdapted);
+      setRooms(roomsAdapted);
       setIsLoading(false);
     };
     loadRooms();
@@ -93,9 +148,11 @@ export default function BookRoomPage() {
           </div>
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {rooms.map((room) => (
-              <RoomCard key={room.id} room={room} />
-            ))}
+            {Array.isArray(rooms) && rooms.length > 0 ? (
+              rooms.map((room) => <RoomCard key={room.id} room={room} userId={10} scheduleId={room.id} />)
+            ) : (
+              <p>No hay salas disponibles.</p>
+            )}
           </div>
         ) : (
           <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">

@@ -1,27 +1,38 @@
-// app/groups/create/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
   name: string;
   description: string;
-  objective: string;
+  goal: string;
   logo: File | null;
 }
 
 export default function CreateGroupPage() {
+  const params = useSearchParams();
+  const userId = Number(params.get('userId') ?? 0);
+
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
-    objective: '',
+    goal: '',
     logo: null,
   });
+
+  useEffect(() => {
+    // Esto sí debería aparecer siempre en la consola del navegador
+    console.log('Form mounted. userId =', userId);
+  }, [userId]);
 
   const handleNext = () => {
     // TODO: Añadir validación antes de pasar al siguiente paso
@@ -48,8 +59,57 @@ export default function CreateGroupPage() {
   };
 
   // La función de envío ya no necesita el evento 'e'
-  const handleSubmit = () => {
-    alert('¡Solicitud de grupo enviada!');
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setErrorMsg(null);
+
+      const { name, description, goal, logo } = formData;
+
+      if (!name.trim() || !description.trim() || !goal.trim()) {
+        setErrorMsg('Por favor completa todos los campos obligatorios.');
+        setSubmitting(false);
+        return;
+      }
+
+      if (!userId) {
+        setErrorMsg('No se detectó el usuario. Reintenta desde el Dashboard.');
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          name: name.trim(),
+          goal: goal.trim(),
+          description: description.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || 'No se pudo crear la solicitud de grupo.');
+      }
+
+      const data = await res.json();
+      console.log('Creada:', data);
+
+      alert('¡Solicitud de grupo enviada con éxito!');
+      setFormData({ name: '', description: '', goal: '', logo: null });
+      setStep(1);
+    } catch (err: any) {
+      console.log(err);
+      setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
+    } finally {
+      setSubmitting(false);
+    }
+
+    alert('¡Solicitud de grupo enviada! Revisa la consola.');
   };
 
   return (
@@ -135,15 +195,15 @@ export default function CreateGroupPage() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
                 <div className="space-y-8">
                   <div>
-                    <label htmlFor="objective" className="block text-sm font-medium text-slate-700 mb-1">
+                    <label htmlFor="goal" className="block text-sm font-medium text-slate-700 mb-1">
                       Objetivo Principal
                     </label>
                     <textarea
-                      id="objective"
-                      name="objective"
+                      id="goal"
+                      name="goal"
                       rows={10}
                       placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
-                      value={formData.objective}
+                      value={formData.goal}
                       onChange={handleInputChange}
                       className="resize-none block w-full rounded-md border-slate-300 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600"
                       required
@@ -192,6 +252,12 @@ export default function CreateGroupPage() {
               </div>
             )}
 
+            {errorMsg && (
+              <div className="mt-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                {errorMsg}
+              </div>
+            )}
+
             {/* Navegación del Carrusel */}
             <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
               <button
@@ -215,9 +281,18 @@ export default function CreateGroupPage() {
                 <button
                   type="button" // Cambiado de 'submit' a 'button'
                   onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
-                  className="flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                  disabled={submitting}
+                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
-                  Enviar Solicitud <Send size={16} />
+                  {submitting ? (
+                    'Enviando…'
+                  ) : (
+                    <>
+                      Enviar Solicitud <Send size={16} />
+                    </>
+                  )}
                 </button>
               )}
             </div>

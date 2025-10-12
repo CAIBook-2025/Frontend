@@ -10,13 +10,14 @@ export default async function CallbackCheck() {
 
   const accessToken = session.tokenSet.accessToken;
 
-  const res = await fetch('http://localhost:3003/api/users/check', {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
     cache: 'no-store',
   });
   const data = await res.json();
+  console.log('User data check response:', data);
 
   if (data.exists) {
     redirect('/ProfileSSR');

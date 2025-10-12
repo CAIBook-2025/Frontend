@@ -1,8 +1,15 @@
 // components/dashboard/PersonalView.tsx
 'use client';
 
-import Link from 'next/link';
+import Link, { type LinkProps } from 'next/link';
 import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert } from 'lucide-react';
+
+type Stats = {
+  reservasActivas: number;
+  // eventosProximos: number;
+  strikes: number;
+  userId: number;
+};
 
 // --- Componente para Tarjetas de Acción Principal ---
 const ActionCard = ({
@@ -11,7 +18,7 @@ const ActionCard = ({
   title,
   description,
 }: {
-  href: string;
+  href: LinkProps['href'];
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -44,20 +51,20 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
   </div>
 );
 
-export const PersonalView = () => {
+export const PersonalView = ({ stats }: { stats: Stats }) => {
   return (
     <>
       {/* 2. Resumen Rápido (Stats) */}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard icon={<CalendarClock size={20} />} value="2" label="Reservas Activas" />
-        <StatCard icon={<PartyPopper size={20} />} value="1" label="Evento Próximo" />
-        <StatCard icon={<ShieldAlert size={20} />} value="0" label="Strikes" />
+        <StatCard icon={<CalendarClock size={20} />} value={stats.reservasActivas} label="Reservas Activas" />
+        <StatCard icon={<PartyPopper size={20} />} value={'0'} label="Evento Próximo" />
+        <StatCard icon={<ShieldAlert size={20} />} value={stats.strikes} label="Strikes" />
       </section>
 
       {/* 3. Acciones Principales */}
       <section className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
         <ActionCard
-          href="Student/StudyRoomBooker"
+          href={{ pathname: '/Student/StudyRoomBooker', query: { userId: stats.userId } }}
           icon={<BookMarked className="h-6 w-6 text-blue-500" />}
           title="Reservar una Sala"
           description="Busca y asegura un espacio de estudio para ti o tu grupo."
