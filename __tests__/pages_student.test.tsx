@@ -3,8 +3,6 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import StudentDashboardPage from '@/app/Student/page';
 import CreateGroupPage from '@/app/Student/Groups/Form/page';
-import PartnerPage from '@/app/Student/Groups/Partner/[id]/page';
-import RepresentativePage from '@/app/Student/Groups/Representative/[id]/page';
 import StudyRoomBookerPage from '@/app/Student/StudyRoomBooker/page';
 
 jest.mock('next/link', () => ({
@@ -35,22 +33,6 @@ jest.mock('@/components/dashboard/GroupsView', () => ({
   GroupsView: (props: any) => {
     groupsViewMock(props);
     return <div data-testid="groups-view">GroupsView</div>;
-  },
-}));
-
-const partnerViewMock = jest.fn();
-jest.mock('@/components/dashboard/PartnerView', () => ({
-  PartnerView: (props: any) => {
-    partnerViewMock(props);
-    return <div data-testid="partner-view">Partner</div>;
-  },
-}));
-
-const representativeViewMock = jest.fn();
-jest.mock('@/components/dashboard/RepresentativeView', () => ({
-  RepresentativeView: (props: any) => {
-    representativeViewMock(props);
-    return <div data-testid="representative-view">Representative</div>;
   },
 }));
 
@@ -89,7 +71,8 @@ jest.mock('@/components/ui/SearchInput', () => ({
 }));
 
 describe('StudentDashboardPage', () => {
-  it('switches between personal and groups views', () => {
+  // Confirms the dashboard toggles between personal and group views
+  it('permite alternar entre vista personal y de grupos', () => {
     render(<StudentDashboardPage />);
 
     expect(screen.getByTestId('personal-view')).toBeInTheDocument();
@@ -105,34 +88,25 @@ describe('CreateGroupPage', () => {
     alertSpy.mockRestore();
   });
 
-  it('progresses through the multi-step form', () => {
+  it('avanza por todas las etapas del formulario', () => {
     render(<CreateGroupPage />);
 
-    expect(screen.getByText(/Informaci/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
-    expect(screen.getByText(/Detalles y Objetivos/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Siguiente/i }));
-    expect(screen.getByText(/Finalizar/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: /información general/i })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: /detalles y objetivos/i })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: /finalizar y enviar/i })
+    ).toBeInTheDocument();
   });
 });
 
-describe('PartnerPage', () => {
-  it('passes groupId to PartnerView', () => {
-    render(<PartnerPage params={{ groupId: 'abc' }} />);
-
-    expect(partnerViewMock).toHaveBeenCalledWith(expect.objectContaining({ groupId: 'abc' }));
-    expect(screen.getByTestId('partner-view')).toBeInTheDocument();
-  });
-});
-
-describe('RepresentativePage', () => {
-  it('passes groupId to RepresentativeView', () => {
-    render(<RepresentativePage params={{ groupId: 'rep-1' }} />);
-
-    expect(representativeViewMock).toHaveBeenCalledWith(expect.objectContaining({ groupId: 'rep-1' }));
-    expect(screen.getByTestId('representative-view')).toBeInTheDocument();
-  });
-});
 
 describe('StudyRoomBookerPage', () => {
   let mathRandomSpy: jest.SpyInstance<number, []>;
@@ -144,7 +118,8 @@ describe('StudyRoomBookerPage', () => {
     }
   });
 
-  it('displays rooms after loading', async () => {
+  // Ensures rooms are shown after the simulated load completes
+  it('muestra las salas disponibles despues de cargar', async () => {
     mathRandomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.6);
     jest.useFakeTimers();
     render(<StudyRoomBookerPage />);

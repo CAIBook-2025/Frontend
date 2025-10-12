@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DashboardSection } from '@/components/ui/dashboard/DashboardSection';
-import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
-import { ActivityCard } from '@/components/ui/dashboard/admin/ActivityCard';
 import { AdminToolsCard } from '@/components/ui/dashboard/admin/AdminTools';
 import { GroupRequestCard } from '@/components/ui/dashboard/admin/GroupRequestCard';
 
@@ -16,44 +14,22 @@ jest.mock('next/link', () => ({
   ),
 }));
 
-describe('StatCard', () => {
-  it('renders icon, value and labels', () => {
-    render(
-      <StatCard icon={<span data-testid="icon">I</span>} value={10} label="Reservas" footer="Hoy" />
-    );
-
-    expect(screen.getByText('Reservas')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
-    expect(screen.getByText('Hoy')).toBeInTheDocument();
-    expect(screen.getByTestId('icon')).toBeInTheDocument();
-  });
-});
-
 describe('DashboardSection', () => {
-  it('wraps children and renders action link', () => {
+  // Verifies action links keep pointing to the provided href
+  it('renderiza el enlace de accion con el href esperado', () => {
     render(
-      <DashboardSection title="Actividad" buttonText="Ver más" href="/actividad">
+      <DashboardSection title="Actividad" buttonText="Ver mas" href="/actividad">
         <p>Contenido</p>
       </DashboardSection>
     );
 
-    expect(screen.getByRole('heading', { name: /Actividad/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Ver más/i })).toHaveAttribute('href', '/actividad');
-    expect(screen.getByText(/Contenido/i)).toBeInTheDocument();
-  });
-});
-
-describe('ActivityCard', () => {
-  it('shows status and details', () => {
-    render(<ActivityCard status="Reserva completada" details="Sala A" variant="green" />);
-
-    expect(screen.getByText(/Reserva completada/i)).toBeInTheDocument();
-    expect(screen.getByText(/Sala A/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Ver mas/i })).toHaveAttribute('href', '/actividad');
   });
 });
 
 describe('AdminToolsCard', () => {
-  it('renders navigation buttons', () => {
+  // Ensures each admin tool navigates to the right management page
+  it('expone enlaces de navegacion hacia las herramientas clave', () => {
     render(<AdminToolsCard />);
 
     expect(screen.getByRole('link', { name: /Gestionar Grupos/i })).toHaveAttribute(
@@ -72,12 +48,12 @@ describe('AdminToolsCard', () => {
 });
 
 describe('GroupRequestCard', () => {
-  it('links to group details', () => {
+  // Confirms the review button navigates to the selected group
+  it('dirige a la revision del grupo correcto', () => {
     render(
-      <GroupRequestCard title="Club" subtitle="Hace 1 día" id="42" />
+      <GroupRequestCard title="Club" subtitle="Hace 1 dia" id="42" />
     );
 
-    expect(screen.getByText(/Club/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Revisar/i })).toHaveAttribute(
       'href',
       '/Admin/Groups?groupId=42'

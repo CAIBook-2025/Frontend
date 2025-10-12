@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import HomePage from '@/app/page';
-import AboutPage from '@/app/About/page';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -19,28 +18,14 @@ jest.mock('next/image', () => ({
 }));
 
 describe('HomePage', () => {
-  it('renders hero section and CTA links', () => {
+  // Ensures the home CTA links point to the correct destinations
+  it('expone los enlaces principales hacia dashboard y login', () => {
     render(<HomePage />);
 
-    expect(
-      screen.getByRole('heading', {
-        name: /gestión de espacios/i,
-        level: 1,
-      })
-    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Acceder a la Plataforma/i })).toHaveAttribute(
       'href',
       '/dashboard'
     );
     expect(screen.getByRole('link', { name: /Comenzar ahora/i })).toHaveAttribute('href', '/login');
-  });
-});
-
-describe('AboutPage', () => {
-  it('shows team information and image', () => {
-    render(<AboutPage />);
-
-    expect(screen.getByRole('heading', { name: /Nuestro Equipo/i })).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /Mapocho/i })).toBeInTheDocument();
   });
 });

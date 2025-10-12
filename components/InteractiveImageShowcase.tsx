@@ -28,14 +28,14 @@ export const InteractiveImageShowcase = ({
       <Image
         src={beforeImageSrc}
         alt="Estudiante frustrado por el proceso manual de reserva"
-        fill // 'fill' hace que la imagen ocupe todo el espacio del contenedor padre
+        fill={true}
         className="object-cover transition-opacity duration-700 ease-in-out group-hover:opacity-0"
       />
-      {/* IMAGEN "DESPUÉS" (aparece al hacer hover) */}
+
       <Image
         src={afterImageSrc}
         alt="Estudiante feliz reservando una sala desde su computador"
-        fill
+        fill={true}
         className="object-cover opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
       />
 

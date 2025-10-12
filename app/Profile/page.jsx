@@ -15,7 +15,6 @@ export default function ProfilePage() {
                 try {
                     const accessToken = await getAccessToken();
                     setAccessToken(accessToken);
-                    console.log('Access Token:', accessToken);
                 } catch (error) {
                     console.error('Error fetching access token:', error);
                 }
@@ -38,7 +37,6 @@ export default function ProfilePage() {
                     if (res.ok) {
                         const userData = await res.json();
                         setUserData(userData);
-                        console.log('User Data:', userData);
                     } else {
                         console.error('Backend error:', res.status, res.statusText);
                     }

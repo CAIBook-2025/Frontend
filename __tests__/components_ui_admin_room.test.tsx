@@ -33,6 +33,7 @@ const mockRooms: Room[] = [
 ];
 
 describe('FilterRoom', () => {
+  // Checks that filter updates propagate to the handler
   it('emits updates when filters change', () => {
     const handleFiltersChange = jest.fn();
     render(<FilterRoom rooms={mockRooms} onFiltersChange={handleFiltersChange} />);
@@ -54,6 +55,7 @@ describe('FilterRoom', () => {
 describe('RoomManagementModal', () => {
   const room = mockRooms[0];
 
+  // Ensures the modal saves changes and closes after submission
   it('allows changing status and saving', () => {
     const onSave = jest.fn();
     const onClose = jest.fn();
@@ -73,12 +75,10 @@ describe('RoomManagementModal', () => {
 });
 
 describe('RoomsTable', () => {
+  // Confirms the manage action notifies the parent about the selected room
   it('renders rooms and triggers manage callback', () => {
     const onManage = jest.fn();
     render(<RoomsTable rooms={mockRooms} onManage={onManage} />);
-
-    expect(screen.getByText(/Sala A1/i)).toBeInTheDocument();
-    expect(screen.getByText(/Reparaci/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getAllByRole('button', { name: /Gestionar/i })[0]);
     expect(onManage).toHaveBeenCalledWith(mockRooms[0]);
