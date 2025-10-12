@@ -8,7 +8,7 @@ export default async function UserInfo() {
     if (user) {
         try {
             console.log('Fetching user data with access token:', session.tokenSet.accessToken);
-            const res = await fetch(`${process.env.API_URL}/api/users/profile`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
                 headers: {
                     Authorization: `Bearer ${session.tokenSet.accessToken}`
                 }

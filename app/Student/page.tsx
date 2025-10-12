@@ -59,6 +59,8 @@ export default function StudentDashboardPage() {
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
+  console.log(process.env.NEXT_PUBLIC_API_URL);
+
   const [userData, setUserData] = useState(null);
   const [accessToken, setAccessToken] = useState('');
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ export default function StudentDashboardPage() {
     async function fetchUserData() {
       if (accessToken) {
         try {
-          const res = await fetch(`${process.env.API_URL}/api/users/profile`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
             headers: {
               Authorization: `Bearer ${accessToken}`
             }
@@ -156,7 +158,7 @@ export default function StudentDashboardPage() {
       <div>
         {viewMode === 'personal' ? (
           <PersonalView
-            stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber }}
+            stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber, userId: profile.user.id }}
           />) : <GroupsView userId={profile.user.id} />}
       </div>
 

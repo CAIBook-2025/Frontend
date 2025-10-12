@@ -29,7 +29,7 @@ export default function ProfilePage() {
         async function fetchUserData() {
             if (accessToken) {
                 try {
-                    const res = await fetch(`${process.env.API_URL}/api/users/profile`, {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
                         headers: {
                             Authorization: `Bearer ${accessToken}`
                         }

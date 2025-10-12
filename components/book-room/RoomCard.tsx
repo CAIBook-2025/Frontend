@@ -18,9 +18,28 @@ export interface Room {
   module: number
 }
 
-export const RoomCard = ({ room }: { room: Room }) => {
+export const RoomCard = ({ room, userId, scheduleId }: { room: Room, userId: number, scheduleId: number }) => {
   const isAvailable = room.status === 'Disponible';
-  
+
+  const handleReservar = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/${scheduleId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || 'Error al reservar');
+      }
+      const data = await res.json();
+      // refresca estado/UI
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+
   return (
     <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
       <div>
@@ -58,12 +77,12 @@ export const RoomCard = ({ room }: { room: Room }) => {
         disabled={!isAvailable}
         className={`
           mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300
-          ${isAvailable 
+          ${isAvailable
             ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' // Estilo para el estado HABILITADO
             : 'bg-slate-400 cursor-not-allowed' // Estilo para el estado DESHABILITADO
           }
         `}
-        // onClick={handleReservar}
+      onClick={handleReservar}
       >
         {isAvailable ? 'Reservar' : 'No Disponible'}
       </button>

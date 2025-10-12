@@ -1,17 +1,18 @@
 // components/dashboard/PersonalView.tsx
 'use client';
 
-import Link from 'next/link';
+import Link, { type LinkProps} from 'next/link';
 import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert } from 'lucide-react';
 
 type Stats = { 
   reservasActivas: number; 
   // eventosProximos: number; 
-  strikes: number 
+  strikes: number;
+  userId: number;
 };
 
 // --- Componente para Tarjetas de Acción Principal ---
-const ActionCard = ({ href, icon, title, description }: { href: string; icon: React.ReactNode; title: string; description: string }) => (
+const ActionCard = ({ href, icon, title, description }: { href: LinkProps['href']; icon: React.ReactNode; title: string; description: string }) => (
   <Link href={href} className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg">
     <div className="flex items-start justify-between">
       <div>
@@ -45,18 +46,16 @@ export const PersonalView = ({stats}: {stats: Stats}) => {
   return (
     <>
       {/* 2. Resumen Rápido (Stats) */}
-      {console.log("stats: ", stats)}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard icon={<CalendarClock size={20} />} value={stats.reservasActivas} label="Reservas Activas" />
-        <StatCard icon={<PartyPopper size={20} />} value={"4"} label="Evento Próximo" />
+        <StatCard icon={<PartyPopper size={20} />} value={"0"} label="Evento Próximo" />
         <StatCard icon={<ShieldAlert size={20} />} value={stats.strikes} label="Strikes" />
       </section>
 
       {/* 3. Acciones Principales */}
       <section className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
         <ActionCard
-          href="Student/StudyRoomBooker"
-          icon={<BookMarked className="h-6 w-6 text-blue-500" />}
+          href={{ pathname: "/Student/StudyRoomBooker", query: { userId: stats.userId } }}          icon={<BookMarked className="h-6 w-6 text-blue-500" />}
           title="Reservar una Sala"
           description="Busca y asegura un espacio de estudio para ti o tu grupo."
         />

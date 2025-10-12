@@ -78,7 +78,7 @@ export default function CreateGroupPage() {
         return;
       }
 
-      const res = await fetch(`${process.env.API_URL}/api/group-requests`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
