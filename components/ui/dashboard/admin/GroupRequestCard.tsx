@@ -1,12 +1,8 @@
-"use client"
+'use client';
 
-import Link from "next/link";
+import Link from 'next/link';
 
-export const GroupRequestCard = ({
-  title,
-  subtitle,
-  id
-}: { title: string; subtitle: string; id: string }) => (
+export const GroupRequestCard = ({ title, subtitle, id }: { title: string; subtitle: string; id: string }) => (
   <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
     <div>
       <h4 className="font-medium text-gray-800 text-sm">{title}</h4>
@@ -19,4 +15,4 @@ export const GroupRequestCard = ({
       Revisar
     </Link>
   </div>
-)
+);

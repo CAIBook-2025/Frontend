@@ -9,9 +9,7 @@ describe('ApplyStrikeModal', () => {
   it('envia los datos del strike al confirmar', () => {
     const onApply = jest.fn();
     const onClose = jest.fn();
-    render(
-      <ApplyStrikeModal isOpen onApply={onApply} onClose={onClose} />
-    );
+    render(<ApplyStrikeModal isOpen onApply={onApply} onClose={onClose} />);
 
     fireEvent.change(screen.getByLabelText(/Email del Usuario/i), {
       target: { value: 'user@example.com' },

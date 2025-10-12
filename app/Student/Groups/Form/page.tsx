@@ -31,19 +31,19 @@ export default function CreateGroupPage() {
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      setFormData(prev => ({ ...prev, logo: file }));
+      setFormData((prev) => ({ ...prev, logo: file }));
     } else {
-      setFormData(prev => ({ ...prev, logo: null }));
+      setFormData((prev) => ({ ...prev, logo: null }));
     }
   };
 
@@ -72,8 +72,10 @@ export default function CreateGroupPage() {
       </div>
 
       <div className="w-full lg:w-3/5  flex flex-col items-center h-full p-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">¡Felicidades! Estás dando el primer paso hacia tu comunidad</h1>
-        
+        <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">
+          ¡Felicidades! Estás dando el primer paso hacia tu comunidad
+        </h1>
+
         <div className="max-w-3xl w-full">
           <div className="mb-8 flex items-center justify-center gap-4">
             {[1, 2, 3].map((s) => (
@@ -96,7 +98,6 @@ export default function CreateGroupPage() {
 
           {/* El contenedor principal ahora es un <div> en lugar de <form> */}
           <div className="bg-white px-8 py-12 rounded-2xl shadow-lg">
-            
             {step === 1 && (
               <div className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Información General</h2>
@@ -111,7 +112,9 @@ export default function CreateGroupPage() {
                     required
                   />
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">Descripción Corta</label>
+                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
+                      Descripción Corta
+                    </label>
                     <textarea
                       id="description"
                       name="description"
@@ -126,13 +129,15 @@ export default function CreateGroupPage() {
                 </div>
               </div>
             )}
-            
+
             {step === 2 && (
               <div className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
                 <div className="space-y-8">
-                   <div>
-                    <label htmlFor="objective" className="block text-sm font-medium text-slate-700 mb-1">Objetivo Principal</label>
+                  <div>
+                    <label htmlFor="objective" className="block text-sm font-medium text-slate-700 mb-1">
+                      Objetivo Principal
+                    </label>
                     <textarea
                       id="objective"
                       name="objective"
@@ -152,7 +157,9 @@ export default function CreateGroupPage() {
               <div className="animate-fade-in">
                 <h2 className="text-2xl font-bold text-gray-800 mb-8">Finalizar y Enviar</h2>
                 <div>
-                  <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1">Logo del Grupo (Opcional)</label>
+                  <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1">
+                    Logo del Grupo (Opcional)
+                  </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-slate-900/25 px-6 py-10">
                     <div className="text-center">
                       <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
@@ -162,18 +169,29 @@ export default function CreateGroupPage() {
                           className="relative cursor-pointer rounded-md bg-white font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
                         >
                           <span>Sube un archivo</span>
-                          <input id="logo-upload" name="logo" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg"/>
+                          <input
+                            id="logo-upload"
+                            name="logo"
+                            type="file"
+                            className="sr-only"
+                            onChange={handleFileChange}
+                            accept="image/png, image/jpeg"
+                          />
                         </label>
                         <p className="pl-1">o arrástralo aquí</p>
                       </div>
                       <p className="text-xs leading-5 text-slate-500">PNG, JPG hasta 2MB</p>
                     </div>
                   </div>
-                  {formData.logo && <p className="mt-2 text-sm text-green-600 text-center">Archivo seleccionado: {formData.logo.name}</p>}
+                  {formData.logo && (
+                    <p className="mt-2 text-sm text-green-600 text-center">
+                      Archivo seleccionado: {formData.logo.name}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
-            
+
             {/* Navegación del Carrusel */}
             <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
               <button

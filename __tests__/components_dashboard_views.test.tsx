@@ -63,10 +63,7 @@ describe('PersonalView', () => {
   it('mantiene el enlace para reservar sala', () => {
     render(<PersonalView />);
 
-    expect(screen.getByRole('link', { name: /Reservar una Sala/i })).toHaveAttribute(
-      'href',
-      'Student/StudyRoomBooker'
-    );
+    expect(screen.getByRole('link', { name: /Reservar una Sala/i })).toHaveAttribute('href', 'Student/StudyRoomBooker');
   });
 });
 

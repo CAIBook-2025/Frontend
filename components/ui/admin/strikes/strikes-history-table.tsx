@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
 interface Strike {
   id: string;
   userId: string;
   userName: string;
   userEmail: string;
-  type: "No-show" | "Misuse" | "Late-cancellation";
+  type: 'No-show' | 'Misuse' | 'Late-cancellation';
   reason: string;
   appliedBy: string;
   date: string;
@@ -15,25 +15,25 @@ interface StrikeHistoryTableProps {
   strikes: Strike[];
 }
 
-const getTypeLabel = (type: Strike["type"]) => {
+const getTypeLabel = (type: Strike['type']) => {
   switch (type) {
-    case "No-show":
-      return "No Show";
-    case "Misuse":
-      return "Mal Uso";
-    case "Late-cancellation":
-      return "Cancelación Tardía";
+    case 'No-show':
+      return 'No Show';
+    case 'Misuse':
+      return 'Mal Uso';
+    case 'Late-cancellation':
+      return 'Cancelación Tardía';
   }
 };
 
-const getTypeBadgeColor = (type: Strike["type"]) => {
+const getTypeBadgeColor = (type: Strike['type']) => {
   switch (type) {
-    case "No-show":
-      return "bg-red-500 text-white";
-    case "Misuse":
-      return "bg-yellow-500 text-white";
-    case "Late-cancellation":
-      return "bg-yellow-600 text-white";
+    case 'No-show':
+      return 'bg-red-500 text-white';
+    case 'Misuse':
+      return 'bg-yellow-500 text-white';
+    case 'Late-cancellation':
+      return 'bg-yellow-600 text-white';
   }
 };
 

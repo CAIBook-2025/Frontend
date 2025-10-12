@@ -51,12 +51,14 @@ describe('LoginPage', () => {
 
   it('redirecciona al dashboard de estudiantes tras un login exitoso', async () => {
     mathRandomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.1);
-    setTimeoutMock = jest
-      .spyOn(global, 'setTimeout')
-      .mockImplementation(((callback: any, _delay?: number, ...args: any[]) => {
-        callback?.(...args);
-        return 0 as unknown as ReturnType<typeof setTimeout>;
-      }) as any);
+    setTimeoutMock = jest.spyOn(global, 'setTimeout').mockImplementation(((
+      callback: any,
+      _delay?: number,
+      ...args: any[]
+    ) => {
+      callback?.(...args);
+      return 0 as unknown as ReturnType<typeof setTimeout>;
+    }) as any);
 
     render(<LoginPage />);
 

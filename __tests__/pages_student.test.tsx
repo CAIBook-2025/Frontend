@@ -91,22 +91,15 @@ describe('CreateGroupPage', () => {
   it('avanza por todas las etapas del formulario', () => {
     render(<CreateGroupPage />);
 
-    expect(
-      screen.getByRole('heading', { level: 2, name: /información general/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /información general/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
 
-    expect(
-      screen.getByRole('heading', { level: 2, name: /detalles y objetivos/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /detalles y objetivos/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /siguiente/i }));
 
-    expect(
-      screen.getByRole('heading', { level: 2, name: /finalizar y enviar/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /finalizar y enviar/i })).toBeInTheDocument();
   });
 });
-
 
 describe('StudyRoomBookerPage', () => {
   let mathRandomSpy: jest.SpyInstance<number, []>;

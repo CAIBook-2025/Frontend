@@ -22,10 +22,7 @@ describe('HomePage', () => {
   it('expone los enlaces principales hacia dashboard y login', () => {
     render(<HomePage />);
 
-    expect(screen.getByRole('link', { name: /Acceder a la Plataforma/i })).toHaveAttribute(
-      'href',
-      '/dashboard'
-    );
+    expect(screen.getByRole('link', { name: /Acceder a la Plataforma/i })).toHaveAttribute('href', '/dashboard');
     expect(screen.getByRole('link', { name: /Comenzar ahora/i })).toHaveAttribute('href', '/login');
   });
 });

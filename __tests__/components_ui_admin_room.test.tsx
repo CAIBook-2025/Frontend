@@ -60,9 +60,7 @@ describe('RoomManagementModal', () => {
     const onSave = jest.fn();
     const onClose = jest.fn();
 
-    render(
-      <RoomManagementModal room={room} isOpen onClose={onClose} onSave={onSave} />
-    );
+    render(<RoomManagementModal room={room} isOpen onClose={onClose} onSave={onSave} />);
 
     fireEvent.click(screen.getByLabelText(/Mantenimiento/i));
     const textarea = screen.getByLabelText(/Motivo/i);

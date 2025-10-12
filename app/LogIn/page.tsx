@@ -22,12 +22,12 @@ export const metadata: Metadata = {
 
 // 1. ESQUEMA DE VALIDACIÓN PARA EL LOGIN (más simple)
 const loginSchema = z.object({
-  email: z.string()
-    .min(1, { message: "El correo es requerido." })
-    .email({ message: "Debe ser un formato de correo válido." })
-    .refine((email) => email.endsWith('@uc.cl'), { message: "El correo debe ser institucional (@uc.cl)." }),
-  password: z.string()
-    .min(1, { message: "La contraseña es requerida." }),
+  email: z
+    .string()
+    .min(1, { message: 'El correo es requerido.' })
+    .email({ message: 'Debe ser un formato de correo válido.' })
+    .refine((email) => email.endsWith('@uc.cl'), { message: 'El correo debe ser institucional (@uc.cl).' }),
+  password: z.string().min(1, { message: 'La contraseña es requerida.' }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -42,49 +42,48 @@ const fakeApiLogin = (data: LoginFormData): Promise<{ token: string; role: strin
       if (Math.random() < 0.7) {
         // Éxito: devolvemos un token falso y un rol
         resolve({
-          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp1YW4gUGVyZXoiLCJpYXQiOjE1MTYyMzkwMjJ9.fake_jwt_signature",
-          role: "student", // Podría ser 'student' o 'admin'
+          token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp1YW4gUGVyZXoiLCJpYXQiOjE1MTYyMzkwMjJ9.fake_jwt_signature',
+          role: 'student', // Podría ser 'student' o 'admin'
         });
       } else {
         // Fracaso: rechazamos la promesa con un mensaje de error
-        reject(new Error("Credenciales inválidas"));
+        reject(new Error('Credenciales inválidas'));
       }
     }, 1500);
   });
 };
 
-
-
-
 export default function LoginPage() {
-
   const router = useRouter();
   // 3. ESTADOS PARA MANEJAR LA UI
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
   // 4. LÓGICA DE ENVÍO ACTUALIZADA
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setIsLoading(true); // Ponemos el botón en estado de carga
-    setApiError(null);  // Reseteamos cualquier error anterior
+    setApiError(null); // Reseteamos cualquier error anterior
 
     try {
       // Llamamos a nuestra función de simulación
       await fakeApiLogin(data);
       // Aquí guardarías el token (ej. en cookies o en el estado global)
-      
+
       // Redirigimos al Dashboard
       router.push('/Student');
-
     } catch (error) {
       // Si la promesa fue rechazada (login fallido)
-      console.error("Error en el login:", error);
-      setApiError("El correo o la contraseña son incorrectos. Por favor, intenta de nuevo.");
-    
+      console.error('Error en el login:', error);
+      setApiError('El correo o la contraseña son incorrectos. Por favor, intenta de nuevo.');
     } finally {
       // Esto se ejecuta siempre, tanto en éxito como en fracaso
       setIsLoading(false); // Quitamos el estado de carga del botón
@@ -100,12 +99,8 @@ export default function LoginPage() {
             <School className="h-10 w-10 text-brand-primary" />
             <span className="text-3xl font-bold text-brand-dark">CAIBook</span>
           </Link>
-          <h1 className="text-2xl font-bold text-brand-dark">
-            Bienvenido de vuelta
-          </h1>
-          <p className="mt-2 text-slate-600">
-            Ingresa tus credenciales para acceder a la plataforma.
-          </p>
+          <h1 className="text-2xl font-bold text-brand-dark">Bienvenido de vuelta</h1>
+          <p className="mt-2 text-slate-600">Ingresa tus credenciales para acceder a la plataforma.</p>
         </div>
 
         {/* Mensaje de error de la API */}
@@ -115,27 +110,26 @@ export default function LoginPage() {
           </div>
         )}
 
-
         {/* Formulario de Login */}
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
           <div>
-            <Input 
-              id="email" 
-              label="Correo Institucional (@uc.cl)" 
-              type="email" 
+            <Input
+              id="email"
+              label="Correo Institucional (@uc.cl)"
+              type="email"
               autoComplete="email"
-              {...register('email')} 
+              {...register('email')}
             />
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
           </div>
 
           <div>
-            <Input 
-              id="password" 
-              label="Contraseña" 
-              type="password" 
+            <Input
+              id="password"
+              label="Contraseña"
+              type="password"
               autoComplete="current-password"
-              {...register('password')} 
+              {...register('password')}
             />
             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
           </div>

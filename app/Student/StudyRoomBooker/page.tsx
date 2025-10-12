@@ -12,13 +12,14 @@ import { DaySelector } from '@/components/book-room/DaySelector';
 
 // --- SIMULACIÓN DE API (sin cambios) ---
 const fakeApiFetchRooms = (): Promise<Room[]> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
       const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
         id: i + 1,
         name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
-        location: i % 2 === 0 ? `Biblioteca Central - Piso ${i % 4 + 1}` : `Centro de Estudiantes - Piso ${i % 2 + 1}`,
+        location:
+          i % 2 === 0 ? `Biblioteca Central - Piso ${(i % 4) + 1}` : `Centro de Estudiantes - Piso ${(i % 2) + 1}`,
         capacity: 2 + Math.floor(Math.random() * 8),
         nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
         status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
@@ -53,14 +54,15 @@ export default function BookRoomPage() {
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SearchInput 
-            id="search" 
-            label="Buscar por nombre o edificio"
-            placeholder="Ej: Biblioteca, Sala A1..."
-          />
+          <SearchInput id="search" label="Buscar por nombre o edificio" placeholder="Ej: Biblioteca, Sala A1..." />
           <div>
-            <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">Capacidad mínima</label>
-            <select id="capacity" className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+            <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">
+              Capacidad mínima
+            </label>
+            <select
+              id="capacity"
+              className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+            >
               <option>Cualquier capacidad</option>
               <option>2+ personas</option>
               <option>4+ personas</option>
@@ -70,12 +72,10 @@ export default function BookRoomPage() {
           </div>
           {/* --- REEMPLAZAMOS EL INPUT DE FECHA POR NUESTRO COMPONENTE --- */}
           {/* Ocupará una columna completa en pantallas pequeñas y una columna en medianas */}
-          <div className="md:col-span-1">
-             {/* No es necesario un div extra, el componente ya tiene su label */}
-          </div>
+          <div className="md:col-span-1">{/* No es necesario un div extra, el componente ya tiene su label */}</div>
         </div>
         <div className="mt-4">
-            <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
         </div>
       </section>
 
@@ -91,18 +91,16 @@ export default function BookRoomPage() {
             <Loader2 className="h-12 w-12 animate-spin text-brand-primary" />
             <p className="mt-4 text-lg text-slate-600">Buscando salas para el {selectedDate}...</p>
           </div>
+        ) : viewMode === 'list' ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {rooms.map((room) => (
+              <RoomCard key={room.id} room={room} />
+            ))}
+          </div>
         ) : (
-          viewMode === 'list' ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {rooms.map(room => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">
-              <p className="text-lg">Aquí irá el componente del mapa interactivo.</p>
-            </div>
-          )
+          <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">
+            <p className="text-lg">Aquí irá el componente del mapa interactivo.</p>
+          </div>
         )}
       </section>
     </main>

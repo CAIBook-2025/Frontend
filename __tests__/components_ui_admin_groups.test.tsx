@@ -2,11 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { GroupDetailsModal } from '@/components/ui/admin/groups/group-details-modal';
-import {
-  GroupRequestsTable,
-  PendingRequest,
-  ApprovedRequest,
-} from '@/components/ui/admin/groups/group-requests-table';
+import { GroupRequestsTable, PendingRequest, ApprovedRequest } from '@/components/ui/admin/groups/group-requests-table';
 
 describe('GroupDetailsModal', () => {
   const baseRequest: PendingRequest = {
@@ -39,13 +35,7 @@ describe('GroupDetailsModal', () => {
     const onApprove = jest.fn();
     const onClose = jest.fn();
     render(
-      <GroupDetailsModal
-        request={baseRequest}
-        isOpen
-        onClose={onClose}
-        onApprove={onApprove}
-        onReject={jest.fn()}
-      />
+      <GroupDetailsModal request={baseRequest} isOpen onClose={onClose} onApprove={onApprove} onReject={jest.fn()} />
     );
 
     fireEvent.click(screen.getByRole('button', { name: /Aprobar/i }));
@@ -109,14 +99,7 @@ describe('GroupRequestsTable', () => {
     ];
     const onManage = jest.fn();
 
-    render(
-      <GroupRequestsTable
-        requests={approved}
-        tableType="approved"
-        onView={jest.fn()}
-        onManage={onManage}
-      />
-    );
+    render(<GroupRequestsTable requests={approved} tableType="approved" onView={jest.fn()} onManage={onManage} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Gestionar/i }));
     expect(onManage).toHaveBeenCalledWith('2');

@@ -32,31 +32,17 @@ describe('AdminToolsCard', () => {
   it('expone enlaces de navegacion hacia las herramientas clave', () => {
     render(<AdminToolsCard />);
 
-    expect(screen.getByRole('link', { name: /Gestionar Grupos/i })).toHaveAttribute(
-      'href',
-      '/Admin/Groups'
-    );
-    expect(screen.getByRole('link', { name: /Administrar Salas/i })).toHaveAttribute(
-      'href',
-      '/Admin/Room'
-    );
-    expect(screen.getByRole('link', { name: /Sistema de Strikes/i })).toHaveAttribute(
-      'href',
-      '/Admin/Strikes'
-    );
+    expect(screen.getByRole('link', { name: /Gestionar Grupos/i })).toHaveAttribute('href', '/Admin/Groups');
+    expect(screen.getByRole('link', { name: /Administrar Salas/i })).toHaveAttribute('href', '/Admin/Room');
+    expect(screen.getByRole('link', { name: /Sistema de Strikes/i })).toHaveAttribute('href', '/Admin/Strikes');
   });
 });
 
 describe('GroupRequestCard', () => {
   // Confirms the review button navigates to the selected group
   it('dirige a la revision del grupo correcto', () => {
-    render(
-      <GroupRequestCard title="Club" subtitle="Hace 1 dia" id="42" />
-    );
+    render(<GroupRequestCard title="Club" subtitle="Hace 1 dia" id="42" />);
 
-    expect(screen.getByRole('link', { name: /Revisar/i })).toHaveAttribute(
-      'href',
-      '/Admin/Groups?groupId=42'
-    );
+    expect(screen.getByRole('link', { name: /Revisar/i })).toHaveAttribute('href', '/Admin/Groups?groupId=42');
   });
 });
