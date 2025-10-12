@@ -49,8 +49,7 @@ export default function CreateGroupPage() {
 
   // La función de envío ya no necesita el evento 'e'
   const handleSubmit = () => {
-    console.log("Enviando formulario:", formData);
-    alert('¡Solicitud de grupo enviada! Revisa la consola.');
+    alert('¡Solicitud de grupo enviada!');
   };
 
   return (
@@ -59,7 +58,8 @@ export default function CreateGroupPage() {
         <Image
           src="/PeopleForm.png"
           alt="Estudiantes colaborando en un grupo"
-          fill
+          width={500}
+          height={500}
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gray-900/40" />

@@ -17,7 +17,6 @@ export default async function CallbackCheck() {
         cache: "no-store",
     })
     const data = await res.json();
-    console.log('User data check response:', data);
 
     if (data.exists) {
         redirect('/ProfileSSR');

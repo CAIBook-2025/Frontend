@@ -65,12 +65,11 @@ export default function RegisterPage() {
         body: JSON.stringify(userData)
       });
       if (response.ok) {
-        alert('¡Registro exitoso! Revisa la consola para ver los datos.');
+        alert('¡Registro exitoso!');
         window.location.href = '/ProfileSSR';
       } else {
         console.error('Error en la respuesta del servidor:', response.statusText);
       }
-      console.log('Datos a enviar al backend:', userData);
     } catch (error) {
       console.error("Error al enviar los datos:", error);
     }
@@ -97,7 +96,6 @@ export default function RegisterPage() {
       try {
         const accessToken = await getAccessToken();
         setToken(accessToken);
-        console.log('Access Token obtenido:', accessToken);
       } catch (err) {
         console.error('Error obteniendo el token de acceso:', err);
       }
