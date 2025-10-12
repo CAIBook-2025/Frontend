@@ -11,40 +11,46 @@ import { useUser } from '@auth0/nextjs-auth0';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import React, { useEffect, useState } from 'react';
 
-
 // 1. ESQUEMA DE VALIDACIÓN CON ZOD
 const registerSchema = z.object({
-  firstName: z.string()
-    .min(1, { message: "El nombre es requerido." })
-    .max(50, { message: "El nombre no puede exceder los 50 caracteres." })
-    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: "El nombre solo puede contener letras y espacios." }),
-  lastName: z.string()
-    .min(1, { message: "El apellido es requerido." })
-    .max(50, { message: "El apellido no puede exceder los 50 caracteres." })
-    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: "El apellido solo puede contener letras y espacios." }),
-  career: z.string()
-    .min(1, { message: "La carrera es requerida." })
-    .max(60, { message: "La carrera no puede exceder los 60 caracteres." })
-    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: "La carrera solo puede contener letras y espacios." }),
-  phone: z.string()
-    .min(1, { message: "El número de teléfono es requerido." })
+  firstName: z
+    .string()
+    .min(1, { message: 'El nombre es requerido.' })
+    .max(50, { message: 'El nombre no puede exceder los 50 caracteres.' })
+    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: 'El nombre solo puede contener letras y espacios.' }),
+  lastName: z
+    .string()
+    .min(1, { message: 'El apellido es requerido.' })
+    .max(50, { message: 'El apellido no puede exceder los 50 caracteres.' })
+    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: 'El apellido solo puede contener letras y espacios.' }),
+  career: z
+    .string()
+    .min(1, { message: 'La carrera es requerida.' })
+    .max(60, { message: 'La carrera no puede exceder los 60 caracteres.' })
+    .regex(/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]*$/, { message: 'La carrera solo puede contener letras y espacios.' }),
+  phone: z
+    .string()
+    .min(1, { message: 'El número de teléfono es requerido.' })
     .regex(/^(\+)?\d*$/, { message: "El teléfono solo puede contener números y un '+' al inicio." }),
-  studentNumber: z.string()
-    .min(1, { message: "El número de estudiante es requerido." })
+  studentNumber: z.string().min(1, { message: 'El número de estudiante es requerido.' }),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormData>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
   const { user, error, isLoading } = useUser();
   const [token, setToken] = useState<string | null>(null);
-  
+
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     try {
-      
       const userData = {
         auth0_id: user?.sub || '',
         email: user?.email || '',
@@ -53,16 +59,16 @@ export default function RegisterPage() {
         last_name: data.lastName,
         phone: data.phone || null,
         career: data.career,
-        student_number: data.studentNumber || null
-      }
+        student_number: data.studentNumber || null,
+      };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
       if (response.ok) {
         alert('¡Registro exitoso! Revisa la consola para ver los datos.');
@@ -72,7 +78,7 @@ export default function RegisterPage() {
       }
       console.log('Datos a enviar al backend:', userData);
     } catch (error) {
-      console.error("Error al enviar los datos:", error);
+      console.error('Error al enviar los datos:', error);
     }
   };
 
@@ -87,7 +93,10 @@ export default function RegisterPage() {
 
   const handleKeyDownNumbersOnly = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement;
-    if (e.key === '+' && target.value.length > 0) { e.preventDefault(); return; }
+    if (e.key === '+' && target.value.length > 0) {
+      e.preventDefault();
+      return;
+    }
     if (['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End', '+'].includes(e.key)) return;
     if (!/\d/.test(e.key)) e.preventDefault();
   };
@@ -101,7 +110,7 @@ export default function RegisterPage() {
       } catch (err) {
         console.error('Error obteniendo el token de acceso:', err);
       }
-    }
+    };
     fetchToken();
   }, []);
 
@@ -116,30 +125,63 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-bold text-brand-dark">Completa tu perfil</h1>
           <p className="mt-2 text-slate-600">Proporciona la información necesaria para tu cuenta.</p>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
           <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
             <div>
-              <Input id="firstName" label="Nombre(s)" type="text" {...register('firstName')} onKeyDown={handleKeyDownLettersOnly} />
+              <Input
+                id="firstName"
+                label="Nombre(s)"
+                type="text"
+                {...register('firstName')}
+                onKeyDown={handleKeyDownLettersOnly}
+              />
               {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
             </div>
             <div>
-              <Input id="lastName" label="Apellido(s)" type="text" {...register('lastName')} onKeyDown={handleKeyDownLettersOnly} />
+              <Input
+                id="lastName"
+                label="Apellido(s)"
+                type="text"
+                {...register('lastName')}
+                onKeyDown={handleKeyDownLettersOnly}
+              />
               {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
             </div>
           </div>
           <div>
-            <Input id="career" label="Carrera" type="text" placeholder="Ej: Ingeniería de Software" {...register('career')} onKeyDown={handleKeyDownLettersOnly} />
+            <Input
+              id="career"
+              label="Carrera"
+              type="text"
+              placeholder="Ej: Ingeniería de Software"
+              {...register('career')}
+              onKeyDown={handleKeyDownLettersOnly}
+            />
             {errors.career && <p className="mt-1 text-sm text-red-600">{errors.career.message}</p>}
           </div>
           <div>
-            <Input id="phone" label="Número de Teléfono" type="tel" placeholder="+56 9 1234 5678" {...register('phone')} onKeyDown={handleKeyDownNumbersOnly} />
+            <Input
+              id="phone"
+              label="Número de Teléfono"
+              type="tel"
+              placeholder="+56 9 1234 5678"
+              {...register('phone')}
+              onKeyDown={handleKeyDownNumbersOnly}
+            />
             {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
           </div>
           <div>
-            <Input id="studentNumber" label="Número de Alumno" type="text" placeholder="Ej: 12345678" {...register('studentNumber')} onKeyDown={handleKeyDownNumbersOnly} />
+            <Input
+              id="studentNumber"
+              label="Número de Alumno"
+              type="text"
+              placeholder="Ej: 12345678"
+              {...register('studentNumber')}
+              onKeyDown={handleKeyDownNumbersOnly}
+            />
             {errors.studentNumber && <p className="mt-1 text-sm text-red-600">{errors.studentNumber.message}</p>}
-          </div>          
+          </div>
 
           <div className="!mt-8">
             <button

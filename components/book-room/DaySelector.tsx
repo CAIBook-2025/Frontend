@@ -27,7 +27,11 @@ const getNextWeekdays = (): DayOption[] => {
       const isToday = weekdays.length === 0;
       const isTomorrow = weekdays.length === 1 && new Date().getDate() + 1 === currentDate.getDate();
 
-      const label = isToday ? "Hoy" : isTomorrow ? "Mañana" : new Intl.DateTimeFormat('es-ES', { month: 'short', day: 'numeric' }).format(currentDate);
+      const label = isToday
+        ? 'Hoy'
+        : isTomorrow
+          ? 'Mañana'
+          : new Intl.DateTimeFormat('es-ES', { month: 'short', day: 'numeric' }).format(currentDate);
 
       weekdays.push({
         value: currentDate.toISOString().split('T')[0], // YYYY-MM-DD
@@ -41,23 +45,20 @@ const getNextWeekdays = (): DayOption[] => {
   return weekdays;
 };
 
-
 export const DaySelector = ({ selectedDate, onDateChange }: DaySelectorProps) => {
   // useMemo para que la función no se recalcule en cada render, solo una vez.
   const availableDays = useMemo(() => getNextWeekdays(), []);
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-2">
-        Selecciona un día
-      </label>
+      <label className="block text-sm font-medium text-slate-700 mb-2">Selecciona un día</label>
       <div className="flex flex-wrap gap-2">
         {availableDays.map((day) => (
           <button
             key={day.value}
             type="button"
             onClick={() => {
-              onDateChange(day.value)
+              onDateChange(day.value);
               console.log('👉 cambiando fecha a', day.value);
             }}
             className={`flex flex-col items-center justify-center rounded-lg border px-4 py-2 text-center transition-colors duration-200 ${

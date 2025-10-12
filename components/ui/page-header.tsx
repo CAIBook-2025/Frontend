@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
 interface PageHeaderProps {
-  title: string
-  subtitle: string
+  title: string;
+  subtitle: string;
 }
 
 export const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
@@ -11,5 +11,5 @@ export const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
       <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
       <p className="text-gray-600">{subtitle}</p>
     </div>
-  )
-}
+  );
+};

@@ -20,7 +20,7 @@ type ScheduleItem = {
   id: number;
   status?: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
   startsAt?: string; // ISO
-  endsAt?: string;   // ISO
+  endsAt?: string; // ISO
   roomName?: string;
 };
 
@@ -37,17 +37,16 @@ type StrikeItem = {
   type: string;
   date: string;
   admin_id: number;
-}
+};
 
 type ProfileData = {
   user: { id: number; first_name: string; last_name: string; email: string };
   schedule: ScheduleItem[];
   scheduleCount: number;
   // events?: EventItem[];   // si tu backend aún no los manda, puede ser opcional
-  strikes?: StrikeItem[];       // idem
-  strikesCount: number
+  strikes?: StrikeItem[]; // idem
+  strikesCount: number;
 };
-
 
 type ViewMode = 'personal' | 'groups';
 
@@ -86,8 +85,8 @@ export default function StudentDashboardPage() {
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
+              Authorization: `Bearer ${accessToken}`,
+            },
           });
 
           if (res.ok) {
@@ -105,23 +104,25 @@ export default function StudentDashboardPage() {
     }
 
     if (user) fetchUserData();
-  }, [accessToken]);
+  }, [accessToken, user]);
 
-  if (loading) return (
-    <div>
-      Loading...
+  if (loading)
+    return (
       <div>
-        <a href="/auth/logout">Logout</a>
+        Loading...
+        <div>
+          <a href="/auth/logout">Logout</a>
+        </div>
       </div>
-    </div>);
+    );
   if (!profile) return <div>No pudimos cargar tu perfil.</div>;
 
-  const reservasActivas = (profile.schedule || [])
+  const reservasActivas = profile.schedule || [];
   // .filter(s => s.status === 'CONFIRMED').length;
-  const reservasActivasCount = (profile.scheduleCount || 0);
+  const reservasActivasCount = profile.scheduleCount || 0;
   // const eventosProximos = (profile.events || []).length;
   const strikes = profile.strikes;
-  const strikesNumber = (profile.strikesCount ?? 1000);
+  const strikesNumber = profile.strikesCount ?? 1000;
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
@@ -132,9 +133,7 @@ export default function StudentDashboardPage() {
             <h1 className="text-4xl font-extrabold text-gray-800">
               ¡Bienvenido, <span className="text-blue-600">{profile.user.first_name}</span>!
             </h1>
-            <p className="mt-2 text-lg text-slate-600">
-              Es genial tenerte de vuelta. ¿Qué te gustaría hacer hoy?
-            </p>
+            <p className="mt-2 text-lg text-slate-600">Es genial tenerte de vuelta. ¿Qué te gustaría hacer hoy?</p>
           </div>
           {/* Selector de Vista */}
           <div className="mt-4 sm:mt-0 flex items-center rounded-full bg-slate-100 p-1">
@@ -159,7 +158,10 @@ export default function StudentDashboardPage() {
         {viewMode === 'personal' ? (
           <PersonalView
             stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber, userId: profile.user.id }}
-          />) : <GroupsView userId={profile.user.id} />}
+          />
+        ) : (
+          <GroupsView userId={profile.user.id} />
+        )}
       </div>
 
       <Link

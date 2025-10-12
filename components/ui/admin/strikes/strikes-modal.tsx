@@ -1,18 +1,17 @@
-"use client"
+'use client';
 
-import { XIcon } from "lucide-react"
-import { Strike } from "@/app/Admin/Strikes/page"
-
+import { XIcon } from 'lucide-react';
+import { Strike } from '@/app/Admin/Strikes/page';
 
 interface UserStrikesHistoryModalProps {
-  isOpen: boolean
-  onClose: () => void
-  userName: string
-  userEmail: string
-  currentStrikes: number
-  maxStrikes: number
-  status: "Activo" | "Advertencia" | "Suspendido"
-  strikes: Strike[]
+  isOpen: boolean;
+  onClose: () => void;
+  userName: string;
+  userEmail: string;
+  currentStrikes: number;
+  maxStrikes: number;
+  status: 'Activo' | 'Advertencia' | 'Suspendido';
+  strikes: Strike[];
 }
 
 export function UserStrikesHistoryModal({
@@ -25,30 +24,30 @@ export function UserStrikesHistoryModal({
   status,
   strikes,
 }: UserStrikesHistoryModalProps) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
-  const getStatusBadge = (status: "Activo" | "Advertencia" | "Suspendido") => {
+  const getStatusBadge = (status: 'Activo' | 'Advertencia' | 'Suspendido') => {
     const statusStyles = {
-      Activo: "bg-blue-500 text-white",
-      Advertencia: "bg-yellow-500 text-white",
-      Suspendido: "bg-red-600 text-white",
-    }
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
-  }
+      Activo: 'bg-blue-500 text-white',
+      Advertencia: 'bg-yellow-500 text-white',
+      Suspendido: 'bg-red-600 text-white',
+    };
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>;
+  };
 
-  const getTypeBadge = (type: Strike["type"]) => {
+  const getTypeBadge = (type: Strike['type']) => {
     const typeStyles = {
-      "No-show": "bg-red-600 text-white",
-      "Misuse": "bg-yellow-600 text-white",
-      "Late-cancellation": "bg-yellow-500 text-white",
-    }
+      'No-show': 'bg-red-600 text-white',
+      Misuse: 'bg-yellow-600 text-white',
+      'Late-cancellation': 'bg-yellow-500 text-white',
+    };
     const typeText = {
-        "No-show": "No Show",
-        "Misuse": "Mal Uso",
-        "Late-cancellation": "Cancelación Tardía",
-    }
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeStyles[type]}`}>{typeText[type]}</span>
-  }
+      'No-show': 'No Show',
+      Misuse: 'Mal Uso',
+      'Late-cancellation': 'Cancelación Tardía',
+    };
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeStyles[type]}`}>{typeText[type]}</span>;
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -69,7 +68,7 @@ export function UserStrikesHistoryModal({
           <p className="text-sm text-gray-500 mt-1">{userEmail}</p>
           <div className="flex items-center gap-3 mt-3">
             <span className="text-sm text-gray-700">
-              Strikes actuales: <span className="font-bold text-gray-900">{currentStrikes}</span> /{" "}
+              Strikes actuales: <span className="font-bold text-gray-900">{currentStrikes}</span> /{' '}
               <span className="font-bold text-gray-900">{maxStrikes}</span>
             </span>
             {getStatusBadge(status)}
@@ -105,5 +104,5 @@ export function UserStrikesHistoryModal({
         </div>
       </div>
     </div>
-  )
+  );
 }

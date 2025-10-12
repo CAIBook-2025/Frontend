@@ -23,7 +23,7 @@ import { DaySelector } from '@/components/book-room/DaySelector';
 //         nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
 //         status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
 //         equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
-//         module: 
+//         module:
 //       }));
 //       resolve(sampleRooms);
 //     }, 1500);
@@ -63,16 +63,16 @@ export default function BookRoomPage() {
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
 
       const params = new URLSearchParams({
-        day: selectedDate,   // "YYYY-MM-DD"
-        take: "30",
-        page: "1"
+        day: selectedDate, // "YYYY-MM-DD"
+        take: '30',
+        page: '1',
       });
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule?${params.toString()}`, {
-        cache: "no-store"
+        cache: 'no-store',
       });
 
-      console.log("EStá entrando aquí??")
+      console.log('EStá entrando aquí??');
 
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}`);
@@ -95,7 +95,7 @@ export default function BookRoomPage() {
         };
       });
 
-      console.log("📦 Schedules recibidos:", data.items);
+      console.log('📦 Schedules recibidos:', data.items);
       console.log(roomsAdapted);
       setRooms(roomsAdapted);
       setIsLoading(false);
@@ -109,14 +109,15 @@ export default function BookRoomPage() {
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SearchInput
-            id="search"
-            label="Buscar por nombre o edificio"
-            placeholder="Ej: Biblioteca, Sala A1..."
-          />
+          <SearchInput id="search" label="Buscar por nombre o edificio" placeholder="Ej: Biblioteca, Sala A1..." />
           <div>
-            <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">Capacidad mínima</label>
-            <select id="capacity" className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary">
+            <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">
+              Capacidad mínima
+            </label>
+            <select
+              id="capacity"
+              className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
+            >
               <option>Cualquier capacidad</option>
               <option>2+ personas</option>
               <option>4+ personas</option>
@@ -126,9 +127,7 @@ export default function BookRoomPage() {
           </div>
           {/* --- REEMPLAZAMOS EL INPUT DE FECHA POR NUESTRO COMPONENTE --- */}
           {/* Ocupará una columna completa en pantallas pequeñas y una columna en medianas */}
-          <div className="md:col-span-1">
-            {/* No es necesario un div extra, el componente ya tiene su label */}
-          </div>
+          <div className="md:col-span-1">{/* No es necesario un div extra, el componente ya tiene su label */}</div>
         </div>
         <div className="mt-4">
           <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
@@ -147,22 +146,18 @@ export default function BookRoomPage() {
             <Loader2 className="h-12 w-12 animate-spin text-brand-primary" />
             <p className="mt-4 text-lg text-slate-600">Buscando salas para el {selectedDate}...</p>
           </div>
+        ) : viewMode === 'list' ? (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {Array.isArray(rooms) && rooms.length > 0 ? (
+              rooms.map((room) => <RoomCard key={room.id} room={room} userId={10} scheduleId={room.id} />)
+            ) : (
+              <p>No hay salas disponibles.</p>
+            )}
+          </div>
         ) : (
-          viewMode === 'list' ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {Array.isArray(rooms) && rooms.length > 0 ? (
-                rooms.map((room) => (
-                  <RoomCard key={room.id} room={room} userId={10} scheduleId={room.id} />
-                ))
-              ) : (
-                <p>No hay salas disponibles.</p>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">
-              <p className="text-lg">Aquí irá el componente del mapa interactivo.</p>
-            </div>
-          )
+          <div className="flex h-96 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-500 shadow-sm">
+            <p className="text-lg">Aquí irá el componente del mapa interactivo.</p>
+          </div>
         )}
       </section>
     </main>

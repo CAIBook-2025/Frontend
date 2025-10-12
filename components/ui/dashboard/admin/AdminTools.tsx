@@ -1,16 +1,13 @@
 // components/dashboard/AdminToolsCard.tsx
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Users, Building2, AlertTriangle } from "lucide-react";
-
+import Link from 'next/link';
+import { Users, Building2, AlertTriangle } from 'lucide-react';
 
 export const AdminToolsCard = () => {
   return (
     <div className={`w-full rounded-xl border border-gray-200 p-6 shadow-sm`}>
-      <h3 className="mb-4 text-lg font-semibold text-gray-800">
-        Herramientas de Administración
-      </h3>
+      <h3 className="mb-4 text-lg font-semibold text-gray-800">Herramientas de Administración</h3>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Link href="/Admin/Groups" className="w-full">

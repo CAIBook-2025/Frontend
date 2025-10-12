@@ -19,13 +19,37 @@ type GroupsViewProps = {
 };
 
 const fakeApiFetchGroups = (): Promise<Group[]> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { id: '1', name: 'Club de Programación', description: 'Dedicado a enseñar y practicar algoritmos y desarrollo de software.', role: 'Representante', memberCount: 45 },
-        { id: '2', name: 'Comité de Sustentabilidad', description: 'Promovemos prácticas sustentables en el campus y organizamos eventos verdes.', role: 'Socio', memberCount: 23 },
-        { id: '3', name: 'Club de Ajedrez UC', description: 'Para todos los amantes del ajedrez, desde principiantes hasta expertos.', role: 'Socio', memberCount: 31 },
-        { id: '4', name: 'Club de ESports UC', description: 'Para todos los amantes de los videojuegos competitivos.', role: 'Representante', memberCount: 12 }
+        {
+          id: '1',
+          name: 'Club de Programación',
+          description: 'Dedicado a enseñar y practicar algoritmos y desarrollo de software.',
+          role: 'Representante',
+          memberCount: 45,
+        },
+        {
+          id: '2',
+          name: 'Comité de Sustentabilidad',
+          description: 'Promovemos prácticas sustentables en el campus y organizamos eventos verdes.',
+          role: 'Socio',
+          memberCount: 23,
+        },
+        {
+          id: '3',
+          name: 'Club de Ajedrez UC',
+          description: 'Para todos los amantes del ajedrez, desde principiantes hasta expertos.',
+          role: 'Socio',
+          memberCount: 31,
+        },
+        {
+          id: '4',
+          name: 'Club de ESports UC',
+          description: 'Para todos los amantes de los videojuegos competitivos.',
+          role: 'Representante',
+          memberCount: 12,
+        },
       ]);
     }, 1000); // Simula 1s de carga
   });
@@ -35,7 +59,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log("user id: ", userId);
+  console.log('user id: ', userId);
 
   useEffect(() => {
     const loadGroups = async () => {
@@ -60,27 +84,32 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Mis Grupos</h2>
         <Link
-          href={{ pathname: "Student/Groups/Form", query: { userId } }}
-          className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
+          href={{ pathname: 'Student/Groups/Form', query: { userId } }}
+          className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        >
           <PlusCircle size={16} /> Crear Grupo
         </Link>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
         <ul className="divide-y divide-slate-200">
-          {groups.map(group => (
+          {groups.map((group) => (
             <li key={group.id}>
               <Link
-                href={group.role === 'Representante'
-                  ? `/Student/Groups/Representative/${group.id}`
-                  : `/Student/Groups/Partner/${group.id}`}
+                href={
+                  group.role === 'Representante'
+                    ? `/Student/Groups/Representative/${group.id}`
+                    : `/Student/Groups/Partner/${group.id}`
+                }
                 className="group block p-6 transition-colors hover:bg-slate-50"
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-3">
                       <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-600">{group.name}</h3>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${group.role === 'Representante' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${group.role === 'Representante' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}
+                      >
                         {group.role}
                       </span>
                     </div>

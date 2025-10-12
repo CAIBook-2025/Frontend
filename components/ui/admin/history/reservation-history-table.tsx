@@ -1,35 +1,35 @@
-"use client"
-import { Check } from "lucide-react"
+'use client';
+import { Check } from 'lucide-react';
 
 export interface Reservation {
-  id: string
-  userName: string
-  userEmail: string
-  room: string
-  date: string
-  timeRange: string
-  checkInTime?: string
-  status: "Completada" | "No Show" | "Cancelada"
+  id: string;
+  userName: string;
+  userEmail: string;
+  room: string;
+  date: string;
+  timeRange: string;
+  checkInTime?: string;
+  status: 'Completada' | 'No Show' | 'Cancelada';
 }
 
 interface ReservationHistoryTableProps {
-  reservations: Reservation[]
+  reservations: Reservation[];
 }
 
 export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTableProps) => {
-  const getStatusBadge = (status: Reservation["status"]) => {
+  const getStatusBadge = (status: Reservation['status']) => {
     const statusStyles = {
-      Completada: "bg-blue-500 text-white",
-      "No Show": "bg-red-500 text-white",
-      Cancelada: "bg-yellow-500 text-white",
-    }
+      Completada: 'bg-blue-500 text-white',
+      'No Show': 'bg-red-500 text-white',
+      Cancelada: 'bg-yellow-500 text-white',
+    };
 
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
-  }
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>;
+  };
 
   const renderCheckIn = (checkInTime?: string) => {
     if (!checkInTime) {
-      return <span className="text-red-600 text-sm">No realizado</span>
+      return <span className="text-red-600 text-sm">No realizado</span>;
     }
 
     return (
@@ -37,8 +37,8 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
         <Check />
         <span className="text-sm font-medium">{checkInTime}</span>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -81,5 +81,5 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
         </table>
       </div>
     </div>
-  )
-}
+  );
+};
