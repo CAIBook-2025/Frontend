@@ -82,7 +82,7 @@ export default function StudentDashboardPage() {
     async function fetchUserData() {
       if (accessToken) {
         try {
-          const res = await fetch('http://localhost:3003/api/users/profile', {
+          const res = await fetch(`${process.env.API_URL}/api/users/profile`, {
             headers: {
               Authorization: `Bearer ${accessToken}`
             }

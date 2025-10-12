@@ -56,7 +56,7 @@ export default function RegisterPage() {
         student_number: data.studentNumber || null
       }
 
-      const response = await fetch('http://localhost:3003/api/users', {
+      const response = await fetch(`${process.env.API_URL}/api/users`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

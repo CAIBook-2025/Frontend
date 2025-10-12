@@ -63,6 +63,7 @@ export const RoomCard = ({ room }: { room: Room }) => {
             : 'bg-slate-400 cursor-not-allowed' // Estilo para el estado DESHABILITADO
           }
         `}
+        // onClick={handleReservar}
       >
         {isAvailable ? 'Reservar' : 'No Disponible'}
       </button>

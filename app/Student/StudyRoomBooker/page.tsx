@@ -62,14 +62,13 @@ export default function BookRoomPage() {
       console.log('🔄 fetching schedules for', selectedDate);
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
 
-      const API_BASE = "http://localhost:3003"
       const params = new URLSearchParams({
         day: selectedDate,   // "YYYY-MM-DD"
         take: "30",
         page: "1"
       });
 
-      const res = await fetch(`${API_BASE}/api/srSchedule?${params.toString()}`, {
+      const res = await fetch(`${process.env.API_URL}/api/srSchedule?${params.toString()}`, {
         cache: "no-store"
       });
 
