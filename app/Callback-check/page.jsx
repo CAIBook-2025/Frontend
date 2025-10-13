@@ -20,7 +20,7 @@ export default async function CallbackCheck() {
   console.log('User data check response:', data);
 
   if (data.exists) {
-    redirect('/ProfileSSR');
+    redirect('/Student');
   } else {
     redirect('/CompleteProfile');
   }
