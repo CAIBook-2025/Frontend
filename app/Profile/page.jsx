@@ -58,9 +58,9 @@ export default function ProfilePage() {
       {userData ? (
         <>
           <p>
-            Welcome, {userData.first_name} {userData.last_name}!
+            Welcome, {userData.user.first_name} {userData.user.last_name}!
           </p>
-          <p>Your email: {userData.email}</p>
+          <p>Your email: {userData.user.email}</p>
           <p>Your career: {userData.career}</p>
           <p>Your phone: {userData.phone}</p>
           <p>Your student number: {userData.student_number}</p>
