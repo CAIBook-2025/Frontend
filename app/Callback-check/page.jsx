@@ -16,6 +16,7 @@ export default async function CallbackCheck() {
     },
     cache: 'no-store',
   });
+  console.log(res);
   const data = await res.json();
   console.log('User data check response:', data);
 
