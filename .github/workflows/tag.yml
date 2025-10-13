@@ -3,10 +3,10 @@ name: Auto Tag
 on:
   push:
     branches: [main]
-  workflow_dispatch: {}  # permite correrlo manualmente desde Actionssss
+  workflow_dispatch: {} # permite correrlo manualmente desde Actionssss
 
 permissions:
-  contents: write  # << clave para poder push tags
+  contents: write # << clave para poder push tags
 
 jobs:
   create_tag:
