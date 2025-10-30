@@ -1,12 +1,12 @@
-"use client"
+'use client';
 
 interface TabNavigationProps {
   tabs: Array<{
-    label: string
-    count?: number
-    active?: boolean
-  }>
-  onTabChange: (index: number) => void
+    label: string;
+    count?: number;
+    active?: boolean;
+  }>;
+  onTabChange: (index: number) => void;
 }
 
 export const TabNavigation = ({ tabs, onTabChange }: TabNavigationProps) => {
@@ -17,13 +17,13 @@ export const TabNavigation = ({ tabs, onTabChange }: TabNavigationProps) => {
           key={index}
           onClick={() => onTabChange(index)}
           className={`pb-3 px-1 text-sm font-medium transition-colors ${
-            tab.active ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-700"
+            tab.active ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'
           }`}
         >
           {tab.label}
-          {typeof tab.count === "number" && ` (${tab.count})`}
+          {typeof tab.count === 'number' && ` (${tab.count})`}
         </button>
       ))}
     </div>
-  )
-}
+  );
+};

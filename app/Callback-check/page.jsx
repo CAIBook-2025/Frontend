@@ -1,28 +1,27 @@
-import { auth0 } from "@/lib/auth0";
-import { redirect } from "next/navigation";
+import { auth0 } from '@/lib/auth0';
+import { redirect } from 'next/navigation';
 
 export default async function CallbackCheck() {
-    const session = await auth0.getSession();
+  const session = await auth0.getSession();
 
-    if (!session || !session.user) {
-        redirect('/auth/login?returnTo=/Callback-check');
-    }
+  if (!session || !session.user) {
+    redirect('/auth/login?returnTo=/Callback-check');
+  }
 
-    const accessToken = session.tokenSet.accessToken;
-    
-    const res = await fetch('http://localhost:3003/users/check', {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        },
-        cache: "no-store",
-    })
-    const data = await res.json();
-    console.log('User data check response:', data);
+  const accessToken = session.tokenSet.accessToken;
 
-    if (data.exists) {
-        redirect('/ProfileSSR');
-    } else {
-        redirect('/CompleteProfile');
-    }
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    cache: 'no-store',
+  });
+  const data = await res.json();
+  console.log('User data check response:', data);
 
+  if (data.exists) {
+    redirect('/Student');
+  } else {
+    redirect('/CompleteProfile');
+  }
 }

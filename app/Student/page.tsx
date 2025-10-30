@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useUser } from '@auth0/nextjs-auth0'; // 1. IMPORTAMOS el hook useUser
 import { PersonalView } from '@/components/dashboard/PersonalView';
 import { GroupsView } from '@/components/dashboard/GroupsView';
+import { useUser } from '@auth0/nextjs-auth0';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import Link from 'next/link';
 
 // --- Componente Skeleton para el Encabezado ---
 // Muestra una UI de carga mientras se obtienen los datos del usuario.
@@ -19,6 +22,38 @@ const DashboardHeaderSkeleton = () => (
     </div>
   </section>
 );
+
+type ScheduleItem = {
+  id: number;
+  status?: 'CONFIRMED' | 'PENDING' | 'CANCELLED';
+  startsAt?: string; // ISO
+  endsAt?: string; // ISO
+  roomName?: string;
+};
+
+type EventItem = {
+  id: number;
+  title: string;
+  when: string; // ISO
+  status?: 'REGISTERED' | 'OPEN';
+};
+
+type StrikeItem = {
+  id: number;
+  student_id: number;
+  type: string;
+  date: string;
+  admin_id: number;
+};
+
+type ProfileData = {
+  user: { id: number; first_name: string; last_name: string; email: string };
+  schedule: ScheduleItem[];
+  scheduleCount: number;
+  // events?: EventItem[];   // si tu backend aún no los manda, puede ser opcional
+  strikes?: StrikeItem[]; // idem
+  strikesCount: number;
+};
 
 type ViewMode = 'personal' | 'groups';
 
@@ -71,8 +106,21 @@ export default function StudentDashboardPage() {
 
       {/* El resto de la página no necesita esperar por el nombre de usuario */}
       <div>
-        {viewMode === 'personal' ? <PersonalView /> : <GroupsView />}
+        {viewMode === 'personal' ? (
+          <PersonalView
+            stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber, userId: profile.user.id }}
+          />
+        ) : (
+          <GroupsView userId={profile.user.id} />
+        )}
       </div>
+
+      <Link
+        href="/auth/logout"
+        className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
+      >
+        Cerrar Sesión
+      </Link>
     </main>
   );
 }

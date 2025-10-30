@@ -3,18 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
-  Users, 
-  Calendar, 
-  Star, 
-  Loader2,
-  LogOut,
-  AlertTriangle,
-  MapPin,
-  Clock,
-  User,
-  Shield
-} from 'lucide-react';
+import { Users, Calendar, Star, Loader2, LogOut, AlertTriangle, MapPin, Clock, User, Shield } from 'lucide-react';
 
 // --- Tipos ---
 interface GroupDetails {
@@ -53,54 +42,105 @@ interface GroupEvent {
 
 // --- Simulación de API ---
 const fakeApiFetchGroupDetails = (groupId: string): Promise<GroupDetails> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         id: groupId,
         name: 'Club de Programación',
-        description: 'Dedicado a enseñar y practicar algoritmos y desarrollo de software. Organizamos talleres semanales, hackathons y sesiones de programación colaborativa para todos los niveles.',
+        description:
+          'Dedicado a enseñar y practicar algoritmos y desarrollo de software. Organizamos talleres semanales, hackathons y sesiones de programación colaborativa para todos los niveles.',
         reputation: 4.7,
         memberCount: 45,
         moderatorCount: 3,
         createdAt: '2024-01-15',
         representative: {
           name: 'Pedro Martínez',
-          email: 'pedro.martinez@uc.cl'
-        }
+          email: 'pedro.martinez@uc.cl',
+        },
       });
     }, 800);
   });
 };
 
 const fakeApiFetchMembers = (groupId: string): Promise<Member[]> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        { id: '0', name: 'Pedro Martínez', email: 'pedro.martinez@uc.cl', role: 'Representante', joinedAt: '2024-01-15', reputation: 5.0 },
-        { id: '1', name: 'Ana García', email: 'ana.garcia@uc.cl', role: 'Moderador', joinedAt: '2024-01-20', reputation: 4.8 },
-        { id: '2', name: 'Carlos López', email: 'carlos.lopez@uc.cl', role: 'Moderador', joinedAt: '2024-02-10', reputation: 4.6 },
-        { id: '3', name: 'María Silva', email: 'maria.silva@uc.cl', role: 'Moderador', joinedAt: '2024-02-15', reputation: 4.9 },
-        { id: '4', name: 'Diego Ramírez', email: 'diego.ramirez@uc.cl', role: 'Miembro', joinedAt: '2024-03-01', reputation: 4.2 },
-        { id: '5', name: 'Sofía Torres', email: 'sofia.torres@uc.cl', role: 'Miembro', joinedAt: '2024-03-10', reputation: 4.5 },
-        { id: '6', name: 'Luis González', email: 'luis.gonzalez@uc.cl', role: 'Miembro', joinedAt: '2024-03-15', reputation: 4.1 },
+        {
+          id: '0',
+          name: 'Pedro Martínez',
+          email: 'pedro.martinez@uc.cl',
+          role: 'Representante',
+          joinedAt: '2024-01-15',
+          reputation: 5.0,
+        },
+        {
+          id: '1',
+          name: 'Ana García',
+          email: 'ana.garcia@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-01-20',
+          reputation: 4.8,
+        },
+        {
+          id: '2',
+          name: 'Carlos López',
+          email: 'carlos.lopez@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-02-10',
+          reputation: 4.6,
+        },
+        {
+          id: '3',
+          name: 'María Silva',
+          email: 'maria.silva@uc.cl',
+          role: 'Moderador',
+          joinedAt: '2024-02-15',
+          reputation: 4.9,
+        },
+        {
+          id: '4',
+          name: 'Diego Ramírez',
+          email: 'diego.ramirez@uc.cl',
+          role: 'Miembro',
+          joinedAt: '2024-03-01',
+          reputation: 4.2,
+        },
+        {
+          id: '5',
+          name: 'Sofía Torres',
+          email: 'sofia.torres@uc.cl',
+          role: 'Miembro',
+          joinedAt: '2024-03-10',
+          reputation: 4.5,
+        },
+        {
+          id: '6',
+          name: 'Luis González',
+          email: 'luis.gonzalez@uc.cl',
+          role: 'Miembro',
+          joinedAt: '2024-03-15',
+          reputation: 4.1,
+        },
       ]);
     }, 600);
   });
 };
 
 const fakeApiFetchGroupEvents = (groupId: string): Promise<GroupEvent[]> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
         {
           id: '1',
           title: 'Taller de Python Avanzado',
-          description: 'Aprende conceptos avanzados de Python incluyendo decoradores, generadores y programación asíncrona.',
+          description:
+            'Aprende conceptos avanzados de Python incluyendo decoradores, generadores y programación asíncrona.',
           date: '2024-09-22T14:00:00',
           location: 'Sala A1 - Biblioteca',
           attendees: 18,
           maxAttendees: 25,
-          status: 'Próximo'
+          status: 'Próximo',
         },
         {
           id: '2',
@@ -110,7 +150,7 @@ const fakeApiFetchGroupEvents = (groupId: string): Promise<GroupEvent[]> => {
           location: 'Laboratorio de Computación',
           attendees: 32,
           maxAttendees: 40,
-          status: 'Próximo'
+          status: 'Próximo',
         },
         {
           id: '3',
@@ -120,8 +160,8 @@ const fakeApiFetchGroupEvents = (groupId: string): Promise<GroupEvent[]> => {
           location: 'Auditorio Principal',
           attendees: 45,
           maxAttendees: 50,
-          status: 'Finalizado'
-        }
+          status: 'Finalizado',
+        },
       ]);
     }, 700);
   });
@@ -131,9 +171,7 @@ const fakeApiFetchGroupEvents = (groupId: string): Promise<GroupEvent[]> => {
 const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
   <div className="rounded-lg bg-white p-4 shadow-sm border border-slate-200">
     <div className="flex items-center gap-4">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        {icon}
-      </div>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">{icon}</div>
       <div>
         <p className="text-2xl font-bold text-gray-800">{value}</p>
         <p className="text-sm text-slate-500">{label}</p>
@@ -146,10 +184,14 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
 const EventCard = ({ event }: { event: GroupEvent }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Próximo': return 'bg-blue-100 text-blue-800';
-      case 'En Curso': return 'bg-green-100 text-green-800';
-      case 'Finalizado': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Próximo':
+        return 'bg-blue-100 text-blue-800';
+      case 'En Curso':
+        return 'bg-green-100 text-green-800';
+      case 'Finalizado':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -173,7 +215,9 @@ const EventCard = ({ event }: { event: GroupEvent }) => {
         </div>
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4" />
-          <span>{event.attendees}/{event.maxAttendees} asistentes</span>
+          <span>
+            {event.attendees}/{event.maxAttendees} asistentes
+          </span>
         </div>
       </div>
     </div>
@@ -199,13 +243,13 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
       setIsLoadingGroup(true);
       setIsLoadingMembers(true);
       setIsLoadingEvents(true);
-      
+
       const [groupData, membersData, eventsData] = await Promise.all([
         fakeApiFetchGroupDetails(groupId),
         fakeApiFetchMembers(groupId),
-        fakeApiFetchGroupEvents(groupId)
+        fakeApiFetchGroupEvents(groupId),
       ]);
-      
+
       setGroupDetails(groupData);
       setMembers(membersData);
       setEvents(eventsData);
@@ -213,13 +257,12 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
       setIsLoadingMembers(false);
       setIsLoadingEvents(false);
     };
-    
+
     loadData();
   }, [groupId]);
 
   const handleLeaveGroup = () => {
     // Aquí iría la lógica para abandonar el grupo
-    console.log('Abandonando grupo:', groupId);
     setShowLeaveConfirm(false);
     // Redirigir al dashboard después de abandonar
   };
@@ -261,9 +304,7 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
               </div>
             </div>
             <div className="flex flex-col items-end gap-3">
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
-                Miembro
-              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">Miembro</span>
               <button
                 onClick={() => setShowLeaveConfirm(true)}
                 className="flex items-center gap-2 rounded-full bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-200"
@@ -292,7 +333,7 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
           </div>
         ) : events.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {events.map(event => (
+            {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
@@ -307,7 +348,7 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
       {/* 4. Miembros del Grupo */}
       <section>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Miembros del Grupo</h2>
-        
+
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
           {isLoadingMembers ? (
             <div className="flex justify-center items-center py-8">
@@ -315,13 +356,16 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
             </div>
           ) : (
             <ul className="divide-y divide-slate-200">
-              {members.map(member => (
+              {members.map((member) => (
                 <li key={member.id} className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                         <span className="text-blue-600 font-semibold text-sm">
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                          {member.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
                         </span>
                       </div>
                       <div>
@@ -335,17 +379,17 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                           <span className="text-sm text-slate-600">{member.reputation}</span>
                         </div>
-                        <p className="text-xs text-slate-500">
-                          Desde {new Date(member.joinedAt).toLocaleDateString()}
-                        </p>
+                        <p className="text-xs text-slate-500">Desde {new Date(member.joinedAt).toLocaleDateString()}</p>
                       </div>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        member.role === 'Representante' 
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : member.role === 'Moderador' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-slate-100 text-slate-700'
-                      }`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          member.role === 'Representante'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : member.role === 'Moderador'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
                         {member.role}
                       </span>
                     </div>
@@ -366,8 +410,8 @@ export const PartnerView = ({ groupId }: PartnerViewProps) => {
               <h3 className="text-lg font-bold text-gray-800">Confirmar Salida</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas abandonar el grupo &quot;{groupDetails.name}&quot;? 
-              Perderás acceso a todos los eventos y contenido del grupo.
+              ¿Estás seguro de que deseas abandonar el grupo &quot;{groupDetails.name}&quot;? Perderás acceso a todos
+              los eventos y contenido del grupo.
             </p>
             <div className="flex gap-3 justify-end">
               <button

@@ -15,17 +15,38 @@ export interface Room {
   nextAvailable: string;
   status: RoomStatus;
   equipment: Equipment[];
+  module: number;
 }
 
-export const RoomCard = ({ room }: { room: Room }) => {
+export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: number; scheduleId: number }) => {
   const isAvailable = room.status === 'Disponible';
-  
+
+  const handleReservar = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/${scheduleId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || 'Error al reservar');
+      }
+      const data = await res.json();
+      // refresca estado/UI
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
       <div>
         <div className="flex items-start justify-between">
           <h3 className="text-xl font-bold text-gray-800">{room.name}</h3>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isAvailable ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${isAvailable ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}
+          >
             {room.status}
           </span>
         </div>
@@ -38,16 +59,22 @@ export const RoomCard = ({ room }: { room: Room }) => {
             <Users size={16} /> {room.capacity} personas
           </div>
           <div className="flex items-center gap-2">
-            <Clock size={16} /> Próximo: {room.nextAvailable}
+            <Clock size={16} /> Módulo: {room.module}
           </div>
         </div>
 
         <div>
           <h4 className="mb-2 text-sm font-medium text-slate-600">Equipamiento:</h4>
           <div className="flex flex-wrap gap-2">
-            {room.equipment.length > 0 ? room.equipment.map(item => (
-              <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{item}</span>
-            )) : <span className="text-xs text-slate-500">No especificado</span>}
+            {room.equipment.length > 0 ? (
+              room.equipment.map((item) => (
+                <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
+                  {item}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-slate-500">No especificado</span>
+            )}
           </div>
         </div>
       </div>
@@ -57,11 +84,13 @@ export const RoomCard = ({ room }: { room: Room }) => {
         disabled={!isAvailable}
         className={`
           mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300
-          ${isAvailable 
-            ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' // Estilo para el estado HABILITADO
-            : 'bg-slate-400 cursor-not-allowed' // Estilo para el estado DESHABILITADO
+          ${
+            isAvailable
+              ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' // Estilo para el estado HABILITADO
+              : 'bg-slate-400 cursor-not-allowed' // Estilo para el estado DESHABILITADO
           }
         `}
+        onClick={handleReservar}
       >
         {isAvailable ? 'Reservar' : 'No Disponible'}
       </button>

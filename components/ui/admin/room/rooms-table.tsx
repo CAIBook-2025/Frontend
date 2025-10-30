@@ -1,32 +1,32 @@
-"use client"
-import { SettingsIcon } from "lucide-react"
-import { Room } from "@/types/room"
+'use client';
+import { SettingsIcon } from 'lucide-react';
+import { Room } from '@/types/room';
 
 interface RoomsTableProps {
-  rooms: Room[]
-  onManage?: (room: Room) => void // ⬅️ nuevo
+  rooms: Room[];
+  onManage?: (room: Room) => void; // ⬅️ nuevo
 }
 
 export const RoomsTable = ({ rooms, onManage }: RoomsTableProps) => {
-  const getStatusBadge = (status: Room["status"], statusNote?: string) => {
+  const getStatusBadge = (status: Room['status'], statusNote?: string) => {
     const statusStyles = {
-      Activa: "bg-blue-500 text-white",
-      Mantenimiento: "bg-yellow-500 text-white",
-      Deshabilitada: "bg-red-500 text-white",
-    }
+      Activa: 'bg-blue-500 text-white',
+      Mantenimiento: 'bg-yellow-500 text-white',
+      Deshabilitada: 'bg-red-500 text-white',
+    };
     return (
       <div>
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
         {statusNote && <p className="text-xs text-gray-500 mt-1">{statusNote}</p>}
       </div>
-    )
-  }
+    );
+  };
 
   const getUtilizationColor = (utilization: number) => {
-    if (utilization >= 80) return "text-blue-600"
-    if (utilization >= 50) return "text-yellow-600"
-    return "text-red-600"
-  }
+    if (utilization >= 80) return 'text-blue-600';
+    if (utilization >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -90,5 +90,5 @@ export const RoomsTable = ({ rooms, onManage }: RoomsTableProps) => {
         </table>
       </div>
     </div>
-  )
-}
+  );
+};
