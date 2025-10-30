@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useUser } from '@auth0/nextjs-auth0'; // 1. IMPORTAMOS el hook useUser
 import { PersonalView } from '@/components/dashboard/PersonalView';
 import { GroupsView } from '@/components/dashboard/GroupsView';
 import { useUser } from '@auth0/nextjs-auth0';
@@ -108,10 +107,10 @@ export default function StudentDashboardPage() {
       <div>
         {viewMode === 'personal' ? (
           <PersonalView
-            stats={{ reservasActivas: reservasActivasCount, strikes: strikesNumber, userId: profile.user.id }}
+            stats={{ reservasActivas: 1, strikes: 1, userId: 123 }}
           />
         ) : (
-          <GroupsView userId={profile.user.id} />
+          <GroupsView userId={123} />
         )}
       </div>
 
