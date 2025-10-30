@@ -54,7 +54,6 @@ export default function RegisterPage() {
       const userData = {
         auth0_id: user?.sub || '',
         email: user?.email || '',
-        hashed_password: '',
         first_name: data.firstName,
         last_name: data.lastName,
         phone: data.phone || null,
