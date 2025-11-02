@@ -15,7 +15,7 @@ interface Group {
 }
 
 type GroupsViewProps = {
-  userId: number;
+  userId?: number;
 };
 
 const fakeApiFetchGroups = (): Promise<Group[]> => {
