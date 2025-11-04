@@ -118,7 +118,6 @@ export default function StrikesPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    console.log('Buscar:', value);
   };
 
   // Filtrado de usuarios basado en la búsqueda
@@ -223,7 +222,6 @@ export default function StrikesPage() {
           isOpen={isApplyStrikeModalOpen}
           onClose={() => setIsApplyStrikeModalOpen(false)}
           onApply={(email, type, description) => {
-            console.log('Aplicar Strike:', email, type, description);
             setIsApplyStrikeModalOpen(false);
           }}
         />

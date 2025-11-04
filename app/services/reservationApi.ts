@@ -24,12 +24,10 @@ const mockReservations: Reservation[] = [
 
 // 3. Creamos la función que simula la llamada a la API.
 export const getReservations = (): Promise<Reservation[]> => {
-  console.log('Simulando llamada a la API para obtener reservas...');
   
   return new Promise((resolve) => {
     // Simulamos un retraso de red de 1.5 segundos (1500 ms)
     setTimeout(() => {
-      console.log('Datos de reservas recibidos.');
       resolve(mockReservations);
     }, 1500);
   });
@@ -42,14 +40,12 @@ export const getReservations = (): Promise<Reservation[]> => {
 // --- AÑADIR ESTA NUEVA FUNCIÓN ---
 // Simula una petición POST para cancelar una reserva.
 export const cancelReservation = (reservationId: number): Promise<{ success: boolean; message: string }> => {
-  console.log(`Simulando llamada a la API para CANCELAR la reserva con ID: ${reservationId}`);
 
   return new Promise((resolve, reject) => {
     // Simulamos un retraso de red de 1 segundo
     setTimeout(() => {
       // En un caso real, podrías tener una lógica de error aquí
       if (reservationId) {
-        console.log(`Reserva ${reservationId} cancelada con éxito.`);
         resolve({ success: true, message: 'Reserva cancelada con éxito.' });
       } else {
         reject({ success: false, message: 'ID de reserva no válido.' });
