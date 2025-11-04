@@ -59,8 +59,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log('user id: ', userId);
-
   useEffect(() => {
     const loadGroups = async () => {
       setIsLoading(true);
