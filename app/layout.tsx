@@ -10,8 +10,8 @@ import { isAdmin } from '@/lib/user/isAdmin';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'CAIBook - Gestion de Espacios',
-  description: 'Plataforma para la reserva de salas y eventos de Ingenieria UC.',
+  title: 'CAIBook - Gestión de Espacios',
+  description: 'Plataforma para la reserva de salas y eventos de Ingeniería UC.',
 };
 
 export default async function RootLayout({
