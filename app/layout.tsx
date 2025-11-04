@@ -27,7 +27,7 @@ export default async function RootLayout({
 
   const accountAction = isAuthenticated ? (
     <Link
-      href="/auth/login?returnTo=/Callback-check"
+      href="/Profile"
       className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
     >
       Mi cuenta
