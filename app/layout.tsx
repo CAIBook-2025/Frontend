@@ -37,7 +37,7 @@ export default async function RootLayout({
       href="/auth/login?returnTo=/Callback-check"
       className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
     >
-      Iniciar Sesion
+      Iniciar Sesión
     </Link>
   );
 
