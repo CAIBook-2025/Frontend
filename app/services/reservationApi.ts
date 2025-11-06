@@ -41,19 +41,55 @@ export const getReservations = (): Promise<Reservation[]> => {
 
 // --- AÑADIR ESTA NUEVA FUNCIÓN ---
 // Simula una petición POST para cancelar una reserva.
-export const cancelReservation = (reservationId: number): Promise<{ success: boolean; message: string }> => {
-  console.log(`Simulando llamada a la API para CANCELAR la reserva con ID: ${reservationId}`);
+// app/services/reservationApi.ts (o donde tengas la función)
 
-  return new Promise((resolve, reject) => {
-    // Simulamos un retraso de red de 1 segundo
-    setTimeout(() => {
-      // En un caso real, podrías tener una lógica de error aquí
-      if (reservationId) {
-        console.log(`Reserva ${reservationId} cancelada con éxito.`);
-        resolve({ success: true, message: 'Reserva cancelada con éxito.' });
-      } else {
-        reject({ success: false, message: 'ID de reserva no válido.' });
-      }
-    }, 1000);
-  });
+// La función ahora necesita tanto el ID de la reserva como el ID del usuario
+export const cancelReservation = async (reservationId: number, userId: number): Promise<{ success: boolean; message: string }> => {
+  // Verificación para asegurar que tenemos un userId válido
+  if (!userId) {
+    throw new Error('El ID del usuario es requerido para cancelar la reserva.');
+  }
+  console.log(`Preparando para cancelar la reserva con ID: ${reservationId} para el usuario con ID: ${userId}`);
+
+  // Construimos la URL dinámicamente usando la variable de entorno y el ID de la reserva
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/cancel/${reservationId}`;
+  
+  console.log(`Intentando cancelar reserva en: ${apiUrl}`);
+  console.log(`Enviando body: { userId: ${userId} }`);
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PUT', // Usamos PUT ya que estamos actualizando el estado de un recurso existente
+      headers: {
+        'Content-Type': 'application/json',
+        // Si tu API requiere autenticación (ej. un token JWT), deberías añadirlo aquí:
+        // 'Authorization': `Bearer ${your_auth_token}`,
+      },
+      body: JSON.stringify({ userId }), // El cuerpo de la petición con el ID del usuario
+    });
+
+    // Si la respuesta no es exitosa (ej. 400, 404, 500), lanzamos un error
+    if (!res.ok) {
+      // Intentamos leer el mensaje de error del cuerpo de la respuesta de la API
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor: ${res.status}`);
+    }
+
+    // Si la respuesta es exitosa, la procesamos
+    const responseData = await res.json();
+    console.log('Respuesta de la API:', responseData);
+
+    return {
+      success: true,
+      message: responseData.message || 'Reserva cancelada con éxito.',
+    };
+
+  } catch (error) {
+    console.error('Error en la llamada a la API para cancelar la reserva:', error);
+    // Re-lanzamos el error para que el componente que llamó a la función pueda manejarlo
+    // y mostrar un mensaje al usuario.
+    throw error;
+  }
 };
+
+// ... (El resto de tus funciones de API, como getReservations, etc.)

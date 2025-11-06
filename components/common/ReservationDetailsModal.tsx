@@ -2,22 +2,45 @@
 'use client';
 
 import { X, MapPin, Calendar, Clock } from 'lucide-react';
-import { Reservation, ReservationStatus } from '../../app/services/reservationApi';
 
+// --- CAMBIOS CLAVE AQUÍ ---
+
+// ACTUALIZADO: Definimos los tipos localmente para que coincidan con los datos de MyReservationsView.
+type ReservationStatus = 'Activa' | 'Cancelada';
+
+export interface Reservation {
+  id: number;
+  roomName: string;
+  location: string;
+  day: string; // <-- USAREMOS ESTE
+  module: number; // <-- USAREMOS ESTE
+  status: ReservationStatus;
+}
+
+// ACTUALIZADO: Los estilos ahora usan los nuevos estados 'Activa' y 'Cancelada'.
 const statusStyles: { [key in ReservationStatus]: string } = {
-  Confirmada: 'bg-green-100 text-green-800',
-  Pendiente: 'bg-yellow-100 text-yellow-800',
+  Activa: 'bg-green-100 text-green-800',
   Cancelada: 'bg-red-100 text-red-800',
 };
+
+// --- FIN DE CAMBIOS CLAVE ---
 
 type DetailsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  reservation: Reservation | null; // Puede ser nulo cuando el modal está cerrado
+  reservation: Reservation | null; // El tipo 'Reservation' ahora es el que definimos arriba.
 };
 
 export const ReservationDetailsModal = ({ isOpen, onClose, reservation }: DetailsModalProps) => {
   if (!isOpen || !reservation) return null;
+
+  // NUEVO: Formateamos la fecha para mostrarla de forma amigable, igual que en la tarjeta.
+  const formattedDate = new Date(reservation.day).toLocaleDateString('es-CL', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <div
@@ -48,12 +71,13 @@ export const ReservationDetailsModal = ({ isOpen, onClose, reservation }: Detail
             </div>
             <div className="space-y-3 text-slate-600">
               <p className="flex items-center gap-2"><MapPin size={16} className="text-blue-500" /> {reservation.location}</p>
-              <p className="flex items-center gap-2"><Calendar size={16} className="text-blue-500" /> {reservation.date}</p>
-              <p className="flex items-center gap-2"><Clock size={16} className="text-blue-500" /> {reservation.time}</p>
+              {/* ACTUALIZADO: Mostramos la fecha formateada y el módulo */}
+              <p className="flex items-center gap-2"><Calendar size={16} className="text-blue-500" /> {formattedDate}</p>
+              <p className="flex items-center gap-2"><Clock size={16} className="text-blue-500" /> Módulo: {reservation.module}</p>
             </div>
           </div>
 
-          {/* --- SECCIÓN 2: Instrucciones y Buenas Prácticas (aprox. 2/3) --- */}
+          {/* --- SECCIÓN 2: Instrucciones y Buenas Prácticas (SIN CAMBIOS) --- */}
           <div className="p-6">
             <h4 className="text-lg font-bold text-gray-800 mb-4">Instrucciones y Buenas Prácticas</h4>
             <ol className="list-decimal list-inside space-y-3 text-slate-600">
@@ -66,7 +90,7 @@ export const ReservationDetailsModal = ({ isOpen, onClose, reservation }: Detail
           </div>
         </div>
 
-        {/* Pie de Página Fijo del Modal */}
+        {/* Pie de Página Fijo del Modal (SIN CAMBIOS) */}
         <div className="flex-shrink-0 p-4 border-t bg-slate-50 flex justify-end">
           <button
             onClick={onClose}

@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Info } from 'lucide-react';
+import { useDbUser } from '../../contexts/AuthProvider';
 
 // Importaciones de todos los componentes que hemos creado
 import { ReservationCard } from './ReservationCard';
@@ -12,65 +13,100 @@ import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { InfoModal } from '@/components/common/InfoModal';
 import { ReservationDetailsModal } from '@/components/common/ReservationDetailsModal';
 
-// Importaciones del servicio de API y los tipos de datos
-import { getReservations, cancelReservation, Reservation } from '../../app/services/reservationApi';
+// Importación del servicio de API (solo para cancelar)
+import { cancelReservation } from '../../app/services/reservationApi';
+
+// NUEVO: Definimos el tipo de reserva localmente para incluir el estado.
+// Esto nos permite manejar el estado ('Activa', 'Cancelada') en el frontend.
+interface Reservation {
+  id: number;
+  roomName: string;
+  location: string;
+  day: string;
+  module: number;
+  status: 'Activa' | 'Cancelada'; // Añadimos el estado que no viene en `profile.schedule`
+}
 
 export const MyReservationsView = () => {
   // --- ESTADOS DEL COMPONENTE ---
+  // Obtenemos el perfil del usuario desde el contexto. `loading` nos dirá si el perfil aún se está cargando.
+  const { profile, loading: profileLoading } = useDbUser();
+  console.log("PROFILE EN MY RESERVATIONS:", profile);
 
-  // Estado para la lista de reservas obtenidas de la API
+  // Estado para la lista de reservas (ahora derivado del perfil)
   const [reservations, setReservations] = useState<Reservation[]>([]);
   
-  // Estados para el ciclo de vida de la carga inicial de datos
-  const [isLoading, setIsLoading] = useState(true); // Inicia en true para mostrar skeletons
+  // El estado de carga del componente ahora depende directamente del estado de carga del perfil
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados para gestionar el modal de cancelación
+  // Estados para gestionar el modal de cancelación (sin cambios)
   const [reservationToCancel, setReservationToCancel] = useState<Reservation | null>(null);
-  const [isCancelling, setIsCancelling] = useState(false); // Para el estado de carga del botón del modal
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  // Estado para gestionar el modal de información ("Cómo hacer Check-In")
+  // Estado para gestionar el modal de información ("Cómo hacer Check-In") (sin cambios)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
-  // Estado para gestionar el modal de detalles de la reserva
+  // Estado para gestionar el modal de detalles de la reserva (sin cambios)
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
 
   // --- EFECTOS Y LÓGICA DE DATOS ---
 
-  // useEffect se ejecuta una vez cuando el componente se monta para obtener las reservas
+  // REFACTORIZADO: Este useEffect ahora reacciona a los cambios en `profile` y `profileLoading`
+  // en lugar de hacer su propia llamada a la API.
   useEffect(() => {
-    const fetchReservations = async () => {
-      try {
-        const data = await getReservations();
-        setReservations(data);
-      } catch (err) {
-        setError('No se pudieron cargar las reservas. Intenta de nuevo más tarde.');
-        console.error("Error al obtener las reservas:", err);
-      } finally {
-        setIsLoading(false); // Termina el estado de carga, con o sin éxito
-      }
-    };
+    // Si el perfil aún está cargando, mostramos los skeletons.
+    if (profileLoading) {
+      setIsLoading(true);
+      return;
+    }
 
-    fetchReservations();
-  }, []); // El array vacío [] asegura que esto se ejecute solo una vez
+    // Si la carga terminó pero no hay perfil, mostramos un error.
+    if (!profile) {
+      setError('No se pudieron cargar tus datos de perfil y reservas.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Si la carga terminó y tenemos perfil, procesamos las reservas.
+    if (profile.schedule && Array.isArray(profile.schedule)) {
+      // Transformamos los datos de `profile.schedule` a nuestro tipo `Reservation` local,
+      // añadiendo el estado 'Activa' por defecto a cada una.
+      const formattedReservations = profile.schedule.map(item => ({
+        ...item,
+        status: 'Activa' as const, // Asignamos un estado inicial
+      }));
+      setReservations(formattedReservations);
+    } else {
+        // Si no hay `schedule` o no es un array, lo dejamos como vacío.
+        setReservations([]);
+    }
+    
+    // Una vez procesado, terminamos el estado de carga.
+    setIsLoading(false);
+
+  }, [profile, profileLoading]); // Se ejecuta cada vez que el perfil o su estado de carga cambian
 
   // --- FUNCIONES MANEJADORAS (HANDLERS) PARA LOS MODALES ---
 
   // Handlers para el modal de CANCELACIÓN
   const handleOpenCancelModal = (reservation: Reservation) => setReservationToCancel(reservation);
   const handleCloseCancelModal = () => setReservationToCancel(null);
+
   const handleConfirmCancellation = async () => {
     if (!reservationToCancel) return;
     setIsCancelling(true);
     try {
-      await cancelReservation(reservationToCancel.id);
+      console.log("Cancelando reserva con ID:", reservationToCancel.id);
+      await cancelReservation(reservationToCancel.id, profile?.user.id || 0);
+      // Actualización optimista: Cambiamos el estado localmente sin recargar
       setReservations(current => current.map(res => 
         res.id === reservationToCancel.id ? { ...res, status: 'Cancelada' } : res
       ));
       handleCloseCancelModal();
     } catch (err) {
       console.error("Error al cancelar la reserva:", err);
-      alert("Hubo un error al cancelar la reserva.");
+      alert("Hubo un error al cancelar la reserva."); // Podríamos usar un modal de error aquí también
     } finally {
       setIsCancelling(false);
     }
@@ -82,7 +118,7 @@ export const MyReservationsView = () => {
 
   // --- LÓGICA DE RENDERIZADO ---
 
-  // Función auxiliar para renderizar la lista de tarjetas (o sus estados alternativos)
+  // Función auxiliar para renderizar la lista de tarjetas (sin cambios)
   const renderReservationList = () => {
     if (isLoading) {
       return (
@@ -96,10 +132,12 @@ export const MyReservationsView = () => {
     if (error) {
       return <div className="text-red-500 text-center p-4">{error}</div>;
     }
-    if (reservations.length === 0) {
+    // Mostramos solo las reservas que no han sido canceladas en esta sesión
+    const activeReservations = reservations.filter(res => res.status === 'Activa');
+    if (activeReservations.length === 0) {
       return <div className="text-slate-500 text-center p-4">No tienes ninguna reserva activa.</div>;
     }
-    return reservations.map((res) => (
+    return activeReservations.map((res) => (
       <ReservationCard 
         key={res.id}
         reservation={res}
