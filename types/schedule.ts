@@ -6,6 +6,8 @@ export type ScheduleItem = {
   day: string;
   module: string;
   available: string;
+  status?: string;
+  attendanceStatus?: string;
   studyRoom: Room | null;
   createdAt?: string;
   updatedAt?: string;
