@@ -16,4 +16,5 @@ export interface Room {
   reservationsToday: number;
   utilization: number;
   maintenanceBlocks?: MaintenanceBlock[];
+  equipment?: string[];
 }

@@ -1,4 +1,4 @@
-import type { ScheduleItem } from '@/lib/schedule/fetchSchedule';
+import type { ScheduleItem } from '@/types/schedule';
 import type { StudyRoomRecord } from '@/lib/studyRooms/fetchStudyRooms';
 import type { Room } from '@/types/room';
 import { API_STATUS_TO_ROOM_STATUS, STATUS_PRIORITY } from './constants';

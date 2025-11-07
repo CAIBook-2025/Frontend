@@ -127,5 +127,6 @@ export const getActionMode = (status: RoomEditableStatus): MaintenanceActionMode
 
 export const isActionAllowed = (mode: MaintenanceActionMode, slotStatus: SlotStatus, isPast?: boolean) => {
   if (isPast) return false;
-  return mode === 'block' ? slotStatus === 'AVAILABLE' : slotStatus === 'MAINTENANCE';
+  if (mode === 'block') return slotStatus === 'AVAILABLE';
+  return slotStatus === 'MAINTENANCE' || slotStatus === 'UNAVAILABLE';
 };

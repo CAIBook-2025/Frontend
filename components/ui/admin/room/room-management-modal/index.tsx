@@ -1,37 +1,23 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { getAccessToken } from '@auth0/nextjs-auth0';
-import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
-import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
+import { useCallback, useEffect, useState } from 'react';
 import { disableScheduleSlot } from '@/lib/schedule/disableSchedule';
 import { enableScheduleSlot } from '@/lib/schedule/enableSchedule';
-import { fetchSchedule } from '@/lib/schedule/fetchSchedule';
-import type { MaintenanceBlock, MaintenanceModule, Room } from '@/types/room';
+import { cancelScheduleSlot } from '@/lib/schedule/cancelSchedule';
+import type { MaintenanceBlock, Room } from '@/types/room';
 import { MaintenanceReasonField } from './MaintenanceReasonField';
 import { ModalActions } from './ModalActions';
 import { ModalHeader } from './ModalHeader';
 import { ScheduleGrid } from './ScheduleGrid';
 import { StatusSelector } from './StatusSelector';
+import type { RoomEditableStatus } from './types';
 import {
-  MaintenanceActionMode,
-  MaintenanceSelectionMap,
-  RoomEditableStatus,
-  ScheduleStatusMap,
-} from './types';
-import {
-  buildEmptyDayStatus,
-  buildSelectionMap,
-  filterSelectionToWeek,
-  generateCurrentWeekDays,
-  getActionMode,
-  getRoomIdentifier,
-  getSlotStatus,
-  isActionAllowed,
-  normalizeMaintenanceBlocks,
-  parseModule,
-  sortModules,
-} from './utils';
+  useActionMode,
+  useAdminSession,
+  useMaintenanceSelections,
+  useScheduleMatrix,
+  useVisibleWeekDays,
+} from './hooks';
 
 export type { RoomEditableStatus } from './types';
 
@@ -52,187 +38,38 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
     room?.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE'
   );
   const [statusNote, setStatusNote] = useState<string>(room?.statusNote || '');
-  const [blockSelectionMap, setBlockSelectionMap] = useState<MaintenanceSelectionMap>(() =>
-    buildSelectionMap(room?.maintenanceBlocks)
-  );
-  const [freeSelectionMap, setFreeSelectionMap] = useState<MaintenanceSelectionMap>({});
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [adminId, setAdminId] = useState<number | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [scheduleStatusMap, setScheduleStatusMap] = useState<ScheduleStatusMap>({});
-  const [scheduleLoading, setScheduleLoading] = useState(false);
-  const [scheduleError, setScheduleError] = useState<string | null>(null);
 
-  const visibleDays = useMemo(() => generateCurrentWeekDays(), [isOpen]);
-  const actionMode: MaintenanceActionMode = getActionMode(selectedStatus);
-  const normalizedBlockSelection = useMemo(
-    () => normalizeMaintenanceBlocks(blockSelectionMap),
-    [blockSelectionMap]
+  const visibleDays = useVisibleWeekDays(isOpen);
+  const actionMode = useActionMode(selectedStatus);
+  const { accessToken, adminId, sessionError } = useAdminSession(isOpen);
+  const { scheduleStatusMap, scheduleLoading, scheduleError } = useScheduleMatrix(
+    room?.id,
+    isOpen,
+    accessToken,
+    visibleDays
   );
-  const selectedModulesCount = useMemo(() => {
-    const sourceMap = actionMode === 'block' ? blockSelectionMap : freeSelectionMap;
-    return Object.values(sourceMap).reduce((acc, modules) => acc + modules.length, 0);
-  }, [actionMode, blockSelectionMap, freeSelectionMap]);
+  const {
+    blockSelectionMap,
+    freeSelectionMap,
+    toggleMaintenanceSlot,
+    normalizedBlockSelection,
+    selectedModulesCount,
+    clearFreeSelection,
+  } = useMaintenanceSelections(room, visibleDays, actionMode, scheduleStatusMap);
 
   useEffect(() => {
-    if (!isOpen) {
-      setAccessToken(null);
-      setAdminId(null);
-      setSaveError(null);
-      return;
+    if (sessionError) {
+      setSaveError(sessionError);
     }
-
-    let isCancelled = false;
-
-    const resolveSession = async () => {
-      try {
-        const tokenResponse = await getAccessToken();
-        if (isCancelled) return;
-        const resolvedToken = resolveAccessToken(tokenResponse);
-        if (!resolvedToken) {
-          throw new Error('Access token not available');
-        }
-        setAccessToken(resolvedToken);
-
-        const profile = await fetchUserProfile(resolvedToken);
-        if (!isCancelled) {
-          if (!profile) {
-            setSaveError('No se pudo identificar al administrador.');
-            setAdminId(null);
-          } else {
-            setAdminId(profile.id);
-          }
-        }
-      } catch (error) {
-        console.error('Error resolving admin session', error);
-        if (!isCancelled) {
-          setAccessToken(null);
-          setAdminId(null);
-          setSaveError('No se pudieron obtener las credenciales necesarias.');
-        }
-      }
-    };
-
-    void resolveSession();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isOpen]);
+  }, [sessionError]);
 
   useEffect(() => {
     if (!room) return;
     setSelectedStatus(room.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE');
     setStatusNote(room.statusNote || '');
-    setBlockSelectionMap(buildSelectionMap(room.maintenanceBlocks));
-    setFreeSelectionMap({});
   }, [room]);
-
-  useEffect(() => {
-    const allowedKeys = visibleDays.map((day) => day.key);
-    setBlockSelectionMap((prev) => filterSelectionToWeek(prev, allowedKeys));
-    setFreeSelectionMap((prev) => filterSelectionToWeek(prev, allowedKeys));
-  }, [visibleDays]);
-
-  useEffect(() => {
-    const roomId = room?.id;
-    if (!roomId || !isOpen || !accessToken) return;
-
-    let isCancelled = false;
-    const dayKeys = visibleDays.map(({ key }) => key);
-
-    const loadSchedule = async () => {
-      setScheduleLoading(true);
-      setScheduleError(null);
-      try {
-        const results = await Promise.allSettled(
-          dayKeys.map((day) => fetchSchedule(accessToken, { day, take: 200 }))
-        );
-        if (isCancelled) return;
-
-        const nextMap: ScheduleStatusMap = {};
-        let foundAny = false;
-        let hadErrors = false;
-
-        results.forEach((result, index) => {
-          const dayKey = dayKeys[index];
-          const dayStatus = buildEmptyDayStatus(dayKey);
-
-          if (result.status === 'fulfilled') {
-            const items = result.value?.items ?? [];
-            const roomItems = items.filter((item) => getRoomIdentifier(item) === roomId);
-            if (roomItems.length > 0) {
-              foundAny = true;
-              roomItems.forEach((item) => {
-                const module = parseModule(item.module);
-                if (!module) return;
-                dayStatus[module] = {
-                  ...dayStatus[module],
-                  status: getSlotStatus(item.available),
-                  scheduleId: Number(item.id),
-                  attendanceStatus: item.status ?? item.attendanceStatus ?? null,
-                };
-              });
-            }
-          } else {
-            console.error('Error fetching schedule', result.reason);
-            setScheduleError('No se pudo cargar la disponibilidad del horario.');
-            hadErrors = true;
-          }
-
-          nextMap[dayKey] = dayStatus;
-        });
-
-        setScheduleStatusMap(nextMap);
-        if (!hadErrors) {
-          setScheduleError(foundAny ? null : 'No se encontraron datos de horarios.');
-        }
-      } catch (error) {
-        console.error('Unexpected error loading schedule', error);
-        if (!isCancelled) {
-          setScheduleError('No se pudo cargar la disponibilidad del horario.');
-        }
-      } finally {
-        if (!isCancelled) {
-          setScheduleLoading(false);
-        }
-      }
-    };
-
-    void loadSchedule();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [room?.id, isOpen, visibleDays, accessToken]);
-
-  const toggleMaintenanceSlot = useCallback(
-    (dayKey: string, module: MaintenanceModule) => {
-      const setMap = actionMode === 'block' ? setBlockSelectionMap : setFreeSelectionMap;
-      setMap((prev) => {
-        const slotInfo = scheduleStatusMap[dayKey]?.[module];
-        const slotStatus = slotInfo?.status ?? 'AVAILABLE';
-        if (!isActionAllowed(actionMode, slotStatus, slotInfo?.isPast)) {
-          return prev;
-        }
-
-        const next = { ...prev };
-        const current = next[dayKey] ?? [];
-        const exists = current.includes(module);
-        const updated = exists ? current.filter((value) => value !== module) : [...current, module];
-
-        if (updated.length) {
-          next[dayKey] = [...new Set(updated)].sort(sortModules);
-        } else {
-          delete next[dayKey];
-        }
-
-        return next;
-      });
-    },
-    [actionMode, scheduleStatusMap]
-  );
 
   const handleSave = useCallback(async () => {
     if (!room) return;
@@ -290,11 +127,13 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
     if (selectedStatus === 'AVAILABLE') {
       const freeSelection = freeSelectionMap;
       const hasSelections = Object.keys(freeSelection).some((day) => freeSelection[day]?.length);
+
       if (hasSelections) {
         if (!accessToken) {
           setSaveError('No se pudo autenticar la sesión.');
           return;
         }
+
         if (!adminId) {
           setSaveError('No se pudo identificar al administrador.');
           return;
@@ -303,10 +142,13 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
         const slotsToEnable = Object.entries(freeSelection).flatMap(([date, modules]) =>
           modules.map((module) => ({
             scheduleId: scheduleStatusMap[date]?.[module]?.scheduleId,
+            status: scheduleStatusMap[date]?.[module]?.status,
           }))
+
         );
 
         const missingSchedule = slotsToEnable.find((slot) => !slot.scheduleId);
+
         if (missingSchedule) {
           setSaveError('No se encontraron horarios asociados a algunos modulos seleccionados.');
           return;
@@ -314,24 +156,36 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
         setSaveLoading(true);
         try {
+
           const enableResults = await Promise.all(
-            slotsToEnable.map((slot) =>
-              enableScheduleSlot(accessToken, {
+            slotsToEnable.map((slot) => {
+              const targetStatus = slot.status ?? 'AVAILABLE';
+              if (targetStatus === 'UNAVAILABLE') {
+                return cancelScheduleSlot(accessToken, {
+                  scheduleId: slot.scheduleId!,
+                  adminId,
+                });
+              }
+
+              return enableScheduleSlot(accessToken, {
                 scheduleId: slot.scheduleId!,
                 adminId,
-              })
-            )
+              });
+            })
           );
 
           if (enableResults.some((result) => !result)) {
             setSaveError('No se pudieron liberar todos los modulos seleccionados. Intenta nuevamente.');
             return;
           }
-          setFreeSelectionMap({});
+
+          clearFreeSelection();
+
         } catch (error) {
           console.error('Error enabling schedules', error);
           setSaveError('Ocurrió un error al liberar los modulos seleccionados.');
           return;
+
         } finally {
           setSaveLoading(false);
         }
@@ -356,6 +210,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
     statusNote,
     onSave,
     onClose,
+    clearFreeSelection,
   ]);
 
   if (!isOpen || !room) return null;
