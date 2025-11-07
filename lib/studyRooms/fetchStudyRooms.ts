@@ -2,7 +2,7 @@ export type StudyRoomRecord = {
   id: number;
   name: string;
   capacity: number;
-  equipment: unknown;
+  equipment: string | string[] | Record<string, unknown> | null;
   location: string;
   createdAt: string;
   updatedAt: string;
