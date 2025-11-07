@@ -113,7 +113,7 @@ export const ScheduleGrid = ({
                           <span className={`text-[10px] font-medium ${slotStyles.labelClass}`}>{slotStyles.label}</span>
                           {slotStatus === 'UNAVAILABLE' && (attendanceHint || restrictionHint) && (
                             <span className="relative inline-flex justify-center w-full">
-                              <span className="sr-only">Detalles del modulo</span>
+                              <span className="sr-only">Detalles del módulo</span>
                               <span
                                 className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-medium shadow-lg transition-opacity duration-200 ${
                                   slotInfo?.isPast
