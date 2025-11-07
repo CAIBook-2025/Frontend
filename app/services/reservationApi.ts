@@ -52,21 +52,18 @@ export const cancelReservation = async (reservationId: number, userId: number): 
   console.log(`Preparando para cancelar la reserva con ID: ${reservationId} para el usuario con ID: ${userId}`);
 
   // Construimos la URL dinámicamente usando la variable de entorno y el ID de la reserva
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/cancel/${reservationId}`;
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/cancel`;
+
   
   console.log(`Intentando cancelar reserva en: ${apiUrl}`);
   console.log(`Enviando body: { userId: ${userId} }`);
 
   try {
     const res = await fetch(apiUrl, {
-      method: 'PUT', // Usamos PUT ya que estamos actualizando el estado de un recurso existente
-      headers: {
-        'Content-Type': 'application/json',
-        // Si tu API requiere autenticación (ej. un token JWT), deberías añadirlo aquí:
-        // 'Authorization': `Bearer ${your_auth_token}`,
-      },
-      body: JSON.stringify({ userId }), // El cuerpo de la petición con el ID del usuario
-    });
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scheduleId: reservationId, userId }),
+  });
 
     // Si la respuesta no es exitosa (ej. 400, 404, 500), lanzamos un error
     if (!res.ok) {
@@ -93,3 +90,117 @@ export const cancelReservation = async (reservationId: number, userId: number): 
 };
 
 // ... (El resto de tus funciones de API, como getReservations, etc.)
+// app/services/reservationApi.ts
+
+// ... (tus tipos y otras funciones como getReservations y cancelReservation)
+
+// --- AÑADIR ESTA NUEVA FUNCIÓN ---
+
+/**
+ * Realiza una llamada a la API para confirmar el check-in de una reserva.
+ * @param scheduleId - El ID de la reserva (schedule).
+ * @param userId - El ID del usuario que realiza el check-in.
+ * @param accessToken - El token de autenticación de Auth0.
+ * @returns Una promesa que se resuelve con el resultado de la operación.
+ */
+export const confirmCheckIn = async (
+  scheduleId: number,
+  userId: number,
+  accessToken: string
+): Promise<{ success: boolean; message: string }> => {
+  // Verificaciones para asegurar que tenemos todos los datos necesarios
+  if (!scheduleId || !userId || !accessToken) {
+    throw new Error('Faltan datos requeridos (scheduleId, userId, o accessToken) para realizar el check-in.');
+  }
+
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkin`;
+  
+  console.log(`Intentando hacer check-in en: ${apiUrl}`);
+  console.log(`Enviando body: { userId: ${userId}, scheduleId: ${scheduleId} }`);
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PATCH', // O 'PUT' si tu API lo requiere, pero POST es común para crear una "asistencia"
+      headers: {
+        'Content-Type': 'application/json',
+        // ¡Este es el paso clave! Añadimos el token de autorización.
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ userId, scheduleId }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor al hacer check-in: ${res.status}`);
+    }
+
+    const responseData = await res.json();
+    console.log('Respuesta de la API de check-in:', responseData);
+
+    return {
+      success: true,
+      message: responseData.message || 'Check-in realizado con éxito.',
+    };
+
+  } catch (error) {
+    console.error('Error en la llamada a la API para confirmar el check-in:', error);
+    throw error;
+  }
+};
+
+// app/services/reservationApi.ts
+
+// ... (tus otras funciones como cancelReservation y confirmCheckIn)
+
+// --- AÑADIR ESTA NUEVA FUNCIÓN ---
+
+/**
+ * Realiza una llamada a la API para confirmar el check-out de una reserva.
+ * @param scheduleId - El ID de la reserva (schedule).
+ * @param userId - El ID del usuario que realiza el check-out.
+ * @param accessToken - El token de autenticación de Auth0.
+ * @returns Una promesa que se resuelve con el resultado de la operación.
+ */
+export const confirmCheckOut = async (
+  scheduleId: number,
+  userId: number,
+  accessToken: string
+): Promise<{ success: boolean; message: string }> => {
+  if (!scheduleId || !userId || !accessToken) {
+    throw new Error('Faltan datos requeridos (scheduleId, userId, o accessToken) para realizar el check-out.');
+  }
+
+  // Usamos el endpoint que especificaste
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkout`;
+  
+  console.log(`Intentando hacer check-out en: ${apiUrl}`);
+  console.log(`Enviando body: { userId: ${userId}, scheduleId: ${scheduleId} }`);
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PATCH', // Usamos PATCH como lo especificaste
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`, // Token de autorización
+      },
+      body: JSON.stringify({ scheduleId, userId }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor al hacer check-out: ${res.status}`);
+    }
+
+    const responseData = await res.json();
+    console.log('Respuesta de la API de check-out:', responseData);
+
+    return {
+      success: true,
+      message: responseData.message || 'Check-out realizado con éxito.',
+    };
+
+  } catch (error) {
+    console.error('Error en la llamada a la API para confirmar el check-out:', error);
+    throw error;
+  }
+};

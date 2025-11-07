@@ -1,26 +1,39 @@
 // app/components/dashboard/ReservationCard.tsx
 'use client';
 
-import { Calendar, Clock, MapPin, XCircle, Eye } from "lucide-react";
+import { Calendar, Clock, MapPin, XCircle, Eye, QrCode, LogOut } from "lucide-react"; // NUEVO: Importamos LogOut
+import Link from 'next/link';
 
-// ACTUALIZADO: Definimos los tipos aquí mismo para que coincidan con los datos de MyReservationsView.
-// Ya no los importamos desde el servicio API.
-type ReservationStatus = 'Activa' | 'Cancelada';
+// ACTUALIZADO: Definimos los posibles estados de forma más estricta.
+type ReservationStatus = 'PENDING' | 'PRESENT' | 'CANCELED' | 'ABSENT' | string;
 
 export interface Reservation {
   id: number;
   roomName: string;
   location: string;
-  day: string; // Ahora es 'day', un string con formato ISO
-  module: number; // Ahora es 'module', un número
+  day: string;
+  module: number;
   status: ReservationStatus;
 }
 
-// ACTUALIZADO: Los estilos ahora coinciden con los nuevos estados 'Activa' y 'Cancelada'.
-const statusStyles: { [key in ReservationStatus]: string } = {
-  Activa: 'bg-green-100 text-green-800',
-  Cancelada: 'bg-red-100 text-red-800',
+// ACTUALIZADO: Añadimos estilos para todos los estados relevantes.
+const statusStyles: { [key: string]: string } = {
+  PENDING: 'bg-yellow-100 text-yellow-800', // Pendiente
+  PRESENT: 'bg-green-100 text-green-800',   // Presente (check-in hecho)
+  CANCELED: 'bg-red-100 text-red-800',      // Cancelada
+  ABSENT: 'bg-slate-100 text-slate-800',     // Ausente (no hizo check-in)
+  // Añadimos un default por si llega un estado no esperado
+  default: 'bg-gray-100 text-gray-800',
 };
+
+const statusText: { [key: string]: string } = {
+  PENDING: 'Pendiente',
+  PRESENT: 'En curso',
+  CANCELED: 'Cancelada',
+  ABSENT: 'Ausente',
+  default: 'Desconocido',
+}
+
 
 type ReservationCardProps = {
   reservation: Reservation;
@@ -29,59 +42,76 @@ type ReservationCardProps = {
 };
 
 export const ReservationCard = ({ reservation, onCancelClick, onDetailsClick }: ReservationCardProps) => {
-  // ACTUALIZADO: Desestructuramos las nuevas propiedades 'day' y 'module'.
-  const { roomName, location, day, module, status } = reservation;
+  const { id, roomName, location, day, module, status } = reservation;
 
-  // NUEVO: Formateamos la fecha para que sea legible para el usuario.
-  // El string 'day' viene como "2025-11-06T00:00:00.000Z", lo convertimos a un formato local.
   const formattedDate = new Date(day).toLocaleDateString('es-CL', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  return (
-    // ACTUALIZADO: Hacemos que la tarjeta sea menos opaca cuando está cancelada para mejor legibilidad.
-    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 ${status === 'Cancelada' ? 'opacity-70 bg-slate-50' : 'hover:shadow-md'}`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-lg font-bold text-gray-800">{roomName}</h3>
-          <p className="text-sm text-slate-500 flex items-center gap-1 mt-1"><MapPin size={14} /> {location}</p>
-        </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[status]}`}>{status}</span>
-      </div>
+  // Determinar el estilo y texto a mostrar. Si el status no se encuentra, usa el default.
+  const currentStatusStyle = statusStyles[status] || statusStyles.default;
+  const currentStatusText = statusText[status] || statusText.default;
 
-      {/* ACTUALIZADO: Mostramos la fecha formateada y el módulo en lugar de date y time. */}
-      <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm text-slate-600">
-        <div className="flex items-center gap-2">
-          <Calendar size={16} className="text-blue-500" /> 
-          <span>{formattedDate}</span>
+  return (
+    <div className={`flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 ${status === 'CANCELED' ? 'opacity-70 bg-slate-50' : 'hover:shadow-md'}`}>
+      <div>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-bold text-gray-800">{roomName}</h3>
+            <p className="text-sm text-slate-500 flex items-center gap-1 mt-1"><MapPin size={14} /> {location}</p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${currentStatusStyle}`}>{currentStatusText}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock size={16} className="text-blue-500" /> 
-          <span>Módulo: {module}</span>
+        <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm text-slate-600">
+          <div className="flex items-center gap-2">
+            <Calendar size={16} className="text-blue-500" /> 
+            <span>{formattedDate}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock size={16} className="text-blue-500" /> 
+            <span>Módulo: {module}</span>
+          </div>
         </div>
       </div>
       
-      <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-        <button 
-          onClick={() => onDetailsClick(reservation)}
-          className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
-        >
-          <Eye size={19} />
-          Ver Detalles
-        </button>
+      {/* --- SECCIÓN DE ACCIONES CON LÓGICA EXTENDIDA --- */}
+      <div className="mt-5 pt-4 border-t border-slate-100">
+        {status === 'PENDING' && (
+          <div className="flex flex-col gap-3">
+            <Link href={`/Reservations/Check-in/${id}`} passHref>
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">
+                <QrCode size={18} />
+                Hacer Check-In
+              </button>
+            </Link>
+            <div className="flex justify-between text-sm">
+              <button onClick={() => onDetailsClick(reservation)} className="font-semibold text-slate-500 hover:text-slate-700">Ver Detalles</button>
+              <button onClick={() => onCancelClick(reservation)} className="font-semibold text-red-500 hover:text-red-700">Cancelar Reserva</button>
+            </div>
+          </div>
+        )}
+        
+        {status === 'PRESENT' && (
+          <div className="flex flex-col gap-3">
+            <Link href={`/Reservations/Check-out/${id}`} passHref>
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-amber-600">
+                <LogOut size={18} />
+                Hacer Check-Out
+              </button>
+            </Link>
+            <div className="flex justify-start text-sm">
+              <button onClick={() => onDetailsClick(reservation)} className="font-semibold text-slate-500 hover:text-slate-700">Ver Detalles</button>
+            </div>
+          </div>
+        )}
 
-        {/* La lógica aquí sigue siendo válida: el botón de cancelar solo aparece si la reserva no está ya cancelada. */}
-        {status !== 'Cancelada' && (
-          <button 
-            onClick={() => onCancelClick(reservation)} 
-            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-700 transition-colors"
-          >
-            <XCircle size={16} />
-            Cancelar
-          </button>
+        {(status === 'CANCELED' || status === 'ABSENT' || !['PENDING', 'PRESENT'].includes(status)) && (
+          <div className="flex justify-start">
+            <button onClick={() => onDetailsClick(reservation)} className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-700">
+              <Eye size={16} />
+              Ver Detalles
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -6,7 +6,7 @@ import { X, MapPin, Calendar, Clock } from 'lucide-react';
 // --- CAMBIOS CLAVE AQUÍ ---
 
 // ACTUALIZADO: Definimos los tipos localmente para que coincidan con los datos de MyReservationsView.
-type ReservationStatus = 'Activa' | 'Cancelada';
+type ReservationStatus = string;
 
 export interface Reservation {
   id: number;

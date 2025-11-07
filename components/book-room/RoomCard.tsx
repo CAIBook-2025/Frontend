@@ -1,10 +1,12 @@
 // components/book-room/RoomCard.tsx
 'use client';
 
-import { useState } from 'react'; // NUEVO: Importamos useState
-import { MapPin, Users, Clock, CheckCircle } from 'lucide-react'; // NUEVO: Importamos un ícono para el modal
+import { useState } from 'react';
+import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
+// NUEVO: Importamos el hook para acceder al usuario y al token
+import { useDbUser } from '@/contexts/AuthProvider'; // <-- Ajusta la ruta si es necesario
 
-// Reutilizamos los tipos que definimos en la página
+// --- Tipos (sin cambios) ---
 type RoomStatus = 'Disponible' | 'Ocupada';
 type Equipment = 'Pizarra' | 'Proyector' | 'WiFi' | 'Enchufes' | 'Mesa grande';
 
@@ -19,44 +21,61 @@ export interface Room {
   module: number;
 }
 
-export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: number; scheduleId: number }) => {
+// ACTUALIZADO: Eliminamos `userId` de las props, ya que lo obtendremos del contexto.
+export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number }) => {
   const isAvailable = room.status === 'Disponible';
   
-  // NUEVO: Estado para controlar la visibilidad del modal de confirmación
+  // NUEVO: Obtenemos el usuario y el accessToken del contexto
+  const { user, accessToken } = useDbUser();
+  
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // --- FUNCIÓN handleReservar COMPLETAMENTE ACTUALIZADA ---
   const handleReservar = async () => {
-    try {
-      console.log("Intentando reservar sala:", room.id, "para usuario:", userId, "en horario:", scheduleId);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book/${scheduleId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room.id, userId }), // CORRECCIÓN: Deberías enviar room.id en lugar de scheduleId en el cuerpo
-      });
-      if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || 'Error al reservar');
-      }
-      console.log("Reserva exitosa!");
+    // NUEVO: Verificación de seguridad. Si no hay usuario o token, no se puede reservar.
+    if (!user || !accessToken) {
+      alert('Debes iniciar sesión para poder realizar una reserva.');
+      return;
+    }
 
-      // NUEVO: En lugar de alert y reload, mostramos el modal
+    try {
+      console.log("Access Token obtenido:", accessToken);
+      console.log("Intentando reservar sala:", room.id, "para usuario:", user.id, "en horario:", scheduleId);
+      
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
+        method: 'PATCH',
+        // ACTUALIZADO: Añadimos el token de autorización a los encabezados
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        // Usamos user.id del contexto en lugar de la prop
+        body: JSON.stringify({ id: scheduleId, userId: user.id }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al realizar la reserva');
+      }
+
+      console.log("Reserva exitosa!");
       setShowSuccessModal(true);
       
     } catch (e) {
       console.error(e);
-      // Opcional: podrías mostrar un modal de error aquí también
-      alert('Hubo un error al realizar la reserva.');
+      const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
+      alert(`Error al reservar: ${errorMessage}`);
     }
   };
   
-  // NUEVO: Función para cerrar el modal y recargar la página
   const handleCloseModal = () => {
     setShowSuccessModal(false);
-    window.location.reload(); // Recarga para ver el estado actualizado de las salas
+    window.location.reload();
   };
 
   return (
-    <> {/* NUEVO: Envolvemos todo en un Fragment para poder añadir el modal al mismo nivel */}
+    <>
+      {/* --- El resto del JSX no necesita cambios --- */}
       <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
         <div>
           <div className="flex items-start justify-between">
@@ -112,7 +131,6 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: num
         </button>
       </div>
 
-      {/* --- NUEVO: Modal de confirmación --- */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="m-4 max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
@@ -123,11 +141,6 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: num
             <p className="mt-2 text-sm text-gray-600">
               Has agendado la <span className="font-semibold">{room.name}</span> para el Módulo <span className="font-semibold">{room.module}</span>.
             </p>
-            {/* Si tienes la fecha disponible, podrías añadirla así:
-            <p className="mt-2 text-sm text-gray-600">
-              Has agendado la <span className="font-semibold">{room.name}</span> para el día <span className="font-semibold">{fecha}</span> en el Módulo <span className="font-semibold">{room.module}</span>.
-            </p>
-            */}
             <button
               onClick={handleCloseModal}
               className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700"
