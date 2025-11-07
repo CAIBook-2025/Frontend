@@ -241,7 +241,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
     if (selectedStatus === 'MAINTENANCE' && maintenancePayload && maintenancePayload.length > 0) {
       if (!accessToken) {
-        setSaveError('No se pudo autenticar la sesion.');
+        setSaveError('No se pudo autenticar la sesión.');
         return;
       }
       if (!adminId) {
