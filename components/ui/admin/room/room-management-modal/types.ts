@@ -7,6 +7,9 @@ export type SlotStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
 export type SlotInfo = {
   status: SlotStatus;
   scheduleId?: number;
+  attendanceStatus?: string | null;
+  timeLabel?: string;
+  isPast?: boolean;
 };
 
 export type ScheduleStatusMap = Record<string, Record<MaintenanceModule, SlotInfo>>;

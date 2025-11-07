@@ -76,32 +76,55 @@ export const ScheduleGrid = ({
                     const slotInfo = statusMap[key]?.[module];
                     const slotStatus = slotInfo?.status ?? 'AVAILABLE';
                     const slotStyles = SLOT_STATUS_STYLES[slotStatus];
-                    const allowed = isActionAllowed(mode, slotStatus);
+                    const allowed = isActionAllowed(mode, slotStatus, slotInfo?.isPast);
                     const actionLabel = getActionLabel(mode);
+                    const attendanceHint =
+                      slotStatus === 'UNAVAILABLE' && slotInfo?.attendanceStatus && slotInfo?.isPast
+                        ? slotInfo.attendanceStatus
+                        : null;
+                    const restrictionHint =
+                      !allowed && slotStatus === 'UNAVAILABLE'
+                        ? slotInfo?.isPast
+                          ? 'No se pueden modificar modulos en el pasado'
+                          : mode === 'block'
+                          ? 'Solo se pueden bloquear modulos disponibles'
+                          : 'Solo se pueden liberar modulos en mantenimiento'
+                        : null;
                     return (
                       <td key={`${module}-${key}`} className="py-2 px-2 text-center">
                         <button
-                          type="button"
-                          onClick={() => onToggle(key, module)}
-                          disabled={saveLoading || !allowed}
-                          className={`w-full min-w-[110px] rounded border px-3 py-3 text-xs font-medium transition flex flex-col gap-1 ${slotStyles.baseClass} ${
+                          className={`group w-full min-w-[110px] rounded border px-3 py-3 text-xs font-medium transition flex flex-col gap-1 ${slotStyles.baseClass} ${
                             isSelected ? 'ring-2 ring-orange-400 shadow-md text-orange-800' : 'hover:shadow-sm'
                           } ${
                             saveLoading || !allowed ? 'opacity-60 cursor-not-allowed' : ''
                           }`}
-                          title={
-                            allowed
-                              ? `${module} - ${label}`
-                              : mode === 'block'
-                              ? 'Solo se pueden bloquear modulos disponibles'
-                              : 'Solo se pueden liberar modulos en mantenimiento'
-                          }
+                          type="button"
+                          onClick={() => onToggle(key, module)}
+                          disabled={saveLoading || !allowed}
+                          title={`${module} - ${label}`}
                         >
                           <span className="text-[11px] font-semibold text-gray-800">{module}</span>
+                          {slotInfo?.timeLabel && (
+                            <span className="text-[10px] text-gray-500 font-medium">{slotInfo.timeLabel}</span>
+                          )}
                           <span className="text-[11px] font-semibold uppercase">
                             {isSelected ? actionLabel : ''}
                           </span>
                           <span className={`text-[10px] font-medium ${slotStyles.labelClass}`}>{slotStyles.label}</span>
+                          {slotStatus === 'UNAVAILABLE' && (attendanceHint || restrictionHint) && (
+                            <span className="relative inline-flex justify-center w-full">
+                              <span className="sr-only">Detalles del módulo</span>
+                              <span
+                                className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-medium shadow-lg transition-opacity duration-200 ${
+                                  slotInfo?.isPast
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-white text-gray-700 border border-gray-200'
+                                } opacity-0 pointer-events-none group-hover:opacity-100 group-focus-within:opacity-100`}
+                              >
+                                {attendanceHint ?? restrictionHint}
+                              </span>
+                            </span>
+                          )}
                         </button>
                       </td>
                     );

@@ -157,7 +157,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
         results.forEach((result, index) => {
           const dayKey = dayKeys[index];
-          const dayStatus = buildEmptyDayStatus();
+          const dayStatus = buildEmptyDayStatus(dayKey);
 
           if (result.status === 'fulfilled') {
             const items = result.value?.items ?? [];
@@ -168,8 +168,10 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                 const module = parseModule(item.module);
                 if (!module) return;
                 dayStatus[module] = {
+                  ...dayStatus[module],
                   status: getSlotStatus(item.available),
                   scheduleId: Number(item.id),
+                  attendanceStatus: item.status ?? item.attendanceStatus ?? null,
                 };
               });
             }
@@ -211,7 +213,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
       setMap((prev) => {
         const slotInfo = scheduleStatusMap[dayKey]?.[module];
         const slotStatus = slotInfo?.status ?? 'AVAILABLE';
-        if (!isActionAllowed(actionMode, slotStatus)) {
+        if (!isActionAllowed(actionMode, slotStatus, slotInfo?.isPast)) {
           return prev;
         }
 

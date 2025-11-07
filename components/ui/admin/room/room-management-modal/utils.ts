@@ -1,6 +1,6 @@
 import type { ScheduleItem } from '@/types/schedule';
 import type { MaintenanceBlock, MaintenanceModule } from '@/types/room';
-import { MODULES } from './constants';
+import { MODULES, MODULE_TIME_WINDOWS } from './constants';
 import type {
   MaintenanceActionMode,
   MaintenanceSelectionMap,
@@ -81,9 +81,32 @@ export const parseModule = (moduleValue: string | number | null | undefined): Ma
   return MODULES.includes(moduleId) ? moduleId : null;
 };
 
-export const buildEmptyDayStatus = (): Record<MaintenanceModule, SlotInfo> =>
+export const getModuleTimeLabel = (module: MaintenanceModule): string =>
+  MODULE_TIME_WINDOWS[module]?.label ?? '';
+
+export const getModuleStartDate = (dayKey: string, module: MaintenanceModule): Date | null => {
+  const window = MODULE_TIME_WINDOWS[module];
+  if (!window) return null;
+  const [hour, minute] = window.start.split(':').map(Number);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  const date = new Date(`${dayKey}T00:00:00`);
+  date.setHours(hour, minute, 0, 0);
+  return date;
+};
+
+export const isSlotInPast = (dayKey: string, module: MaintenanceModule): boolean => {
+  const slotDate = getModuleStartDate(dayKey, module);
+  if (!slotDate) return false;
+  return slotDate.getTime() < Date.now();
+};
+
+export const buildEmptyDayStatus = (dayKey: string): Record<MaintenanceModule, SlotInfo> =>
   MODULES.reduce<Record<MaintenanceModule, SlotInfo>>((acc, module) => {
-    acc[module] = { status: 'AVAILABLE' };
+    acc[module] = {
+      status: 'AVAILABLE',
+      timeLabel: getModuleTimeLabel(module),
+      isPast: isSlotInPast(dayKey, module),
+    };
     return acc;
   }, {} as Record<MaintenanceModule, SlotInfo>);
 
@@ -102,5 +125,7 @@ export const getSlotStatus = (value?: string | null): SlotStatus => {
 export const getActionMode = (status: RoomEditableStatus): MaintenanceActionMode =>
   status === 'MAINTENANCE' ? 'block' : 'free';
 
-export const isActionAllowed = (mode: MaintenanceActionMode, slotStatus: SlotStatus) =>
-  mode === 'block' ? slotStatus === 'AVAILABLE' : slotStatus === 'MAINTENANCE';
+export const isActionAllowed = (mode: MaintenanceActionMode, slotStatus: SlotStatus, isPast?: boolean) => {
+  if (isPast) return false;
+  return mode === 'block' ? slotStatus === 'AVAILABLE' : slotStatus === 'MAINTENANCE';
+};
