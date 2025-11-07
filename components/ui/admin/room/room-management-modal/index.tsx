@@ -328,7 +328,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
           setFreeSelectionMap({});
         } catch (error) {
           console.error('Error enabling schedules', error);
-          setSaveError('Ocurrio un error al liberar los modulos seleccionados.');
+          setSaveError('Ocurrió un error al liberar los modulos seleccionados.');
           return;
         } finally {
           setSaveLoading(false);
