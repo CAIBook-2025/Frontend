@@ -40,7 +40,7 @@ type ScheduleQuery = {
 };
 
 const DEFAULT_QUERY: Required<ScheduleQuery> = {
-  day: '2025-11-03',
+  day: new Date().toISOString().split('T')[0],
   page: 1,
   take: 20,
 };
