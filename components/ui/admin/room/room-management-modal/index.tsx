@@ -130,7 +130,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
       if (hasSelections) {
         if (!accessToken) {
-          setSaveError('No se pudo autenticar la sesion.');
+          setSaveError('No se pudo autenticar la sesión.');
           return;
         }
 
