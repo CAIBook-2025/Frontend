@@ -290,7 +290,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
       const hasSelections = Object.keys(freeSelection).some((day) => freeSelection[day]?.length);
       if (hasSelections) {
         if (!accessToken) {
-          setSaveError('No se pudo autenticar la sesion.');
+          setSaveError('No se pudo autenticar la sesión.');
           return;
         }
         if (!adminId) {
