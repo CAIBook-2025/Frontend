@@ -249,6 +249,6 @@ export const useActionMode = (selectedStatus: Room['status']) => {
         ? selectedStatus
         : 'AVAILABLE';
 
-    return getActionMode(editableStatus as unknown as any);
+    return getActionMode(editableStatus);
   }, [selectedStatus]);
 };
