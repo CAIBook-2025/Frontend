@@ -7,7 +7,7 @@ import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
 import { Building2, Wrench, Percent, CalendarCheck2 } from 'lucide-react';
 import { RoomsTable } from '@/components/ui/admin/room/rooms-table';
 import { RoomManagementModal, RoomEditableStatus } from '@/components/ui/admin/room/room-management-modal';
-import type { Room } from '@/types/room';
+import type { MaintenanceBlock, Room } from '@/types/room';
 import { LoadingRooms } from './loading-state';
 import { useRoomsData } from './useRoomsData';
 
@@ -58,21 +58,26 @@ export default function RoomPage() {
     setIsModalOpen(true);
   }, []);
 
-  const handleSaveRoom = useCallback((id: string, status: RoomEditableStatus, statusNote?: string) => {
-    setRooms((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status,
-              statusNote: status === 'AVAILABLE' ? undefined : statusNote,
-            }
-          : r
-      )
-    );
-    setIsModalOpen(false);
-    setSelectedRoom(null);
-  }, []);
+  const handleSaveRoom = useCallback(
+    (id: string, status: RoomEditableStatus, statusNote?: string, maintenanceBlocks?: MaintenanceBlock[]) => {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? {
+                ...r,
+                status,
+                statusNote: status === 'AVAILABLE' ? undefined : statusNote,
+                maintenanceBlocks:
+                  status === 'MAINTENANCE' && maintenanceBlocks?.length ? maintenanceBlocks : undefined,
+              }
+            : r
+        )
+      );
+      setIsModalOpen(false);
+      setSelectedRoom(null);
+    },
+    []
+  );
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);

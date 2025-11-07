@@ -1,30 +1,4 @@
-export type StudyRoom = {
-  id: number;
-  name: string;
-  location: string | null;
-  capacity: number | null;
-  equipment: unknown;
-};
-
-export type ScheduleUser = {
-  id?: number | string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  career?: string | null;
-};
-
-export type ScheduleItem = {
-  id: number;
-  sr_id?: number;
-  day: string;
-  module: string;
-  available: string;
-  studyRoom: StudyRoom | null;
-  createdAt?: string;
-  updatedAt?: string;
-  user?: ScheduleUser | null;
-};
+import { ScheduleItem } from '@/types/schedule';
 
 export type ScheduleResponse = {
   page: number;
@@ -68,7 +42,11 @@ export async function fetchSchedule(
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch schedule', response.status, response.statusText);
+      console.error('Failed to fetch schedule', {
+        status: response.status,
+        statusText: response.statusText,
+        params: Object.fromEntries(params.entries()),
+      });
       return null;
     }
 
@@ -81,7 +59,10 @@ export async function fetchSchedule(
 
     return data;
   } catch (error) {
-    console.error('Error fetching schedule:', error);
+    console.error('Error fetching schedule:', {
+      error,
+      params: Object.fromEntries(params.entries()),
+    });
     return null;
   }
 }
