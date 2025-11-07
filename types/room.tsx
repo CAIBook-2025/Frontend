@@ -3,9 +3,8 @@ export interface Room {
   name: string;
   features: string[];
   location: string;
-  floor: string;
   capacity: number;
-  status: 'Activa' | 'Mantenimiento' | 'Deshabilitada';
+  status: 'AVAILABLE' | 'MAINTENANCE' | 'UNAVAILABLE';
   statusNote?: string;
   reservationsToday: number;
   utilization: number;
