@@ -1,30 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Room } from '@/types/room';
-import { XIcon, CheckCircleIcon, SettingsIcon, AlertTriangleIcon } from 'lucide-react';
+import { XIcon, CheckCircleIcon, SettingsIcon } from 'lucide-react';
 
-type RoomStatus = 'Activa' | 'Mantenimiento' | 'Deshabilitada';
+export type RoomEditableStatus = Extract<Room['status'], 'AVAILABLE' | 'MAINTENANCE'>;
 
 interface RoomManagementModalProps {
   room: Room | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (id: string, status: RoomStatus, statusNote?: string) => void;
+  onSave: (id: string, status: RoomEditableStatus, statusNote?: string) => void;
 }
 
 export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManagementModalProps) {
-  const [selectedStatus, setSelectedStatus] = useState<RoomStatus>(room?.status || 'Activa');
+  const [selectedStatus, setSelectedStatus] = useState<RoomEditableStatus>(
+    room?.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE'
+  );
   const [statusNote, setStatusNote] = useState<string>(room?.statusNote || '');
+
+  useEffect(() => {
+    if (!room) return;
+    setSelectedStatus(room.status === 'MAINTENANCE' ? 'MAINTENANCE' : 'AVAILABLE');
+    setStatusNote(room.statusNote || '');
+  }, [room]);
 
   if (!isOpen || !room) return null;
 
   const handleSave = () => {
-    onSave(room.id, selectedStatus, selectedStatus !== 'Activa' ? statusNote : undefined);
+    onSave(room.id, selectedStatus, selectedStatus === 'MAINTENANCE' ? statusNote : undefined);
     onClose();
   };
 
-  const showReasonField = selectedStatus === 'Mantenimiento' || selectedStatus === 'Deshabilitada';
+  const showReasonField = selectedStatus === 'MAINTENANCE';
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -49,9 +57,9 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
               <input
                 type="radio"
                 name="roomStatus"
-                value="Activa"
-                checked={selectedStatus === 'Activa'}
-                onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
+                value="AVAILABLE"
+                checked={selectedStatus === 'AVAILABLE'}
+                onChange={(e) => setSelectedStatus(e.target.value as RoomEditableStatus)}
                 className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
               <div className="flex items-start gap-2 flex-1">
@@ -59,7 +67,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                   <CheckCircleIcon />
                 </div>
                 <span className="text-sm text-gray-900">
-                  Activa <span className="text-gray-600">(disponible para reservas)</span>
+                  Disponible <span className="text-gray-600">(apta para reservas)</span>
                 </span>
               </div>
             </label>
@@ -69,9 +77,9 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
               <input
                 type="radio"
                 name="roomStatus"
-                value="Mantenimiento"
-                checked={selectedStatus === 'Mantenimiento'}
-                onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
+                value="MAINTENANCE"
+                checked={selectedStatus === 'MAINTENANCE'}
+                onChange={(e) => setSelectedStatus(e.target.value as RoomEditableStatus)}
                 className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
               <div className="flex items-start gap-2 flex-1">
@@ -80,26 +88,6 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
                 </div>
                 <span className="text-sm text-gray-900">
                   En mantenimiento <span className="text-gray-600">(temporalmente cerrada)</span>
-                </span>
-              </div>
-            </label>
-
-            {/* Disabled Option */}
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <input
-                type="radio"
-                name="roomStatus"
-                value="Deshabilitada"
-                checked={selectedStatus === 'Deshabilitada'}
-                onChange={(e) => setSelectedStatus(e.target.value as RoomStatus)}
-                className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-              />
-              <div className="flex items-start gap-2 flex-1">
-                <div className="text-red-600 mt-0.5">
-                  <AlertTriangleIcon />
-                </div>
-                <span className="text-sm text-gray-900">
-                  Deshabilitada <span className="text-gray-600">(fuera de servicio)</span>
                 </span>
               </div>
             </label>
