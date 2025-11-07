@@ -257,7 +257,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
       const missingSchedule = slotsToDisable.find((slot) => !slot.scheduleId);
       if (missingSchedule) {
-        setSaveError('No se encontraron horarios asociados a algunos modulos seleccionados.');
+        setSaveError('No se encontraron horarios asociados a algunos módulos seleccionados.');
         return;
       }
 
