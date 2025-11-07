@@ -87,7 +87,7 @@ export default function RoomPage() {
         ) : (
           <>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <PageHeader title="Gestion de Salas" subtitle="Habilita, deshabilita o programa mantenimiento de salas" />
+              <PageHeader title="Gestión de Salas" subtitle="Habilita, deshabilita o programa mantenimiento de salas" />
             </div>
 
             <section>
