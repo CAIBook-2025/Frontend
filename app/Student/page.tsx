@@ -4,10 +4,9 @@
 import { useState } from 'react';
 import { PersonalView } from '@/components/dashboard/PersonalView';
 import { GroupsView } from '@/components/dashboard/GroupsView';
-import { useDbUser } from '../../contexts/AuthProvider';
+import { useUser } from '@auth0/nextjs-auth0';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 
 // --- Componente Skeleton para el Encabezado ---
 // Muestra una UI de carga mientras se obtienen los datos del usuario.
@@ -61,22 +60,19 @@ export default function StudentDashboardPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('personal');
   
   // 2. USAMOS el hook para obtener el usuario y el estado de carga
-  const { user, profile, loading } = useDbUser();
-
-  console.log("USUARIOOOOO", profile)
-  // console.log(user);
+  const { user, isLoading } = useUser();
 
   // 3. OBTENEMOS el nombre del usuario de forma segura
   // Si el usuario existe, usamos su nombre; si no, usamos un texto genérico.
-  const userName = user?.first_name || "Usuario";
+  const userName = user?.name || "Usuario";
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
       {/* 4. RENDERIZADO CONDICIONAL del encabezado */}
-      {loading ? (
+      {isLoading ? (
         // Si está cargando, muestra el skeleton
         <DashboardHeaderSkeleton />
-      ) : ( user &&
+      ) : (
         // Si ya cargó, muestra el encabezado real con el nombre del usuario
         <section className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -111,14 +107,10 @@ export default function StudentDashboardPage() {
       <div>
         {viewMode === 'personal' ? (
           <PersonalView
-            stats={{
-              reservasActivas: profile?.scheduleCount ?? 0,
-              strikes: profile?.strikesCount ?? 0,
-              userId: user?.id,
-            }}
+            stats={{ reservasActivas: 1, strikes: 1, userId: 123 }}
           />
         ) : (
-          <GroupsView userId={user?.id} />
+          <GroupsView userId={123} />
         )}
       </div>
 

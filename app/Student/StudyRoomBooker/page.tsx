@@ -9,8 +9,6 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Room, RoomCard } from '@/components/book-room/RoomCard';
 import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
-import { useSearchParams } from 'next/navigation';
-import { useUser } from '@auth0/nextjs-auth0';
 
 // --- SIMULACIÓN DE API (sin cambios) ---
 // const fakeApiFetchRooms = (): Promise<Room[]> => {
@@ -55,18 +53,12 @@ export default function BookRoomPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const searchParams = useSearchParams();
-  const userId = Number(searchParams.get('userId'));
-
-  const { user } = useUser();
-  console.log("USUARIO: ", user);
   // --- NUEVO ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     const loadRooms = async () => {
       setIsLoading(true);
-      console.log('🔄 fetching schedules for', selectedDate);
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
 
       const params = new URLSearchParams({
@@ -79,7 +71,6 @@ export default function BookRoomPage() {
         cache: 'no-store',
       });
 
-      console.log('EStá entrando aquí??');
 
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}`);
@@ -102,8 +93,6 @@ export default function BookRoomPage() {
         };
       });
 
-      console.log('📦 Schedules recibidos:', data.items);
-      console.log(roomsAdapted);
       setRooms(roomsAdapted);
       setIsLoading(false);
     };
@@ -156,7 +145,7 @@ export default function BookRoomPage() {
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
-              rooms.map((room) => <RoomCard key={room.id} room={room}  scheduleId={room.id} />)
+              rooms.map((room) => <RoomCard key={room.id} room={room} userId={10} scheduleId={room.id} />)
             ) : (
               <p>No hay salas disponibles.</p>
             )}
