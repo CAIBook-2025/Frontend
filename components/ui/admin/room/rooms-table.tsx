@@ -9,16 +9,14 @@ interface RoomsTableProps {
 
 export const RoomsTable = ({ rooms, onManage }: RoomsTableProps) => {
   const getStatusBadge = (status: Room['status'], statusNote?: string) => {
-    const statusStyles: Record<Room['status'], { label: string; className: string }> = {
-      AVAILABLE: { label: 'Disponible', className: 'bg-green-500 text-white' },
-      MAINTENANCE: { label: 'Mantenimiento', className: 'bg-yellow-500 text-white' },
-      UNAVAILABLE: { label: 'No disponible', className: 'bg-red-500 text-white' },
+    const statusStyles = {
+      Activa: 'bg-blue-500 text-white',
+      Mantenimiento: 'bg-yellow-500 text-white',
+      Deshabilitada: 'bg-red-500 text-white',
     };
     return (
       <div>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status].className}`}>
-          {statusStyles[status].label}
-        </span>
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[status]}`}>{status}</span>
         {statusNote && <p className="text-xs text-gray-500 mt-1">{statusNote}</p>}
       </div>
     );
@@ -66,6 +64,7 @@ export const RoomsTable = ({ rooms, onManage }: RoomsTableProps) => {
                 <td className="py-4 px-4">
                   <div>
                     <p className="text-sm text-gray-900">{room.location}</p>
+                    <p className="text-xs text-gray-500 mt-1">{room.floor}</p>
                   </div>
                 </td>
                 <td className="py-4 px-4 text-sm text-gray-700">{room.capacity} personas</td>
