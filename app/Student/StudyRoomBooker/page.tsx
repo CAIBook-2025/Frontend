@@ -66,7 +66,6 @@ export default function BookRoomPage() {
   useEffect(() => {
     const loadRooms = async () => {
       setIsLoading(true);
-      console.log('🔄 fetching schedules for', selectedDate);
       // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
 
       const params = new URLSearchParams({
@@ -79,7 +78,6 @@ export default function BookRoomPage() {
         cache: 'no-store',
       });
 
-      console.log('EStá entrando aquí??');
 
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}`);
@@ -102,8 +100,6 @@ export default function BookRoomPage() {
         };
       });
 
-      console.log('📦 Schedules recibidos:', data.items);
-      console.log(roomsAdapted);
       setRooms(roomsAdapted);
       setIsLoading(false);
     };

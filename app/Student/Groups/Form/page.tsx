@@ -29,10 +29,6 @@ export default function CreateGroupPage() {
     logo: null,
   });
 
-  useEffect(() => {
-    // Esto sí debería aparecer siempre en la consola del navegador
-    console.log('Form mounted. userId =', userId);
-  }, [userId]);
 
   const handleNext = () => {
     // TODO: Añadir validación antes de pasar al siguiente paso
@@ -97,13 +93,11 @@ export default function CreateGroupPage() {
       }
 
       const data = await res.json();
-      console.log('Creada:', data);
 
       alert('¡Solicitud de grupo enviada con éxito!');
       setFormData({ name: '', description: '', goal: '', logo: null });
       setStep(1);
     } catch (err: any) {
-      console.log(err);
       setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
     } finally {
       setSubmitting(false);
