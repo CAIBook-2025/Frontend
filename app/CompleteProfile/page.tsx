@@ -71,7 +71,7 @@ export default function RegisterPage() {
       });
       if (response.ok) {
         alert('¡Registro exitoso!');
-        window.location.href = '/ProfileSSR';
+        window.location.href = '/Profile';
       } else {
         console.error('Error en la respuesta del servidor:', response.statusText);
       }
