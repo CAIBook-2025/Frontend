@@ -156,7 +156,7 @@ export default function BookRoomPage() {
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
-              rooms.map((room) => <RoomCard key={room.id} room={room} userId={userId} scheduleId={room.id} />)
+              rooms.map((room) => <RoomCard key={room.id} room={room}  scheduleId={room.id} />)
             ) : (
               <p>No hay salas disponibles.</p>
             )}
