@@ -51,6 +51,10 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
       return;
     }
     try {
+      console.log("Reservando sala con los siguientes datos:");
+      console.log(`Schedule ID: ${scheduleId}`);
+      console.log(`User ID: ${userId}`);
+      console.log(`Access Token: ${accessToken}`);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
         method: 'PATCH',
         // ACTUALIZADO: Añadimos el token de autorización a los encabezados

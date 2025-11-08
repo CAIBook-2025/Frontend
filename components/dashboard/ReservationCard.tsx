@@ -1,10 +1,9 @@
 // app/components/dashboard/ReservationCard.tsx
 'use client';
 
-import { Calendar, Clock, MapPin, XCircle, Eye, QrCode, LogOut } from "lucide-react"; // NUEVO: Importamos LogOut
+import { Calendar, Clock, MapPin, XCircle, Eye, QrCode, LogOut } from "lucide-react";
 import Link from 'next/link';
 
-// ACTUALIZADO: Definimos los posibles estados de forma más estricta.
 type ReservationStatus = 'PENDING' | 'PRESENT' | 'CANCELED' | 'ABSENT' | string;
 
 export interface Reservation {
@@ -17,13 +16,11 @@ export interface Reservation {
   isFinished: boolean;
 }
 
-// ACTUALIZADO: Añadimos estilos para todos los estados relevantes.
 const statusStyles: { [key: string]: string } = {
-  PENDING: 'bg-yellow-100 text-yellow-800', // Pendiente
-  PRESENT: 'bg-green-100 text-green-800',   // Presente (check-in hecho)
-  CANCELED: 'bg-red-100 text-red-800',      // Cancelada
-  ABSENT: 'bg-slate-100 text-slate-800',     // Ausente (no hizo check-in)
-  // Añadimos un default por si llega un estado no esperado
+  PENDING: 'bg-yellow-100 text-yellow-800',
+  PRESENT: 'bg-green-100 text-green-800',
+  CANCELED: 'bg-red-100 text-red-800',
+  ABSENT: 'bg-slate-100 text-slate-800',
   default: 'bg-gray-100 text-gray-800',
 };
 
@@ -33,8 +30,7 @@ const statusText: { [key: string]: string } = {
   CANCELED: 'Cancelada',
   ABSENT: 'Ausente',
   default: 'Desconocido',
-}
-
+};
 
 type ReservationCardProps = {
   reservation: Reservation;
@@ -45,13 +41,15 @@ type ReservationCardProps = {
 export const ReservationCard = ({ reservation, onCancelClick, onDetailsClick }: ReservationCardProps) => {
   const { id, roomName, location, day, module, status } = reservation;
 
-  const formattedDate = new Date(day).toLocaleDateString('es-CL', {
+  const formattedDate = new Date(day).toLocaleString('es-CL', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  // Determinar el estilo y texto a mostrar. Si el status no se encuentra, usa el default.
   const currentStatusStyle = statusStyles[status] || statusStyles.default;
   const currentStatusText = statusText[status] || statusText.default;
+
+  // Preparamos el objeto de la reserva para pasarlo como parámetro en la URL.
+  const reservationQueryParam = encodeURIComponent(JSON.stringify(reservation));
 
   return (
     <div className={`flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 ${status === 'CANCELED' ? 'opacity-70 bg-slate-50' : 'hover:shadow-md'}`}>
@@ -75,11 +73,10 @@ export const ReservationCard = ({ reservation, onCancelClick, onDetailsClick }: 
         </div>
       </div>
       
-      {/* --- SECCIÓN DE ACCIONES CON LÓGICA EXTENDIDA --- */}
       <div className="mt-5 pt-4 border-t border-slate-100">
         {status === 'PENDING' && (
           <div className="flex flex-col gap-3">
-            <Link href={`/Reservations/Check-in/${id}`} passHref>
+            <Link href={`/Reservations/Check-in/${id}?data=${reservationQueryParam}`} passHref>
               <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700">
                 <QrCode size={18} />
                 Hacer Check-In
@@ -94,7 +91,8 @@ export const ReservationCard = ({ reservation, onCancelClick, onDetailsClick }: 
         
         {status === 'PRESENT' && (
           <div className="flex flex-col gap-3">
-            <Link href={`/Reservations/Check-out/${id}`} passHref>
+            {/* ACTUALIZADO: El href ahora incluye el parámetro 'data' con la reserva codificada */}
+            <Link href={`/Reservations/Check-out/${id}?data=${reservationQueryParam}`} passHref>
               <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-amber-600">
                 <LogOut size={18} />
                 Hacer Check-Out
