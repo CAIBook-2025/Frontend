@@ -24,10 +24,12 @@ const mockReservations: Reservation[] = [
 
 // 3. Creamos la función que simula la llamada a la API.
 export const getReservations = (): Promise<Reservation[]> => {
+  console.log('Simulando llamada a la API para obtener reservas...');
   
   return new Promise((resolve) => {
     // Simulamos un retraso de red de 1.5 segundos (1500 ms)
     setTimeout(() => {
+      console.log('Datos de reservas recibidos.');
       resolve(mockReservations);
     }, 1500);
   });

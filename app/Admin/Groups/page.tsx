@@ -176,16 +176,19 @@ export default function AdminGroupsPage() {
   };
 
   const handleApprove = (id: string) => {
+    console.log('Aprobar solicitud:', id);
     setIsModalOpen(false);
     setSelectedRequest(null);
   };
 
   const handleReject = (id: string) => {
+    console.log('Rechazar solicitud:', id);
     setIsModalOpen(false);
     setSelectedRequest(null);
   };
 
   const handleManage = (id: string) => {
+    console.log('Gestionar grupo:', id);
   };
 
   const handleCloseModal = () => {
