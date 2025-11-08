@@ -1,12 +1,14 @@
+// components/book-room/RoomCard.tsx
 'use client';
+import { useState, useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0';
 
-import { useCallback, useEffect, useState } from 'react';
-import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
 import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
+import { getAccessToken } from '@auth0/nextjs-auth0';
 
+// --- Tipos (sin cambios) ---
 type RoomStatus = 'Disponible' | 'Ocupada';
 type Equipment = 'Pizarra' | 'Proyector' | 'WiFi' | 'Enchufes' | 'Mesa grande';
-
 export interface Room {
   id: number;
   name: string;
@@ -17,82 +19,69 @@ export interface Room {
   equipment: Equipment[];
   module: number;
 }
+type RoomCardProps = {
+  room: Room;
+  scheduleId: number;
+  userId?: number | null;
+};
 
-export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number }) => {
+export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
   const { user } = useUser();
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-
   const isAvailable = room.status === 'Disponible';
-
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchAccessToken = async () => {
-      if (!user) {
-        if (isMounted) setAccessToken(null);
-        return;
+    async function fetchAccessToken() {
+      if (user) {
+        try {
+          const accessToken = await getAccessToken();
+          setAccessToken(accessToken);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
+        }
       }
-
-      try {
-        const token = await getAccessToken();
-        if (isMounted) setAccessToken(token);
-      } catch (error) {
-        console.error('Error fetching access token:', error);
-        if (isMounted) setAccessToken(null);
-      }
-    };
-
+    }
     fetchAccessToken();
-
-    return () => {
-      isMounted = false;
-    };
   }, [user]);
-
-  const handleReservar = useCallback(async () => {
-    if (!user || !accessToken) {
-      alert('Debes iniciar sesión para poder realizar una reserva.');
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  // --- FUNCIÓN handleReservar COMPLETAMENTE ACTUALIZADA ---
+  const handleReservar = async () => {
+    if (!user || !accessToken || !userId) {
+      alert('Debes iniciar sesión y completar tu perfil para poder realizar una reserva.');
       return;
     }
-
-    const userId = user.sub ?? user.email;
-
-    if (!userId) {
-      alert('No se pudo obtener el identificador del usuario.');
-      return;
-    }
-
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
         method: 'PATCH',
-        headers: {
+        // ACTUALIZADO: Añadimos el token de autorización a los encabezados
+        headers: { 
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${accessToken}`
         },
+        // Usamos el id del perfil del backend para la reserva
         body: JSON.stringify({ id: scheduleId, userId }),
       });
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Error al realizar la reserva');
       }
-
+      console.log("Reserva exitosa!");
       setShowSuccessModal(true);
+      
     } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
       alert(`Error al reservar: ${errorMessage}`);
     }
-  }, [accessToken, scheduleId, user]);
-
+  };
+  
   const handleCloseModal = () => {
     setShowSuccessModal(false);
     window.location.reload();
   };
-
   return (
     <>
+      {/* --- El resto del JSX no necesita cambios --- */}
       <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
         <div>
           <div className="flex items-start justify-between">
@@ -106,7 +95,6 @@ export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number 
           <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
             <MapPin size={14} /> {room.location}
           </p>
-
           <div className="my-4 flex items-center gap-6 border-y border-slate-100 py-3 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <Users size={16} /> {room.capacity} personas
@@ -115,7 +103,6 @@ export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number 
               <Clock size={16} /> Módulo: {room.module}
             </div>
           </div>
-
           <div>
             <h4 className="mb-2 text-sm font-medium text-slate-600">Equipamiento:</h4>
             <div className="flex flex-wrap gap-2">
@@ -131,7 +118,6 @@ export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number 
             </div>
           </div>
         </div>
-
         <button
           disabled={!isAvailable}
           className={`
@@ -147,7 +133,6 @@ export const RoomCard = ({ room, scheduleId }: { room: Room; scheduleId: number 
           {isAvailable ? 'Reservar' : 'No Disponible'}
         </button>
       </div>
-
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="m-4 max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
