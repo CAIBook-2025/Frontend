@@ -53,11 +53,11 @@ export const useAdminSession = (isOpen: boolean) => {
         const profile = await fetchUserProfile(resolvedToken);
         if (cancelled) return;
 
-        if (!profile) {
+        if (!profile?.user) {
           setAdminId(null);
           setSessionError('No se pudo identificar al administrador.');
         } else {
-          setAdminId(profile.id);
+          setAdminId(profile.user.id);
           setSessionError(null);
         }
       } catch (error) {

@@ -53,8 +53,9 @@ export default function ProfilePage() {
     async function fetchUserData() {
       if (accessToken) {
         try {
-          const profile = await fetchUserProfile(accessToken);
-          if (profile) {
+          const profileResponse = await fetchUserProfile(accessToken);
+          if (profileResponse?.user) {
+            const profile = profileResponse.user;
             setUserData(profile);
             setFormData({
               first_name: profile.first_name || '',

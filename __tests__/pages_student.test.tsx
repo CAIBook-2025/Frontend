@@ -101,19 +101,31 @@ const mockProfile = {
 };
 
 const mockUserProfile = {
-  id: 1,
-  email: 'user@uc.cl',
-  first_name: 'Juan',
-  last_name: 'Perez',
-  role: 'STUDENT',
-  is_representative: false,
-  is_moderator: false,
-  createdAt: '2025-01-01T00:00:00.000Z',
-  updatedAt: '2025-01-01T00:00:00.000Z',
-  auth0_id: 'auth0|123',
-  career: 'Ingenieria',
-  phone: '123456789',
-  student_number: '20201234',
+  user: {
+    id: 1,
+    email: 'user@uc.cl',
+    first_name: 'Juan',
+    last_name: 'Perez',
+    role: 'STUDENT',
+    is_representative: false,
+    is_moderator: false,
+    is_deleted: false,
+    createdAt: '2025-01-01T00:00:00.000Z',
+    updatedAt: '2025-01-01T00:00:00.000Z',
+    deletedAt: null,
+    auth0_id: 'auth0|123',
+    career: 'Ingenieria',
+    phone: '123456789',
+    student_number: '20201234',
+  },
+  schedule: [],
+  scheduleCount: 0,
+  strikes: [],
+  strikesCount: 0,
+  upcomingEvents: [],
+  upcomingEventsCount: 0,
+  attendances: [],
+  attendancesCount: 0,
 };
 
 beforeAll(() => {
@@ -222,7 +234,7 @@ describe('StudyRoomBookerPage', () => {
 
     expect(roomCardMock).toHaveBeenCalled();
     const emittedUserIds = roomCardMock.mock.calls.map((call) => call[0].userId);
-    expect(emittedUserIds).toContain(mockUserProfile.id);
+    expect(emittedUserIds).toContain(mockUserProfile.user.id);
     expect(screen.getAllByTestId('room-card').length).toBeGreaterThan(0);
   });
 });

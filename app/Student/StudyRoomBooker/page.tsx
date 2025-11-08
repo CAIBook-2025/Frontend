@@ -10,7 +10,7 @@ import { Room, RoomCard } from '@/components/book-room/RoomCard';
 import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
-import { fetchUserProfile, UserProfile } from '@/lib/user/fetchUserProfile';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 function normalizeEquipment(equ: any): string[] {
   try {
@@ -36,7 +36,7 @@ export default function BookRoomPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
 
   const { user } = useUser();
   console.log("USUARIO: ", user);
@@ -179,7 +179,7 @@ export default function BookRoomPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
               rooms.map((room) => (
-                <RoomCard key={room.id} room={room} scheduleId={room.id} userId={userProfile?.id} />
+                <RoomCard key={room.id} room={room} scheduleId={room.id} userId={userProfile?.user?.id} />
               ))
             ) : (
               <p>No hay salas disponibles.</p>
