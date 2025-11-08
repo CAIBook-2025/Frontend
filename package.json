@@ -11,7 +11,9 @@
     "format:check": "prettier --check .",
     "test": "jest --ci --runInBand",
     "tests": "jest --watch",
-    "tests:watch": "jest --watch"
+    "tests:watch": "jest --watch",
+    "cy:run": "cross-env APP_BASE_URL=http://localhost:3000 start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress run\"",
+    "cy:open": "cross-env APP_BASE_URL=http://localhost:3000 start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress open\""
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.10.0",
@@ -37,6 +39,8 @@
     "@types/react-dom": "^19.2.1",
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
+    "cross-env": "^10.1.0",
+    "cypress": "^15.6.0",
     "eslint": "^9.37.0",
     "eslint-config-next": "15.5.3",
     "eslint-config-prettier": "^10.1.8",
@@ -46,6 +50,7 @@
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "prettier": "^3.6.2",
+    "start-server-and-test": "^2.1.2",
     "tailwindcss": "^4.1.13",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",

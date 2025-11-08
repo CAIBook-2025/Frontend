@@ -1,0 +1,268 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "cristobaldonosomaass@uc.cl",
+      "first_name": "Cristóbal",
+      "last_name": "Donoso",
+      "role": "ADMIN",
+      "is_representative": false,
+      "is_moderator": false,
+      "is_deleted": false,
+      "createdAt": "2025-11-04T14:20:06.545Z",
+      "updatedAt": "2025-11-04T14:36:35.747Z",
+      "deletedAt": "2025-11-07T01:14:32.342Z",
+      "auth0_id": "google-oauth2|102637330228158761140",
+      "career": "Ingeniería de Software",
+      "phone": "+56952277719",
+      "student_number": "21637180"
+    },
+    {
+      "id": 2,
+      "email": "rep@caibook.test",
+      "first_name": "Leo",
+      "last_name": "Campos",
+      "role": "REPRESENTATIVE",
+      "is_representative": true,
+      "is_moderator": false,
+      "is_deleted": false,
+      "createdAt": "2024-02-12T14:05:00.000Z",
+      "updatedAt": "2024-08-01T12:10:00.000Z",
+      "deletedAt": "2024-02-12T14:05:00.000Z",
+      "auth0_id": "auth0|rep-001",
+      "career": "Industrial Design",
+      "phone": "+1-555-0200",
+      "student_number": "R2012"
+    },
+    {
+      "id": 3,
+      "email": "student@caibook.test",
+      "first_name": "Nia",
+      "last_name": "Villalobos",
+      "role": "STUDENT",
+      "is_representative": false,
+      "is_moderator": false,
+      "is_deleted": false,
+      "createdAt": "2024-03-18T09:15:00.000Z",
+      "updatedAt": "2024-10-01T07:50:00.000Z",
+      "deletedAt": "2024-03-18T09:15:00.000Z",
+      "auth0_id": "auth0|student-001",
+      "career": "Architecture",
+      "phone": "+1-555-0300",
+      "student_number": "S3018"
+    },
+    {
+      "id": 4,
+      "email": "moderator@caibook.test",
+      "first_name": "Iris",
+      "last_name": "Montiel",
+      "role": "STUDENT",
+      "is_representative": false,
+      "is_moderator": true,
+      "is_deleted": false,
+      "createdAt": "2024-03-20T11:25:00.000Z",
+      "updatedAt": "2024-09-17T16:01:00.000Z",
+      "deletedAt": "2024-03-20T11:25:00.000Z",
+      "auth0_id": "auth0|student-002",
+      "career": "Software Engineering",
+      "phone": "+1-555-0400",
+      "student_number": "S3020"
+    }
+  ],
+  "groupRequests": [
+    {
+      "id": 1,
+      "name": "CAI Robotics",
+      "goal": "Promote robotics competitions",
+      "description": "Focus on VEX challenges",
+      "logo": "/logos/robotics.png",
+      "status": "CONFIRMED",
+      "createdAt": "2024-03-01T10:00:00.000Z",
+      "updatedAt": "2024-05-02T10:00:00.000Z",
+      "user_id": 2
+    },
+    {
+      "id": 2,
+      "name": "Eco Creators",
+      "goal": "Sustainability workshops",
+      "description": "Pending review",
+      "logo": null,
+      "status": "PENDING",
+      "createdAt": "2024-09-12T10:00:00.000Z",
+      "updatedAt": "2024-09-12T10:00:00.000Z",
+      "user_id": 3
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "reputation": 4.75,
+      "repre_id": 2,
+      "group_request_id": 1,
+      "moderators_ids": [4],
+      "createdAt": "2024-05-03T12:20:00.000Z",
+      "updatedAt": "2024-10-10T18:30:00.000Z"
+    }
+  ],
+  "publicSpaces": [
+    {
+      "id": 1,
+      "name": "Central Auditorium",
+      "capacity": 120,
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-08-15T08:00:00.000Z",
+      "available": "AVAILABLE",
+      "location": "Building A"
+    },
+    {
+      "id": 2,
+      "name": "North Patio",
+      "capacity": 60,
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-09-01T08:00:00.000Z",
+      "available": "MAINTENANCE",
+      "location": "Building C"
+    }
+  ],
+  "eventRequests": [
+    {
+      "id": 1,
+      "group_id": 1,
+      "public_space_id": 1,
+      "name": "Robotics Bootcamp",
+      "goal": "Prepare for nationals",
+      "description": "Two-day intensive training",
+      "status": "CONFIRMED",
+      "n_attendees": 45,
+      "createdAt": "2024-05-05T09:00:00.000Z",
+      "updatedAt": "2024-08-18T12:30:00.000Z",
+      "day": "2024-11-20T00:00:00.000Z",
+      "module": 2
+    }
+  ],
+  "eventsScheduling": [
+    {
+      "id": 1,
+      "event_request_id": 1,
+      "createdAt": "2024-08-18T12:30:00.000Z",
+      "updatedAt": "2024-08-18T12:30:00.000Z",
+      "end_time": "2024-11-20T18:00:00.000Z",
+      "start_time": "2024-11-20T14:00:00.000Z"
+    }
+  ],
+  "attendance": [
+    {
+      "id": 1,
+      "event_id": 1,
+      "student_id": 3,
+      "status": "PRESENT",
+      "rating": 4.5,
+      "feedback": "Great pacing and content",
+      "createdAt": "2024-11-20T18:30:00.000Z",
+      "updatedAt": "2024-11-20T18:30:00.000Z"
+    }
+  ],
+  "studyRooms": [
+    {
+      "id": 1,
+      "name": "SR-101",
+      "capacity": 10,
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-08-15T08:00:00.000Z",
+      "equipment": ["Display", "Whiteboard"],
+      "location": "Library 1F"
+    },
+    {
+      "id": 2,
+      "name": "SR-204",
+      "capacity": 6,
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-08-15T08:00:00.000Z",
+      "equipment": ["Conference Phone"],
+      "location": "Library 2F"
+    },
+    {
+      "id": 3,
+      "name": "Innovation Hub 3D",
+      "capacity": 12,
+      "createdAt": "2024-01-12T10:00:00.000Z",
+      "updatedAt": "2024-09-10T10:00:00.000Z",
+      "equipment": {
+        "primary": "3D Printer",
+        "secondary": "VR Kit"
+      },
+      "location": "Engineering Center"
+    },
+    {
+      "id": 4,
+      "name": "SR-410 Quiet Lab",
+      "capacity": 4,
+      "createdAt": "2024-01-15T09:30:00.000Z",
+      "updatedAt": "2024-10-01T09:30:00.000Z",
+      "equipment": "Soundproofing Panels",
+      "location": "Library 4F"
+    }
+  ],
+  "srScheduling": [
+    {
+      "id": 1,
+      "available": "AVAILABLE",
+      "status": "PRESENT",
+      "is_finished": false,
+      "day": "2024-11-22T00:00:00.000Z",
+      "module": 4,
+      "sr_id": 1,
+      "user_id": 3,
+      "createdAt": "2024-11-10T12:00:00.000Z",
+      "updatedAt": "2024-11-10T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "available": "AVAILABLE",
+      "status": "PENDING",
+      "is_finished": false,
+      "day": "2024-11-25T00:00:00.000Z",
+      "module": 2,
+      "sr_id": 2,
+      "user_id": null,
+      "createdAt": "2024-11-11T12:00:00.000Z",
+      "updatedAt": "2024-11-11T12:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "available": "MAINTENANCE",
+      "status": "PENDING",
+      "is_finished": false,
+      "day": "2024-11-26T00:00:00.000Z",
+      "module": 5,
+      "sr_id": 3,
+      "user_id": 2,
+      "createdAt": "2024-11-12T15:00:00.000Z",
+      "updatedAt": "2024-11-12T15:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "available": "UNAVAILABLE",
+      "status": "PRESENT",
+      "is_finished": true,
+      "day": "2024-11-27T00:00:00.000Z",
+      "module": 1,
+      "sr_id": 4,
+      "user_id": 4,
+      "createdAt": "2024-11-13T08:00:00.000Z",
+      "updatedAt": "2024-11-13T08:00:00.000Z"
+    }
+  ],
+  "strikes": [
+    {
+      "id": 1,
+      "student_id": 3,
+      "description": "Missed scheduled attendance without notice",
+      "date": "2024-06-10T00:00:00.000Z",
+      "admin_id": 1,
+      "createdAt": "2024-06-10T09:00:00.000Z",
+      "updatedAt": "2024-06-10T09:00:00.000Z",
+      "type": "NO_SHOW"
+    }
+  ]
+}
