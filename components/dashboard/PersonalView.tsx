@@ -8,7 +8,7 @@ type Stats = {
   reservasActivas: number;
   // eventosProximos: number;
   strikes: number;
-  userId: number;
+  userId?: number;
 };
 
 // --- Componente para Tarjetas de Acción Principal ---

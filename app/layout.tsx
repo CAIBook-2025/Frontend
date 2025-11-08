@@ -5,6 +5,7 @@ import { School } from 'lucide-react';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { auth0 } from '@/lib/auth0';
+import { UserProvider } from '@/contexts/AuthProvider';
 import { isAdmin } from '@/lib/user/isAdmin';
 
 const inter = Inter({ subsets: ['latin'] });
