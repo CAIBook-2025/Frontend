@@ -14,6 +14,7 @@ export interface Reservation {
   day: string;
   module: number;
   status: ReservationStatus;
+  isFinished: boolean;
 }
 
 // ACTUALIZADO: Añadimos estilos para todos los estados relevantes.
