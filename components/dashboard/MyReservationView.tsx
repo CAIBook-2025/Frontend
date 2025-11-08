@@ -80,7 +80,7 @@ export const MyReservationsView = () => {
     setIsCancelling(true);
     try {
       // Usamos los datos verificados (user.id y accessToken)
-      await cancelReservation(reservationToCancel.id, user.id, accessToken);
+      await cancelReservation(reservationToCancel.id, user.id);
       
       // Actualización optimista: Al cancelar, la reserva pasa a ser histórica.
       setReservations(current => current.map(res => 
