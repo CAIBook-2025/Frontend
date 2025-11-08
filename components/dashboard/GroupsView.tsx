@@ -50,7 +50,7 @@ interface MyGroupRole {
 }
 
 type GroupsViewProps = {
-  userId?: number;
+  userId: number;
 };
 
 export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
