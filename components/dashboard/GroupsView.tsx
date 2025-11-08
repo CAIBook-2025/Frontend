@@ -135,7 +135,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         // Determinar el rol del usuario en cada grupo
         const groupsWithRoles: MyGroupRole[] = data.map((group) => {
           const isRepresentative = group.repre_id === userId;
-          const isModerator = group.moderators_ids.includes(userId);
+          const isModerator = group.moderators_ids.includes(userId!);
 
           return {
             group,
