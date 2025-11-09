@@ -7,23 +7,29 @@ type AdminLayoutProps = {
   children: ReactNode;
 };
 
+const isMockMode = process.env.NEXT_PUBLIC_API_MODE === 'mock';
+
 export default async function AdminLayout({ children }: AdminLayoutProps) {
+  if (isMockMode) {
+    return <>{children}</>;
+  }
+
   const session = await auth0.getSession();
 
   if (!session) {
-    redirect('/');
+    redirect('/Student');
   }
 
   const accessToken = session.tokenSet?.accessToken ?? null;
 
   if (!accessToken) {
-    redirect('/');
+    redirect('/Student');
   }
 
   const hasAdminAccess = await isAdmin(accessToken);
 
   if (!hasAdminAccess) {
-    redirect('/');
+    redirect('/Student');
   }
 
   return <>{children}</>;

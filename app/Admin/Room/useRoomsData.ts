@@ -8,6 +8,18 @@ import type { Room } from '@/types/room';
 import { DEFAULT_DAY } from './constants';
 import { adaptStudyRoomsToView, mergeRoomsWithScheduleData, resolveAccessToken } from './room-utils';
 
+type Auth0User = ReturnType<typeof useUser>['user'];
+
+const isMockMode = process.env.NEXT_PUBLIC_API_MODE === 'mock';
+const MOCK_AUTH_USER: Auth0User = isMockMode
+  ? ({
+      sub: 'auth0|local-mock-user',
+      email: 'admin@example.com',
+      name: 'Mock Admin',
+    } as Auth0User)
+  : undefined;
+const MOCK_ACCESS_TOKEN = 'mock-admin-access-token';
+
 export const useRoomsData = () => {
   const { user, isLoading: isUserLoading } = useUser();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -15,13 +27,21 @@ export const useRoomsData = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadRooms = useCallback(async () => {
-    if (!user) return;
+    const activeUser = user ?? MOCK_AUTH_USER;
+    if (!activeUser) return;
+
     setIsLoadingRooms(true);
     setLoadError(null);
 
     try {
-      const tokenResponse = await getAccessToken();
-      const accessToken = resolveAccessToken(tokenResponse);
+      let accessToken: string | null = null;
+
+      if (isMockMode) {
+        accessToken = MOCK_ACCESS_TOKEN;
+      } else {
+        const tokenResponse = await getAccessToken();
+        accessToken = resolveAccessToken(tokenResponse);
+      }
 
       if (!accessToken) {
         throw new Error('Access token not available');
@@ -58,7 +78,9 @@ export const useRoomsData = () => {
   useEffect(() => {
     if (isUserLoading) return;
 
-    if (!user) {
+    const activeUser = user ?? MOCK_AUTH_USER;
+
+    if (!activeUser) {
       setRooms([]);
       setLoadError('Debes iniciar sesión para ver las salas.');
       setIsLoadingRooms(false);
@@ -76,4 +98,3 @@ export const useRoomsData = () => {
     refresh: loadRooms,
   };
 };
-

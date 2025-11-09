@@ -100,7 +100,6 @@ export const UserView = ({ groupId }: UserViewProps) => {
 
       setIsLoading(true);
       try {
-        console.log('Fetching group details for groupId:', groupId);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
           method: 'GET',
           headers: {

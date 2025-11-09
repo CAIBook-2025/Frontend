@@ -24,12 +24,10 @@ const mockReservations: Reservation[] = [
 
 // 3. Creamos la función que simula la llamada a la API.
 export const getReservations = (): Promise<Reservation[]> => {
-  console.log('Simulando llamada a la API para obtener reservas...');
   
   return new Promise((resolve) => {
     // Simulamos un retraso de red de 1.5 segundos (1500 ms)
     setTimeout(() => {
-      console.log('Datos de reservas recibidos.');
       resolve(mockReservations);
     }, 1500);
   });
@@ -49,14 +47,10 @@ export const cancelReservation = async (reservationId: number, userId: number): 
   if (!userId) {
     throw new Error('El ID del usuario es requerido para cancelar la reserva.');
   }
-  console.log(`Preparando para cancelar la reserva con ID: ${reservationId} para el usuario con ID: ${userId}`);
 
   // Construimos la URL dinámicamente usando la variable de entorno y el ID de la reserva
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/cancel`;
 
-  
-  console.log(`Intentando cancelar reserva en: ${apiUrl}`);
-  console.log(`Enviando body: { userId: ${userId} }`);
 
   try {
     const res = await fetch(apiUrl, {
@@ -74,7 +68,6 @@ export const cancelReservation = async (reservationId: number, userId: number): 
 
     // Si la respuesta es exitosa, la procesamos
     const responseData = await res.json();
-    console.log('Respuesta de la API:', responseData);
 
     return {
       success: true,
@@ -114,9 +107,6 @@ export const confirmCheckIn = async (
   }
 
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkin`;
-  
-  console.log(`Intentando hacer check-in en: ${apiUrl}`);
-  console.log(`Enviando body: { userId: ${userId}, scheduleId: ${scheduleId} }`);
 
   try {
     const res = await fetch(apiUrl, {
@@ -135,7 +125,6 @@ export const confirmCheckIn = async (
     }
 
     const responseData = await res.json();
-    console.log('Respuesta de la API de check-in:', responseData);
 
     return {
       success: true,
@@ -172,9 +161,6 @@ export const confirmCheckOut = async (
 
   // Usamos el endpoint que especificaste
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkout`;
-  
-  console.log(`Intentando hacer check-out en: ${apiUrl}`);
-  console.log(`Enviando body: { userId: ${userId}, scheduleId: ${scheduleId} }`);
 
   try {
     const res = await fetch(apiUrl, {
@@ -192,7 +178,6 @@ export const confirmCheckOut = async (
     }
 
     const responseData = await res.json();
-    console.log('Respuesta de la API de check-out:', responseData);
 
     return {
       success: true,
