@@ -99,7 +99,6 @@ export default function BookRoomPage() {
         cache: 'no-store',
       });
 
-
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}`);
       }

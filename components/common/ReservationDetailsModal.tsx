@@ -70,10 +70,16 @@ export const ReservationDetailsModal = ({ isOpen, onClose, reservation }: Detail
               </span>
             </div>
             <div className="space-y-3 text-slate-600">
-              <p className="flex items-center gap-2"><MapPin size={16} className="text-blue-500" /> {reservation.location}</p>
+              <p className="flex items-center gap-2">
+                <MapPin size={16} className="text-blue-500" /> {reservation.location}
+              </p>
               {/* ACTUALIZADO: Mostramos la fecha formateada y el módulo */}
-              <p className="flex items-center gap-2"><Calendar size={16} className="text-blue-500" /> {formattedDate}</p>
-              <p className="flex items-center gap-2"><Clock size={16} className="text-blue-500" /> Módulo: {reservation.module}</p>
+              <p className="flex items-center gap-2">
+                <Calendar size={16} className="text-blue-500" /> {formattedDate}
+              </p>
+              <p className="flex items-center gap-2">
+                <Clock size={16} className="text-blue-500" /> Módulo: {reservation.module}
+              </p>
             </div>
           </div>
 
@@ -81,11 +87,28 @@ export const ReservationDetailsModal = ({ isOpen, onClose, reservation }: Detail
           <div className="p-6">
             <h4 className="text-lg font-bold text-gray-800 mb-4">Instrucciones y Buenas Prácticas</h4>
             <ol className="list-decimal list-inside space-y-3 text-slate-600">
-              <li><strong>Check-In Obligatorio:</strong> Recuerda hacer check-in escaneando el QR de la sala. Tienes un margen de <strong>15 minutos</strong> desde el inicio de tu reserva para hacerlo. De lo contrario, la reserva se cancelará automáticamente.</li>
-              <li><strong>Mantén la Limpieza:</strong> Deja la sala tal como la encontraste. Bota tu basura en los contenedores designados y borra la pizarra si la utilizaste.</li>
-              <li><strong>Respeta el Horario:</strong> Desocupa la sala puntualmente al finalizar tu bloque horario para permitir que el siguiente grupo pueda ingresar a tiempo.</li>
-              <li><strong>Reporta Problemas:</strong> Si encuentras algún problema con el equipo (proyector, pizarra, etc.) o con la limpieza de la sala, por favor repórtalo a través de la sección de ayuda.</li>
-              <li><strong>Uso Adecuado:</strong> Las salas de estudio son para fines académicos. No está permitido consumir alimentos que generen olores fuertes ni realizar actividades ruidosas que puedan molestar a otros.</li>
+              <li>
+                <strong>Check-In Obligatorio:</strong> Recuerda hacer check-in escaneando el QR de la sala. Tienes un
+                margen de <strong>15 minutos</strong> desde el inicio de tu reserva para hacerlo. De lo contrario, la
+                reserva se cancelará automáticamente.
+              </li>
+              <li>
+                <strong>Mantén la Limpieza:</strong> Deja la sala tal como la encontraste. Bota tu basura en los
+                contenedores designados y borra la pizarra si la utilizaste.
+              </li>
+              <li>
+                <strong>Respeta el Horario:</strong> Desocupa la sala puntualmente al finalizar tu bloque horario para
+                permitir que el siguiente grupo pueda ingresar a tiempo.
+              </li>
+              <li>
+                <strong>Reporta Problemas:</strong> Si encuentras algún problema con el equipo (proyector, pizarra,
+                etc.) o con la limpieza de la sala, por favor repórtalo a través de la sección de ayuda.
+              </li>
+              <li>
+                <strong>Uso Adecuado:</strong> Las salas de estudio son para fines académicos. No está permitido
+                consumir alimentos que generen olores fuertes ni realizar actividades ruidosas que puedan molestar a
+                otros.
+              </li>
             </ol>
           </div>
         </div>

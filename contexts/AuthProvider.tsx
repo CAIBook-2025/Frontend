@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useUser } from '@auth0/nextjs-auth0';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 
@@ -48,7 +48,6 @@ export function UserProvider({
   initialProfile?: UserProfile | null;
   children: React.ReactNode;
 }) {
-
   const { user: auth0User, isLoading: auth0Loading } = useUser();
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -75,39 +74,39 @@ export function UserProvider({
     fetchToken();
   }, [auth0User, auth0Loading]);
 
-  const fetchProfile = async (token?: string) => {
-    const t = token ?? accessToken;
-    if (!t) {
-      setProfile(null);
-      return;
-    }
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`,
-        {
+  const fetchProfile = useCallback(
+    async (token?: string) => {
+      const t = token ?? accessToken;
+      if (!t) {
+        setProfile(null);
+        return;
+      }
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${t}`,
           },
+        });
+        if (res.ok) {
+          const data: UserProfile = await res.json();
+          setProfile(data);
+        } else if (res.status === 401) {
+          // token inválido/expirado → limpiar y forzar nuevo token en el próximo ciclo
+          console.warn('401 desde /users/profile, limpiando token.');
+          setAccessToken(null);
+          setProfile(null);
+        } else {
+          console.error('Error de backend:', res.status, res.statusText);
+          setProfile(null);
         }
-      );
-      if (res.ok) {
-        const data: UserProfile = await res.json();
-        setProfile(data);
-      } else if (res.status === 401) {
-        // token inválido/expirado → limpiar y forzar nuevo token en el próximo ciclo
-        console.warn('401 desde /users/profile, limpiando token.');
-        setAccessToken(null);
-        setProfile(null);
-      } else {
-        console.error('Error de backend:', res.status, res.statusText);
+      } catch (e) {
+        console.error('Error fetch /users/profile:', e);
         setProfile(null);
       }
-    } catch (e) {
-      console.error('Error fetch /users/profile:', e);
-      setProfile(null);
-    }
-  };
+    },
+    [accessToken]
+  );
 
   useEffect(() => {
     const go = async () => {
@@ -122,25 +121,27 @@ export function UserProvider({
       setLoading(false);
     };
     go();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, auth0Loading, auth0User]);
+  }, [accessToken, auth0Loading, auth0User, fetchProfile]);
 
-  const refreshProfile = async (force = false) => {
-    if (force) {
-      // intenta renovar token si está nulo
-      if (!accessToken && auth0User) {
-        try {
-          const token = await getAccessToken();
-          setAccessToken(token as unknown as string);
-          await fetchProfile(token as unknown as string);
-          return;
-        } catch (e) {
-          console.error('No se pudo refrescar token:', e);
+  const refreshProfile = useCallback(
+    async (force = false) => {
+      if (force) {
+        // intenta renovar token si esta nulo
+        if (!accessToken && auth0User) {
+          try {
+            const token = await getAccessToken();
+            setAccessToken(token as unknown as string);
+            await fetchProfile(token as unknown as string);
+            return;
+          } catch (e) {
+            console.error('No se pudo refrescar token:', e);
+          }
         }
       }
-    }
-    await fetchProfile();
-  };
+      await fetchProfile();
+    },
+    [accessToken, auth0User, fetchProfile]
+  );
 
   const value = useMemo(
     () => ({
@@ -150,7 +151,7 @@ export function UserProvider({
       accessToken,
       refreshProfile,
     }),
-    [profile, loading, accessToken]
+    [profile, loading, accessToken, refreshProfile]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

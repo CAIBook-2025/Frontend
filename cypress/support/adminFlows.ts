@@ -37,15 +37,11 @@ export const loginAsAdmin = () => {
 
   cy.contains('Iniciar Sesión').click();
 
-  cy.origin(
-    'https://dev-cbra4z7pzibox6lj.us.auth0.com',
-    { args: ADMIN_CREDENTIALS },
-    ({ email, password }) => {
-      cy.get('input[name="username"], input[type="email"]').type(email);
-      cy.get('input[name="password"]').type(password);
-      cy.get('button[type="submit"], [data-action-button-primary]').filter(':visible').first().click();
-    },
-  );
+  cy.origin('https://dev-cbra4z7pzibox6lj.us.auth0.com', { args: ADMIN_CREDENTIALS }, ({ email, password }) => {
+    cy.get('input[name="username"], input[type="email"]').type(email);
+    cy.get('input[name="password"]').type(password);
+    cy.get('button[type="submit"], [data-action-button-primary]').filter(':visible').first().click();
+  });
 
   cy.url().should('include', Cypress.config('baseUrl'));
 };

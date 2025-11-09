@@ -7,7 +7,7 @@ import { Calendar, Clock, MapPin, QrCode, CheckCircle, Loader2 } from 'lucide-re
 import Link from 'next/link';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
-import { confirmCheckIn } from "../../../services/reservationApi";
+import { confirmCheckIn } from '../../../services/reservationApi';
 
 interface Reservation {
   id: number;
@@ -28,7 +28,7 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
   const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [dbProfile, setDbProfile] = useState<UserProfileResponse | null>(null);
 
@@ -45,7 +45,7 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
           setDbProfile(profile);
         }
       } catch (err) {
-        console.error("Error loading auth data:", err);
+        console.error('Error loading auth data:', err);
         // Podrías mostrar una alerta si falla, ya que el check-in no funcionará
       }
     };
@@ -57,7 +57,7 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
     const reservationDataString = searchParams.get('data');
 
     if (!reservationDataString) {
-      setError("Faltan los datos de la reserva. Por favor, vuelve a intentarlo desde la lista de reservas.");
+      setError('Faltan los datos de la reserva. Por favor, vuelve a intentarlo desde la lista de reservas.');
       setIsLoading(false);
       return;
     }
@@ -66,7 +66,7 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
       const parsedReservation = JSON.parse(decodeURIComponent(reservationDataString));
       setReservation(parsedReservation);
     } catch (e) {
-      setError("Los datos de la reserva están corruptos o no son válidos.");
+      setError('Los datos de la reserva están corruptos o no son válidos.');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
       await confirmCheckIn(reservationId, dbProfile.user.id, accessToken);
       setIsSuccess(true);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Ocurrió un error inesperado.";
+      const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error inesperado.';
       alert(`Error al confirmar la asistencia: ${errorMessage}`);
     } finally {
       setIsCheckingIn(false);
@@ -102,18 +102,20 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50 text-center">
         <div>
-            <h1 className="text-2xl font-bold text-red-600">Error</h1>
-            <p className="text-slate-600 mt-2">{error || "No se pudo cargar la reserva."}</p>
-            <Link href="/Reservations" className="mt-4 inline-block text-blue-600 hover:underline">
-                Volver a Mis Reservas
-            </Link>
+          <h1 className="text-2xl font-bold text-red-600">Error</h1>
+          <p className="text-slate-600 mt-2">{error || 'No se pudo cargar la reserva.'}</p>
+          <Link href="/Reservations" className="mt-4 inline-block text-blue-600 hover:underline">
+            Volver a Mis Reservas
+          </Link>
         </div>
       </div>
     );
   }
 
   const formattedDate = new Date(reservation.day).toLocaleDateString('es-CL', {
-    weekday: 'long', month: 'long', day: 'numeric',
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
   });
 
   if (isSuccess) {
@@ -124,7 +126,9 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
         <p className="mt-2 text-lg text-slate-600">
           Tu asistencia para la <strong className="text-gray-800">{reservation.roomName}</strong> ha sido confirmada.
         </p>
-        <p className="text-slate-500">Módulo {reservation.module} - {formattedDate}</p>
+        <p className="text-slate-500">
+          Módulo {reservation.module} - {formattedDate}
+        </p>
         <Link href="/Reservations" passHref>
           <button className="mt-8 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-green-700">
             Volver a Mis Reservas
@@ -142,23 +146,35 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
             <QrCode className="h-10 w-10 text-blue-600" />
           </div>
           <h1 className="mt-4 text-3xl font-bold text-gray-900">Confirmar Asistencia</h1>
-          <p className="mt-2 text-slate-600">
-            Estás a punto de hacer check-in para tu reserva.
-          </p>
+          <p className="mt-2 text-slate-600">Estás a punto de hacer check-in para tu reserva.</p>
         </div>
         <div className="my-6 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
           <p className="text-lg font-bold text-gray-800">{reservation.roomName}</p>
           <div className="space-y-2 text-sm text-slate-600">
-            <p className="flex items-center gap-2"><MapPin size={14} /> {reservation.location}</p>
-            <p className="flex items-center gap-2"><Calendar size={14} /> {formattedDate}</p>
-            <p className="flex items-center gap-2"><Clock size={14} /> Módulo {reservation.module}</p>
+            <p className="flex items-center gap-2">
+              <MapPin size={14} /> {reservation.location}
+            </p>
+            <p className="flex items-center gap-2">
+              <Calendar size={14} /> {formattedDate}
+            </p>
+            <p className="flex items-center gap-2">
+              <Clock size={14} /> Módulo {reservation.module}
+            </p>
           </div>
         </div>
         <button
           onClick={handleCheckIn}
           disabled={isCheckingIn || !dbProfile}
-          className="flex w-full items-center justify-center gap-3 rounded-lg bg-green-600 px-4 py-3 font-semibold text-white transition-all duration-300 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400">
-          {isCheckingIn ? ( <> <Loader2 className="h-5 w-5 animate-spin" /> Confirmando... </> ) : ( 'Confirmar Asistencia' )}
+          className="flex w-full items-center justify-center gap-3 rounded-lg bg-green-600 px-4 py-3 font-semibold text-white transition-all duration-300 hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
+        >
+          {isCheckingIn ? (
+            <>
+              {' '}
+              <Loader2 className="h-5 w-5 animate-spin" /> Confirmando...{' '}
+            </>
+          ) : (
+            'Confirmar Asistencia'
+          )}
         </button>
         <div className="mt-4 text-center">
           <Link href="/Reservations" className="text-sm text-slate-500 hover:underline">

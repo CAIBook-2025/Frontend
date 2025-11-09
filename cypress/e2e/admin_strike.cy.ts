@@ -1,7 +1,4 @@
-import {
-  loginAsAdmin,
-  visitAdminDashboard
-} from '../support/adminFlows';
+import { loginAsAdmin, visitAdminDashboard } from '../support/adminFlows';
 
 describe('Admin Strike Uses', () => {
   beforeEach(() => {
@@ -28,10 +25,7 @@ describe('Admin Strike Uses', () => {
   it('Add Strike Modal', () => {
     cy.contains('Sistema de Strikes').click();
     cy.url().should('include', '/Admin/Strikes');
-    cy.get('button.fixed')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.get('button.fixed').scrollIntoView().should('be.visible').click();
     cy.contains('Aplica una sanción a un usuario por incumplimiento de reglas').should('exist');
   });
 });

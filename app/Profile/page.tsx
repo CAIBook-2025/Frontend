@@ -28,11 +28,11 @@ export default function ProfilePage() {
     last_name: '',
     phone: '',
     career: '',
-    student_number: ''
+    student_number: '',
   });
 
   // ✅ Detectar si puede cambiar contraseña (si su login es Auth0 Database)
-  const canChangePassword = user?.sub?.startsWith("auth0|");
+  const canChangePassword = user?.sub?.startsWith('auth0|');
 
   useEffect(() => {
     async function fetchAccessToken() {
@@ -62,7 +62,7 @@ export default function ProfilePage() {
               last_name: profile.last_name || '',
               phone: profile.phone || '',
               career: profile.career || '',
-              student_number: profile.student_number || ''
+              student_number: profile.student_number || '',
             });
           }
         } catch (error) {
@@ -76,7 +76,7 @@ export default function ProfilePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
@@ -90,7 +90,7 @@ export default function ProfilePage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -104,7 +104,7 @@ export default function ProfilePage() {
       setUserData(updatedProfile);
       setIsEditing(false);
       setSuccess('Perfil actualizado exitosamente');
-      
+
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -124,7 +124,7 @@ export default function ProfilePage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userData.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -148,7 +148,7 @@ export default function ProfilePage() {
         last_name: userData.last_name || '',
         phone: userData.phone || '',
         career: userData.career || '',
-        student_number: userData.student_number || ''
+        student_number: userData.student_number || '',
       });
     }
     setIsEditing(false);
@@ -162,40 +162,41 @@ export default function ProfilePage() {
 
     try {
       await fetch(`${process.env.AUTH0_DOMAIN}/dbconnections/change_password`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           client_id: user?.id,
           email: user?.email,
-          connection: "Username-Password-Authentication",
+          connection: 'Username-Password-Authentication',
         }),
       });
 
-      setPasswordMessage("Te hemos enviado un correo para cambiar tu contraseña.");
+      setPasswordMessage('Te hemos enviado un correo para cambiar tu contraseña.');
     } catch (err) {
       console.error(err);
-      setPasswordMessage("Hubo un problema al solicitar el cambio de contraseña.");
+      setPasswordMessage('Hubo un problema al solicitar el cambio de contraseña.');
     } finally {
       setIsSendingPasswordEmail(false);
     }
   };
 
-  if (!userData) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg">Cargando...</div>
-    </div>
-  );
+  if (!userData)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Cargando...</div>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow rounded-lg overflow-hidden">
-          
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
             <div className="flex items-center space-x-4">
               <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center text-3xl font-bold text-blue-600">
-                {userData.first_name?.[0]}{userData.last_name?.[0]}
+                {userData.first_name?.[0]}
+                {userData.last_name?.[0]}
               </div>
               <div className="text-white">
                 <h1 className="text-2xl font-bold">
@@ -208,25 +209,18 @@ export default function ProfilePage() {
 
           {/* Content */}
           <div className="px-6 py-6">
-
             {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>
             )}
 
             {success && (
-              <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                {success}
-              </div>
+              <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">{success}</div>
             )}
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre
-                  </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -241,9 +235,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Apellido
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -258,9 +250,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Carrera
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Carrera</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -275,9 +265,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Número de estudiante
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Número de estudiante</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -292,9 +280,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teléfono
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -309,9 +295,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Rol
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
                   <p className="text-gray-900">{userData.role || 'No especificado'}</p>
                 </div>
               </div>
@@ -367,21 +351,17 @@ export default function ProfilePage() {
                     </button>
                   ) : (
                     <div className="bg-blue-50 p-4 rounded">
-                      <p className="text-blue-800 mb-3">
-                        Te enviaremos un correo para cambiar tu contraseña.
-                      </p>
+                      <p className="text-blue-800 mb-3">Te enviaremos un correo para cambiar tu contraseña.</p>
 
                       <button
                         onClick={handlePasswordReset}
                         disabled={isSendingPasswordEmail}
                         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                       >
-                        {isSendingPasswordEmail ? "Enviando..." : "Enviar correo"}
+                        {isSendingPasswordEmail ? 'Enviando...' : 'Enviar correo'}
                       </button>
 
-                      {passwordMessage && (
-                        <p className="text-blue-700 mt-3">{passwordMessage}</p>
-                      )}
+                      {passwordMessage && <p className="text-blue-700 mt-3">{passwordMessage}</p>}
                     </div>
                   )}
                 </div>
@@ -420,10 +400,8 @@ export default function ProfilePage() {
                   </button>
                 )}
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>

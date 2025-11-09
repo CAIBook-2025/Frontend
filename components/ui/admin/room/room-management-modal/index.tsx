@@ -25,12 +25,7 @@ interface RoomManagementModalProps {
   room: Room | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (
-    id: string,
-    status: RoomEditableStatus,
-    statusNote?: string,
-    maintenanceBlocks?: MaintenanceBlock[]
-  ) => void;
+  onSave: (id: string, status: RoomEditableStatus, statusNote?: string, maintenanceBlocks?: MaintenanceBlock[]) => void;
 }
 
 export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManagementModalProps) {
@@ -75,8 +70,7 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
     if (!room) return;
     setSaveError(null);
 
-    const maintenancePayload =
-      selectedStatus === 'MAINTENANCE' ? normalizedBlockSelection : undefined;
+    const maintenancePayload = selectedStatus === 'MAINTENANCE' ? normalizedBlockSelection : undefined;
 
     if (selectedStatus === 'MAINTENANCE' && maintenancePayload && maintenancePayload.length > 0) {
       if (!accessToken) {
@@ -144,7 +138,6 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
             scheduleId: scheduleStatusMap[date]?.[module]?.scheduleId,
             status: scheduleStatusMap[date]?.[module]?.status,
           }))
-
         );
 
         const missingSchedule = slotsToEnable.find((slot) => !slot.scheduleId);
@@ -156,7 +149,6 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
 
         setSaveLoading(true);
         try {
-
           const enableResults = await Promise.all(
             slotsToEnable.map((slot) => {
               const targetStatus = slot.status ?? 'AVAILABLE';
@@ -180,24 +172,17 @@ export function RoomManagementModal({ room, isOpen, onClose, onSave }: RoomManag
           }
 
           clearFreeSelection();
-
         } catch (error) {
           console.error('Error enabling schedules', error);
           setSaveError('Ocurrió un error al liberar los modulos seleccionados.');
           return;
-
         } finally {
           setSaveLoading(false);
         }
       }
     }
 
-    onSave(
-      room.id,
-      selectedStatus,
-      selectedStatus === 'MAINTENANCE' ? statusNote : undefined,
-      maintenancePayload
-    );
+    onSave(room.id, selectedStatus, selectedStatus === 'MAINTENANCE' ? statusNote : undefined, maintenancePayload);
     onClose();
   }, [
     room,

@@ -69,8 +69,7 @@ export const aggregateSchedulesByRoom = (items: ScheduleItem[]): Map<string, Sch
         totalSlots: 1,
         statusNote: moduleNote,
         location: baseRoom?.location ?? null,
-        capacity:
-          typeof baseRoom?.capacity === 'number' ? baseRoom.capacity : Number(baseRoom?.capacity ?? 0),
+        capacity: typeof baseRoom?.capacity === 'number' ? baseRoom.capacity : Number(baseRoom?.capacity ?? 0),
         equipment: baseRoom?.equipment,
         name: baseRoom?.name ?? null,
       });
@@ -85,8 +84,8 @@ export const aggregateSchedulesByRoom = (items: ScheduleItem[]): Map<string, Sch
       finalStatus === 'AVAILABLE'
         ? undefined
         : hasHigherPriority
-        ? moduleNote ?? summary.statusNote
-        : summary.statusNote ?? moduleNote;
+          ? (moduleNote ?? summary.statusNote)
+          : (summary.statusNote ?? moduleNote);
 
     map.set(roomId, {
       status: finalStatus,
@@ -124,8 +123,8 @@ export const mergeRoomsWithScheduleData = (baseRooms: Room[], scheduleItems: Sch
       base?.features && base.features.length
         ? base.features
         : scheduleFeatures.length
-        ? scheduleFeatures
-        : ['Sin datos'];
+          ? scheduleFeatures
+          : ['Sin datos'];
 
     const room: Room = {
       id: roomId,
@@ -134,7 +133,7 @@ export const mergeRoomsWithScheduleData = (baseRooms: Room[], scheduleItems: Sch
       location: base?.location ?? stats.location ?? 'Sin ubicacion',
       capacity: base?.capacity ?? Number(stats.capacity ?? 0),
       status: stats.status,
-      statusNote: stats.status === 'AVAILABLE' ? undefined : stats.statusNote ?? base?.statusNote,
+      statusNote: stats.status === 'AVAILABLE' ? undefined : (stats.statusNote ?? base?.statusNote),
       reservationsToday: stats.busySlots,
       utilization: stats.totalSlots ? Math.round((stats.busySlots / stats.totalSlots) * 100) : 0,
     };
@@ -160,4 +159,3 @@ export const adaptStudyRoomsToView = (items: StudyRoomRecord[]): Room[] => {
     utilization: 0,
   }));
 };
-

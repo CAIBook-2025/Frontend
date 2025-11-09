@@ -29,7 +29,6 @@ export default function CreateGroupPage() {
     logo: null,
   });
 
-
   const handleNext = () => {
     // TODO: Añadir validación antes de pasar al siguiente paso
     if (step < 3) setStep(step + 1);

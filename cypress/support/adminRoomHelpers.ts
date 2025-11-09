@@ -43,14 +43,12 @@ const normalizeFeatures = (equipment: PrismaModelsFixture['studyRooms'][number][
   if (typeof equipment === 'string') {
     return [equipment];
   }
-  return Object.values(equipment)
-    .filter(Boolean)
-    .map(String);
+  return Object.values(equipment).filter(Boolean).map(String);
 };
 
 const buildScheduleRoomPayload = (
   roomId: number,
-  studyRooms: PrismaModelsFixture['studyRooms'],
+  studyRooms: PrismaModelsFixture['studyRooms']
 ): RoomPayload | null => {
   const room = studyRooms.find((candidate) => candidate.id === roomId);
 

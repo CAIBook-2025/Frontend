@@ -5,8 +5,6 @@ import { useUser } from '@auth0/nextjs-auth0';
 import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 
-
-
 // --- Tipos (sin cambios) ---
 type RoomStatus = 'Disponible' | 'Ocupada';
 type Equipment = 'Pizarra' | 'Proyector' | 'WiFi' | 'Enchufes' | 'Mesa grande';
@@ -43,7 +41,7 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
     }
     fetchAccessToken();
   }, [user]);
-  
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   // --- FUNCIÓN handleReservar COMPLETAMENTE ACTUALIZADA ---
   const handleReservar = async () => {
@@ -55,9 +53,9 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
         method: 'PATCH',
         // ACTUALIZADO: Añadimos el token de autorización a los encabezados
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
         },
         // Usamos el id del perfil del backend para la reserva
 
@@ -69,14 +67,13 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
         throw new Error(errorData.error || 'Error al realizar la reserva');
       }
       setShowSuccessModal(true);
-      
     } catch (e) {
       console.error(e);
       const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
       alert(`Error al reservar: ${errorMessage}`);
     }
   };
-  
+
   const handleCloseModal = () => {
     setShowSuccessModal(false);
     window.location.reload();
@@ -126,11 +123,7 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
           disabled={!isAvailable}
           className={`
             mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300
-            ${
-              isAvailable
-                ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                : 'bg-slate-400 cursor-not-allowed'
-            }
+            ${isAvailable ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-slate-400 cursor-not-allowed'}
           `}
           onClick={handleReservar}
         >
@@ -146,7 +139,8 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
             </div>
             <h3 className="mt-4 text-xl font-bold text-gray-900">¡Reserva Confirmada!</h3>
             <p className="mt-2 text-sm text-gray-600">
-              Has agendado la <span className="font-semibold">{room.name}</span> para el Módulo <span className="font-semibold">{room.module}</span>.
+              Has agendado la <span className="font-semibold">{room.name}</span> para el Módulo{' '}
+              <span className="font-semibold">{room.module}</span>.
             </p>
             <button
               onClick={handleCloseModal}
