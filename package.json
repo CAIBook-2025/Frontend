@@ -12,8 +12,8 @@
     "test": "jest --ci --runInBand",
     "tests": "jest --watch",
     "tests:watch": "jest --watch",
-    "cy:run": "cross-env APP_BASE_URL=http://localhost:3000 start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress run\"",
-    "cy:open": "cross-env APP_BASE_URL=http://localhost:3000 start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress open\""
+    "cy:run": "cross-env APP_BASE_URL=http://localhost:3000 NEXT_PUBLIC_API_MODE=mock start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress run\"",
+    "cy:open": "cross-env APP_BASE_URL=http://localhost:3000 NEXT_PUBLIC_API_MODE=mock start-server-and-test \"npm run dev\" http://localhost:3000 \"npx cypress open\""
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.10.0",

@@ -1,3 +1,7 @@
+import { mockUserProfileResponse } from '@/lib/mocks/mockUserProfile';
+
+const shouldUseMockApi = process.env.NEXT_PUBLIC_API_MODE === 'mock';
+
 export type UserProfile = {
   id: number;
   email: string;
@@ -40,6 +44,10 @@ export type UserProfileResponse = {
 };
 
 export async function fetchUserProfile(accessToken: string | null): Promise<UserProfileResponse | null> {
+  if (shouldUseMockApi) {
+    return mockUserProfileResponse;
+  }
+
   if (!accessToken) {
     console.warn('fetchUserProfile called without access token');
     return null;

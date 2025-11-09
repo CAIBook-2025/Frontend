@@ -1,6 +1,8 @@
 import { auth0 } from '@/lib/auth0';
 import { redirect } from 'next/navigation';
 
+const isMockMode = process.env.NEXT_PUBLIC_API_MODE === 'mock';
+
 export default async function CallbackCheck() {
   const session = await auth0.getSession();
 
@@ -9,6 +11,10 @@ export default async function CallbackCheck() {
   }
 
   const accessToken = session.tokenSet.accessToken;
+
+  if (isMockMode) {
+    redirect('/Student');
+  }
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
     headers: {

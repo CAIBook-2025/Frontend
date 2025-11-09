@@ -25,9 +25,16 @@ const HISTORY_DESCRIPTIONS: Record<HistoryCategory, string> = {
   events: 'Registro completo de todos los eventos realizados',
 };
 
-
 export const loginAsAdmin = () => {
+  const isMockMode = Cypress.env('apiMode') === 'mock';
+
   cy.visit('/');
+
+  if (isMockMode) {
+    cy.log('Mock mode enabled - skipping Auth0 login');
+    return;
+  }
+
   cy.contains('Iniciar Sesión').click();
 
   cy.origin(
@@ -43,11 +50,9 @@ export const loginAsAdmin = () => {
   cy.url().should('include', Cypress.config('baseUrl'));
 };
 
-
 export const visitAdminDashboard = () => {
   cy.visit('/Admin');
 };
-
 
 export const openGroupRequests = (status: GroupStatus = 'pending') => {
   const statusConfig = GROUP_STATUS_TEXT[status];
@@ -60,7 +65,6 @@ export const openGroupRequests = (status: GroupStatus = 'pending') => {
 
   cy.contains(statusConfig.header);
 };
-
 
 export const viewFirstGroupRequestDetails = () => {
   cy.get('button[title="Ver detalles"]').first().click();
