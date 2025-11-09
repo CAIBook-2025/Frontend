@@ -82,7 +82,7 @@ export const useRoomsData = () => {
 
     if (!activeUser) {
       setRooms([]);
-      setLoadError('Debes iniciar sesion para ver las salas.');
+      setLoadError('Debes iniciar sesión para ver las salas.');
       setIsLoadingRooms(false);
       return;
     }
