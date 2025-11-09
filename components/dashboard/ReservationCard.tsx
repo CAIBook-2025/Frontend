@@ -1,7 +1,7 @@
 // app/components/dashboard/ReservationCard.tsx
 'use client';
 
-import { Calendar, Clock, MapPin, XCircle, Eye, QrCode, LogOut } from 'lucide-react';
+import { Calendar, Clock, MapPin, Eye, QrCode, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
 type ReservationStatus = 'PENDING' | 'PRESENT' | 'CANCELED' | 'ABSENT' | string;
