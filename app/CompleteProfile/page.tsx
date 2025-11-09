@@ -54,7 +54,6 @@ export default function RegisterPage() {
       const userData = {
         auth0_id: user?.sub || '',
         email: user?.email || '',
-        hashed_password: '',
         first_name: data.firstName,
         last_name: data.lastName,
         phone: data.phone || null,
@@ -72,7 +71,7 @@ export default function RegisterPage() {
       });
       if (response.ok) {
         alert('¡Registro exitoso!');
-        window.location.href = '/ProfileSSR';
+        window.location.href = '/Profile';
       } else {
         console.error('Error en la respuesta del servidor:', response.statusText);
       }

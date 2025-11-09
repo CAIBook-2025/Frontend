@@ -14,7 +14,7 @@ const mockRooms: Room[] = [
     location: 'Biblioteca',
     floor: 'Piso 2',
     capacity: 6,
-    status: 'Activa',
+    status: 'AVAILABLE',
     reservationsToday: 2,
     utilization: 80,
   },
@@ -25,7 +25,7 @@ const mockRooms: Room[] = [
     location: 'Centro',
     floor: 'Piso 1',
     capacity: 4,
-    status: 'Mantenimiento',
+    status: 'MAINTENANCE',
     statusNote: 'Reparación',
     reservationsToday: 0,
     utilization: 10,
@@ -62,12 +62,12 @@ describe('RoomManagementModal', () => {
 
     render(<RoomManagementModal room={room} isOpen onClose={onClose} onSave={onSave} />);
 
-    fireEvent.click(screen.getByLabelText(/Mantenimiento/i));
+    fireEvent.click(screen.getByLabelText(/En mantenimiento/i));
     const textarea = screen.getByLabelText(/Motivo/i);
     fireEvent.change(textarea, { target: { value: 'Revisión técnica' } });
 
     fireEvent.click(screen.getByRole('button', { name: /Guardar Cambios/i }));
-    expect(onSave).toHaveBeenCalledWith(room.id, 'Mantenimiento', 'Revisión técnica');
+    expect(onSave).toHaveBeenCalledWith(room.id, 'MAINTENANCE', 'Revisión técnica');
     expect(onClose).toHaveBeenCalled();
   });
 });

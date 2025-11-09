@@ -1,16 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Search, MapPin, Layers, Users, CheckCircle2, Gauge, CalendarDays } from 'lucide-react';
+import { Search, MapPin, Users, CheckCircle2, Gauge, CalendarDays } from 'lucide-react';
 import type { Room } from '@/types/room';
 
 export type RoomFilters = {
   query: string; // nombre o ubicación
   location: string; // ubicación exacta o "all"
-  floor: string; // piso exacto o "all"
   capacityMin: number | ''; // capacidad mínima
   features: string[]; // debe incluir todas las seleccionadas
-  status: 'all' | 'Activa' | 'Mantenimiento' | 'Deshabilitada';
+  status: 'all' | 'AVAILABLE' | 'MAINTENANCE' | 'UNAVAILABLE';
   utilizationMin: number | ''; // % mínimo de utilización (0–100)
   reservationsTodayMin: number | ''; // mínimo de reservas hoy
 };
@@ -25,7 +24,6 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
   const [filters, setFilters] = useState<RoomFilters>({
     query: '',
     location: 'all',
-    floor: 'all',
     capacityMin: '',
     features: [],
     status: 'all',
@@ -36,9 +34,8 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
   // Opciones derivadas desde la data (si viene)
   const options = useMemo(() => {
     const locations = Array.from(new Set(rooms.map((r) => r.location))).sort();
-    const floors = Array.from(new Set(rooms.map((r) => r.floor))).sort();
     const features = Array.from(new Set(rooms.flatMap((r) => r.features))).sort();
-    return { locations, floors, features };
+    return { locations, features };
   }, [rooms]);
 
   const update = <K extends keyof RoomFilters>(key: K, value: RoomFilters[K]) => {
@@ -91,23 +88,6 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
           </select>
         </div>
 
-        {/* Piso */}
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-gray-500 shrink-0" />
-          <select
-            value={filters.floor}
-            onChange={(e) => update('floor', e.target.value)}
-            className="border border-blue-400 rounded-lg p-2 text-sm w-full"
-          >
-            <option value="all">Todos los pisos</option>
-            {options.floors.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Capacidad mínima */}
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-gray-500 shrink-0" />
@@ -131,9 +111,9 @@ export const FilterRoom = ({ rooms = [], onFiltersChange, className }: Props) =>
             className="border border-blue-400 rounded-lg p-2 text-sm w-full"
           >
             <option value="all">Todos los estados</option>
-            <option value="Activa">Activa</option>
-            <option value="Mantenimiento">Mantenimiento</option>
-            <option value="Deshabilitada">Deshabilitada</option>
+            <option value="AVAILABLE">Disponibles</option>
+            <option value="MAINTENANCE">En mantenimiento</option>
+            <option value="UNAVAILABLE">No disponibles</option>
           </select>
         </div>
 

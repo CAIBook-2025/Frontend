@@ -62,12 +62,18 @@ export const PersonalView = ({ stats }: { stats: Stats }) => {
       </section>
 
       {/* 3. Acciones Principales */}
-      <section className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+      <section className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-3">
         <ActionCard
           href={{ pathname: '/Student/StudyRoomBooker', query: { userId: stats.userId } }}
           icon={<BookMarked className="h-6 w-6 text-blue-500" />}
           title="Reservar una Sala"
           description="Busca y asegura un espacio de estudio para ti o tu grupo."
+        />
+        <ActionCard
+          href="Reservations"
+          icon={<BookMarked className="h-6 w-6 text-blue-500" />}
+          title="Ver mis reservas"
+          description="Revisa tus reservas de salas, no se te vaya a olvidar!."
         />
         <ActionCard
           href="/events"

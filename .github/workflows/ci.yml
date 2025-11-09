@@ -46,7 +46,7 @@ jobs:
 
       # 7️⃣ Tests
       - name: Run tests
-        run: npm run test
+        run: npm run cy:run
 
       # 8️⃣ Build
       - name: Build project
