@@ -159,10 +159,8 @@ export default function ProfilePage() {
   const handlePasswordReset = async () => {
     setIsSendingPasswordEmail(true);
     setPasswordMessage(null);
-    console.log("Iniciando proceso de cambio de contraseña para:", user?.email, user?.id);
 
     try {
-      console.log("Enviando solicitud de cambio de contraseña para:", user?.email, user?.id);
       await fetch(`${process.env.AUTH0_DOMAIN}/dbconnections/change_password`, {
         method: "POST",
         headers: { "content-type": "application/json" },

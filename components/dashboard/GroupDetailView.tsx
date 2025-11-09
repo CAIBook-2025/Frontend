@@ -195,7 +195,6 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
       setIsLoading(true);
       try {
-        console.log('Fetching group details for groupId:', groupId);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
           headers: {
             method: 'GET',
@@ -250,7 +249,6 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   // Salir del grupo (moderador)
   const handleLeaveGroup = async () => {
     // TODO: Implementar cuando el endpoint esté disponible
-    console.log('Salir del grupo - Endpoint pendiente');
     setShowLeaveConfirm(false);
   };
 

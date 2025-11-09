@@ -66,7 +66,6 @@ export async function fetchUserProfile(accessToken: string | null): Promise<User
     }
 
     const data = (await response.json()) as UserProfileResponse;
-    console.log('Fetched user profile:', data);
 
     if (!data.user) {
       console.warn('User profile not found in response');
