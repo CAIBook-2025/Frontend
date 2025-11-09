@@ -1,14 +1,15 @@
 // components/book-room/RoomCard.tsx
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0';
 import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
-// NUEVO: Importamos el hook para acceder al usuario y al token
+import { getAccessToken } from '@auth0/nextjs-auth0';
+
+
 
 // --- Tipos (sin cambios) ---
 type RoomStatus = 'Disponible' | 'Ocupada';
 type Equipment = 'Pizarra' | 'Proyector' | 'WiFi' | 'Enchufes' | 'Mesa grande';
-
 export interface Room {
   id: number;
   name: string;
@@ -19,30 +20,51 @@ export interface Room {
   equipment: Equipment[];
   module: number;
 }
+type RoomCardProps = {
+  room: Room;
+  scheduleId: number;
+  userId?: number | null;
+};
 
-// ACTUALIZADO: Eliminamos `userId` de las props, ya que lo obtendremos del contexto.
-export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId:number, scheduleId: number }) => {
+export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
+  const { user } = useUser();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const isAvailable = room.status === 'Disponible';
-  
-  // NUEVO: Obtenemos el usuario y el accessToken del contexto
+  useEffect(() => {
+    async function fetchAccessToken() {
+      if (user) {
+        try {
+          const accessToken = await getAccessToken();
+          setAccessToken(accessToken);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
+        }
+      }
+    }
+    fetchAccessToken();
+  }, [user]);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
   // --- FUNCIÓN handleReservar COMPLETAMENTE ACTUALIZADA ---
   const handleReservar = async () => {
-    // NUEVO: Verificación de seguridad. Si no hay usuario o token, no se puede reservar.
-    
-
+    if (!user || !accessToken || !userId) {
+      alert('Debes iniciar sesión y completar tu perfil para poder realizar una reserva.');
+      return;
+    }
     try {
-      console.log("Intentando reservar sala:", room.id, "para usuario:", userId, "en horario:", scheduleId);
-      
+      console.log("Reservando sala con los siguientes datos:");
+      console.log(`Schedule ID: ${scheduleId}`);
+      console.log(`User ID: ${userId}`);
+      console.log(`Access Token: ${accessToken}`);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
         method: 'PATCH',
         // ACTUALIZADO: Añadimos el token de autorización a los encabezados
         headers: { 
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
-        // Usamos user.id del contexto en lugar de la prop
+        // Usamos el id del perfil del backend para la reserva
+
         body: JSON.stringify({ id: scheduleId, userId }),
       });
 
@@ -50,7 +72,6 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId:numb
         const errorData = await res.json();
         throw new Error(errorData.error || 'Error al realizar la reserva');
       }
-
       console.log("Reserva exitosa!");
       setShowSuccessModal(true);
       
@@ -82,7 +103,6 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId:numb
           <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
             <MapPin size={14} /> {room.location}
           </p>
-
           <div className="my-4 flex items-center gap-6 border-y border-slate-100 py-3 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <Users size={16} /> {room.capacity} personas
@@ -91,7 +111,6 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId:numb
               <Clock size={16} /> Módulo: {room.module}
             </div>
           </div>
-
           <div>
             <h4 className="mb-2 text-sm font-medium text-slate-600">Equipamiento:</h4>
             <div className="flex flex-wrap gap-2">
