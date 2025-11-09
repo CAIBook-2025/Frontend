@@ -27,18 +27,17 @@ const DashboardHeaderSkeleton = () => (
 
 // --- Componente Skeleton para la vista principal ---
 const ViewSkeleton = () => (
-    <div className="animate-pulse space-y-8">
-        <div className="h-40 rounded-lg bg-slate-200"></div>
-        <div className="h-64 rounded-lg bg-slate-200"></div>
-    </div>
+  <div className="animate-pulse space-y-8">
+    <div className="h-40 rounded-lg bg-slate-200"></div>
+    <div className="h-64 rounded-lg bg-slate-200"></div>
+  </div>
 );
-
 
 type ViewMode = 'personal' | 'groups';
 
 export default function StudentDashboardPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('personal');
-  
+
   // Renombramos 'isLoading' a 'authLoading' para evitar confusiones
   const { user, isLoading: authLoading } = useUser();
 
@@ -63,7 +62,7 @@ export default function StudentDashboardPage() {
         const data = await fetchUserProfile(accessToken);
         setProfileData(data); // Guardamos los datos en el estado
       } catch (error) {
-        console.error("Dashboard: Failed to load user profile:", error);
+        console.error('Dashboard: Failed to load user profile:', error);
         // Opcional: podrías poner un estado de error aquí para mostrar un mensaje
       } finally {
         // Importante: detenemos la carga tanto si tuvo éxito como si falló
@@ -76,17 +75,17 @@ export default function StudentDashboardPage() {
 
   // 5. CALCULAMOS las estadísticas a partir de los datos del perfil
   // Usamos optional chaining (?.) y el operador nullish (??) para evitar errores si los datos aún no llegan.
-  const activeReservationsCount = profileData?.schedule?.filter(
-  (res) => (res.status === 'PENDING' || res.status === 'PRESENT') && res.isFinished === false
-).length ?? 0;
+  const activeReservationsCount =
+    profileData?.schedule?.filter(
+      (res) => (res.status === 'PENDING' || res.status === 'PRESENT') && res.isFinished === false
+    ).length ?? 0;
 
   const strikesCount = profileData?.strikesCount ?? 0;
-  
+
   const userId = profileData?.user?.id ?? 0; // Usamos 0 o null como fallback
 
   // 6. OBTENEMOS el nombre del usuario desde nuestro backend para mayor consistencia
-  const userName = profileData?.user?.first_name || user?.name || "Usuario";
-
+  const userName = profileData?.user?.first_name || user?.name || 'Usuario';
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
@@ -100,9 +99,7 @@ export default function StudentDashboardPage() {
               <h1 className="text-4xl font-extrabold text-gray-800">
                 ¡Bienvenido, <span className="text-blue-600">{userName}</span>!
               </h1>
-              <p className="mt-2 text-lg text-slate-600">
-                Es genial tenerte de vuelta. ¿Qué te gustaría hacer hoy?
-              </p>
+              <p className="mt-2 text-lg text-slate-600">Es genial tenerte de vuelta. ¿Qué te gustaría hacer hoy?</p>
             </div>
             {/* Selector de Vista */}
             <div className="mt-4 sm:mt-0 flex items-center rounded-full bg-slate-100 p-1">
@@ -130,10 +127,10 @@ export default function StudentDashboardPage() {
         ) : viewMode === 'personal' ? (
           // 7. PASAMOS las estadísticas calculadas al componente PersonalView
           <PersonalView
-            stats={{ 
-              reservasActivas: activeReservationsCount, 
-              strikes: strikesCount, 
-              userId: userId 
+            stats={{
+              reservasActivas: activeReservationsCount,
+              strikes: strikesCount,
+              userId: userId,
             }}
           />
         ) : (
@@ -143,10 +140,10 @@ export default function StudentDashboardPage() {
 
       <div className="mt-8">
         <Link
-            href="/auth/logout" // Ruta correcta para cerrar sesión con Auth0
-            className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
+          href="/auth/logout" // Ruta correcta para cerrar sesión con Auth0
+          className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
         >
-            Cerrar Sesión
+          Cerrar Sesión
         </Link>
       </div>
     </main>

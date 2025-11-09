@@ -1,7 +1,7 @@
 // app/components/dashboard/HistoricalReservationCard.tsx
 'use client';
 
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin } from 'lucide-react';
 
 // Usamos los mismos tipos que ya definimos en otros componentes
 interface Reservation {
@@ -25,13 +25,15 @@ const statusText: { [key: string]: string } = {
   CANCELED: 'Cancelada',
   ABSENT: 'Ausente',
   default: 'Finalizada',
-}
+};
 
 export const HistoricalReservationCard = ({ reservation }: { reservation: Reservation }) => {
   const { roomName, location, day, module, status } = reservation;
 
   const formattedDate = new Date(day).toLocaleDateString('es-CL', {
-    year: 'numeric', month: 'long', day: 'numeric',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 
   const currentStatusStyle = statusStyles[status] || statusStyles.default;
@@ -42,17 +44,19 @@ export const HistoricalReservationCard = ({ reservation }: { reservation: Reserv
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-lg font-semibold text-gray-700">{roomName}</h3>
-          <p className="text-sm text-slate-500 flex items-center gap-1 mt-1"><MapPin size={14} /> {location}</p>
+          <p className="text-sm text-slate-500 flex items-center gap-1 mt-1">
+            <MapPin size={14} /> {location}
+          </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-medium ${currentStatusStyle}`}>{currentStatusText}</span>
       </div>
       <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm text-slate-600">
         <div className="flex items-center gap-2">
-          <Calendar size={16} /> 
+          <Calendar size={16} />
           <span>{formattedDate}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock size={16} /> 
+          <Clock size={16} />
           <span>MÃ³dulo: {module}</span>
         </div>
       </div>

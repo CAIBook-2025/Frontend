@@ -2,16 +2,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import {
-  Users,
-  Crown,
-  Shield,
-  Star,
-  Loader2,
-  Calendar,
-  Target,
-} from 'lucide-react';
+import { Users, Crown, Shield, Star, Loader2, Calendar, Target } from 'lucide-react';
 
 // --- Tipos basados en la API ---
 interface GroupRequest {
@@ -153,9 +146,11 @@ export const UserView = ({ groupId }: UserViewProps) => {
           <div className="max-w-4xl">
             <div className="flex items-start gap-4 mb-4">
               {groupDetails.groupRequest.logo ? (
-                <img
+                <Image
                   src={groupDetails.groupRequest.logo}
                   alt={groupDetails.groupRequest.name}
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-xl object-cover border-2 border-blue-200"
                 />
               ) : (
@@ -298,9 +293,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
       <section className="mt-8">
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
           <Users className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-          <p className="text-slate-700 font-medium mb-2">
-            ¿Te interesa este grupo?
-          </p>
+          <p className="text-slate-700 font-medium mb-2">¿Te interesa este grupo?</p>
           <p className="text-sm text-slate-600">
             Contacta al representante o a los moderadores para obtener más información sobre cómo participar.
           </p>

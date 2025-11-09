@@ -86,8 +86,8 @@ const ActionCard = ({
     variant === 'danger'
       ? 'border-red-200 bg-red-50 hover:border-red-500 hover:shadow-lg'
       : variant === 'warning'
-      ? 'border-orange-200 bg-orange-50 hover:border-orange-500 hover:shadow-lg'
-      : 'border-slate-200 bg-white hover:border-blue-500 hover:shadow-lg';
+        ? 'border-orange-200 bg-orange-50 hover:border-orange-500 hover:shadow-lg'
+        : 'border-slate-200 bg-white hover:border-blue-500 hover:shadow-lg';
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
@@ -96,11 +96,7 @@ const ActionCard = ({
       <div>
         <div
           className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-            variant === 'danger'
-              ? 'bg-red-100'
-              : variant === 'warning'
-              ? 'bg-orange-100'
-              : 'bg-blue-100'
+            variant === 'danger' ? 'bg-red-100' : variant === 'warning' ? 'bg-orange-100' : 'bg-blue-100'
           }`}
         >
           {icon}
@@ -114,8 +110,8 @@ const ActionCard = ({
           variant === 'danger'
             ? 'group-hover:text-red-500'
             : variant === 'warning'
-            ? 'group-hover:text-orange-500'
-            : 'group-hover:text-blue-500'
+              ? 'group-hover:text-orange-500'
+              : 'group-hover:text-blue-500'
         }`}
       />
     </div>
@@ -450,8 +446,8 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
               <h3 className="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.groupRequest.name}&quot;? Esta acción
-              no se puede deshacer y se perderán todos los datos del grupo.
+              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.groupRequest.name}&quot;? Esta acción no
+              se puede deshacer y se perderán todos los datos del grupo.
             </p>
             <div className="flex gap-3 justify-end">
               <button

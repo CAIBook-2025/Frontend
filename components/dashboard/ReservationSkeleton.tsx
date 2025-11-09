@@ -26,7 +26,7 @@ export const ReservationSkeleton = () => {
           <div className="h-4 w-32 bg-slate-200 rounded"></div>
         </div>
       </div>
-      
+
       <div className="mt-4 text-right animate-pulse">
         {/* Skeleton para el botón de cancelar */}
         <div className="h-5 w-28 bg-slate-200 rounded ml-auto"></div>

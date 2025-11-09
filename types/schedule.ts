@@ -1,4 +1,4 @@
-import { Room } from "@/types/room";
+import { Room } from '@/types/room';
 
 export type ScheduleItem = {
   id: number;

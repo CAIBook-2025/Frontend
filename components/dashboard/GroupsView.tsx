@@ -64,19 +64,19 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
   // Obtener access token
   useEffect(() => {
-      async function fetchAccessToken() {
-        if (user) {
-          try {
-            const accessToken = await getAccessToken();
-            setAccessToken(accessToken);
-          } catch (error) {
-            console.error('Error fetching access token:', error);
-          }
+    async function fetchAccessToken() {
+      if (user) {
+        try {
+          const accessToken = await getAccessToken();
+          setAccessToken(accessToken);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
         }
       }
-  
-      fetchAccessToken();
-    }, [user]);
+    }
+
+    fetchAccessToken();
+  }, [user]);
 
   // Cargar todos los grupos
   useEffect(() => {
@@ -131,7 +131,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         }
 
         const data: Group[] = await response.json();
-        
+
         // Determinar el rol del usuario en cada grupo
         const groupsWithRoles: MyGroupRole[] = data.map((group) => {
           const isRepresentative = group.repre_id === userId;
@@ -217,22 +217,14 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                           </h3>
                           <span
                             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 ${
-                              role === 'Representante'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-blue-100 text-blue-800'
+                              role === 'Representante' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
                             }`}
                           >
-                            {role === 'Representante' ? (
-                              <Crown size={12} />
-                            ) : (
-                              <Shield size={12} />
-                            )}
+                            {role === 'Representante' ? <Crown size={12} /> : <Shield size={12} />}
                             {role}
                           </span>
                         </div>
-                        <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-                          {group.groupRequest.description}
-                        </p>
+                        <p className="mt-2 text-sm text-slate-600 max-w-2xl">{group.groupRequest.description}</p>
                         <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
                           <div className="flex items-center gap-1.5">
                             <Users size={14} />
@@ -298,18 +290,12 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                                     : 'bg-blue-100 text-blue-800'
                                 }`}
                               >
-                                {myGroupData.role === 'Representante' ? (
-                                  <Crown size={12} />
-                                ) : (
-                                  <Shield size={12} />
-                                )}
+                                {myGroupData.role === 'Representante' ? <Crown size={12} /> : <Shield size={12} />}
                                 {myGroupData.role}
                               </span>
                             )}
                           </div>
-                          <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-                            {group.groupRequest.description}
-                          </p>
+                          <p className="mt-2 text-sm text-slate-600 max-w-2xl">{group.groupRequest.description}</p>
                           <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
                             <div className="flex items-center gap-1.5">
                               <Users size={14} />
@@ -321,7 +307,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <Crown size={14} className="text-amber-600" />
-                              <span>{group.representative.first_name} {group.representative.last_name}</span>
+                              <span>
+                                {group.representative.first_name} {group.representative.last_name}
+                              </span>
                             </div>
                           </div>
                         </div>

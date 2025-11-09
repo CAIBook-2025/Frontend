@@ -19,18 +19,13 @@ type HistoricalReservationsViewProps = {
 };
 
 export const HistoricalReservationsView = ({ reservations }: HistoricalReservationsViewProps) => {
-  
-  const historicalReservations = reservations.filter(res => 
-    res.isFinished || res.status === 'CANCELED'
-  );
+  const historicalReservations = reservations.filter((res) => res.isFinished || res.status === 'CANCELED');
 
   const renderReservationList = () => {
     if (historicalReservations.length === 0) {
       return <div className="text-slate-500 text-center p-4">No tienes ninguna reserva en tu historial.</div>;
     }
-    return historicalReservations.map((res) => (
-      <HistoricalReservationCard key={res.id} reservation={res} />
-    ));
+    return historicalReservations.map((res) => <HistoricalReservationCard key={res.id} reservation={res} />);
   };
 
   return (

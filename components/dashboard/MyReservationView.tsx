@@ -27,16 +27,14 @@ export const MyReservationsView = ({ reservations, onCancelClick }: MyReservatio
   const handleOpenDetailsModal = (reservation: Reservation) => setSelectedReservation(reservation);
   const handleCloseDetailsModal = () => setSelectedReservation(null);
 
-  const activeReservations = reservations.filter(res => 
-    !res.isFinished && res.status !== 'CANCELED'
-  );
+  const activeReservations = reservations.filter((res) => !res.isFinished && res.status !== 'CANCELED');
 
   const renderReservationList = () => {
     if (activeReservations.length === 0) {
       return <div className="text-slate-500 text-center p-4">No tienes ninguna reserva activa.</div>;
     }
     return activeReservations.map((res) => (
-      <ReservationCard 
+      <ReservationCard
         key={res.id}
         reservation={res}
         onCancelClick={onCancelClick}

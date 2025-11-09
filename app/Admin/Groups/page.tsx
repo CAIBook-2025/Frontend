@@ -185,8 +185,7 @@ export default function AdminGroupsPage() {
     setSelectedRequest(null);
   };
 
-  const handleManage = (id: string) => {
-  };
+  const handleManage = (id: string) => {};
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
