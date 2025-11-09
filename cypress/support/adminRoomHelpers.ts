@@ -62,7 +62,7 @@ const buildScheduleRoomPayload = (
     id: String(room.id),
     name: room.name,
     features: normalizeFeatures(room.equipment),
-    location: room.location ?? 'Sin ubicacion',
+    location: room.location ?? 'Sin ubicación',
     capacity: Number(room.capacity ?? 0),
     status: 'AVAILABLE',
     reservationsToday: 0,
