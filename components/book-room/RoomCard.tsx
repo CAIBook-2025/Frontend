@@ -2,9 +2,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0';
-
 import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
+
+
 
 // --- Tipos (sin cambios) ---
 type RoomStatus = 'Disponible' | 'Ocupada';
@@ -63,8 +64,10 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
           'Authorization': `Bearer ${accessToken}`
         },
         // Usamos el id del perfil del backend para la reserva
+
         body: JSON.stringify({ id: scheduleId, userId }),
       });
+
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Error al realizar la reserva');
@@ -83,6 +86,7 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
     setShowSuccessModal(false);
     window.location.reload();
   };
+
   return (
     <>
       {/* --- El resto del JSX no necesita cambios --- */}
@@ -122,6 +126,7 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
             </div>
           </div>
         </div>
+
         <button
           disabled={!isAvailable}
           className={`
@@ -137,6 +142,7 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
           {isAvailable ? 'Reservar' : 'No Disponible'}
         </button>
       </div>
+
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="m-4 max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
