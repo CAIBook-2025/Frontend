@@ -23,10 +23,11 @@ describe('Admin Room Uses', () => {
   });
 
   it('loads room data from the prismaModels fixture', () => {
-    cy.get('@adminRoomFixture').then((fixture: PrismaModelsFixture) => {
-      cy.get('table tbody tr').should('have.length', fixture.studyRooms.length);
+    cy.get('@adminRoomFixture').then((fixture) => {
+      const adminFixture = fixture as unknown as PrismaModelsFixture;
+      cy.get('table tbody tr').should('have.length', adminFixture.studyRooms.length);
 
-      fixture.studyRooms.forEach((room) => {
+      adminFixture.studyRooms.forEach((room) => {
         cy.contains('table tbody tr', room.name).should('exist');
       });
     });
