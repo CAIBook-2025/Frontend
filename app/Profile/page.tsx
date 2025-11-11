@@ -157,18 +157,17 @@ export default function ProfilePage() {
 
   // ✅ NUEVO: Enviar email de cambio de contraseña
   const handlePasswordReset = async () => {
+    if (!accessToken || !userData) return;
     setIsSendingPasswordEmail(true);
     setPasswordMessage(null);
 
     try {
-      await fetch(`${process.env.AUTH0_DOMAIN}/dbconnections/change_password`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/send-change-password-email`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          client_id: user?.id,
-          email: user?.email,
-          connection: 'Username-Password-Authentication',
-        }),
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       setPasswordMessage('Te hemos enviado un correo para cambiar tu contraseña.');
