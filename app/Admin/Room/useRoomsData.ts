@@ -25,14 +25,14 @@ export const useRoomsData = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoadingRooms, setIsLoadingRooms] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-
+  
   const loadRooms = useCallback(async () => {
     const activeUser = user ?? MOCK_AUTH_USER;
     if (!activeUser) return;
-
+    
     setIsLoadingRooms(true);
     setLoadError(null);
-
+    
     try {
       let accessToken: string | null = null;
 
