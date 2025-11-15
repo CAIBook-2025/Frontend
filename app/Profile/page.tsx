@@ -82,9 +82,71 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!accessToken || !userData) return;
 
-    setIsSaving(true);
     setError(null);
     setSuccess(null);
+
+    // ✅ VALIDACIÓN: Campos obligatorios
+    if (!formData.first_name.trim()) {
+      setError('El nombre es obligatorio');
+      return;
+    }
+
+    if (!formData.last_name.trim()) {
+      setError('El apellido es obligatorio');
+      return;
+    }
+
+    if (!formData.career.trim()) {
+      setError('La carrera es obligatoria');
+      return;
+    }
+
+    if (!formData.student_number.trim()) {
+      setError('El número de estudiante es obligatorio');
+      return;
+    }
+
+    // ✅ VALIDACIÓN: Formato de nombre (solo letras y espacios)
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!nameRegex.test(formData.first_name.trim())) {
+      setError('El nombre solo puede contener letras y espacios');
+      return;
+    }
+
+    if (!nameRegex.test(formData.last_name.trim())) {
+      setError('El apellido solo puede contener letras y espacios');
+      return;
+    }
+
+    // ✅ VALIDACIÓN: Carrera (solo letras, números, espacios y guiones)
+    const careerRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-]+$/;
+    if (!careerRegex.test(formData.career.trim())) {
+      setError('La carrera contiene caracteres inválidos');
+      return;
+    }
+
+    // ✅ VALIDACIÓN: Número de estudiante (solo números, guiones y espacios)
+    const studentNumberRegex = /^[0-9\-\s]+$/;
+    if (!studentNumberRegex.test(formData.student_number.trim())) {
+      setError('El número de estudiante solo puede contener números, guiones y espacios');
+      return;
+    }
+
+    if (formData.student_number.replace(/\D/g, '').length < 4) {
+      setError('El número de estudiante debe tener al menos 4 dígitos');
+      return;
+    }
+
+    // ✅ VALIDACIÓN: Teléfono (si se proporciona)
+    if (formData.phone.trim()) {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(formData.phone.trim()) || formData.phone.replace(/\D/g, '').length < 7) {
+        setError('El teléfono no es válido (mínimo 7 dígitos)');
+        return;
+      }
+    }
+
+    setIsSaving(true);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
@@ -220,83 +282,78 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="first_name"
-                      value={formData.first_name}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.first_name || 'No especificado'}</p>
-                  )}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="Tu nombre"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="last_name"
-                      value={formData.last_name}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.last_name || 'No especificado'}</p>
-                  )}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Apellido <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={formData.last_name}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="Tu apellido"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Carrera</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="career"
-                      value={formData.career}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.career || 'No especificado'}</p>
-                  )}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Carrera <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="career"
+                    value={formData.career}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="Tu carrera"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Número de estudiante</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="student_number"
-                      value={formData.student_number}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.student_number || 'No especificado'}</p>
-                  )}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="Tu teléfono"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <p className="text-gray-900">{userData.phone || 'No especificado'}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
-                  <p className="text-gray-900">{userData.role || 'No especificado'}</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Número de Estudiante <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="student_number"
+                    value={formData.student_number}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="Tu número de estudiante"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                  />
                 </div>
               </div>
 
@@ -307,35 +364,25 @@ export default function ProfilePage() {
                     <button
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
                     >
-                      {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                      {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                     </button>
-
                     <button
                       onClick={handleCancel}
                       disabled={isSaving}
-                      className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 disabled:bg-gray-200"
                     >
                       Cancelar
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                    >
-                      Editar perfil
-                    </button>
-
-                    <a
-                      href="/auth/logout"
-                      className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-center"
-                    >
-                      Cerrar sesión
-                    </a>
-                  </div>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    Editar Perfil
+                  </button>
                 )}
               </div>
 
