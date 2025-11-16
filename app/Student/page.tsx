@@ -141,6 +141,7 @@ export default function StudentDashboardPage() {
       <div className="mt-8">
         <Link
           href="/auth/logout" // Ruta correcta para cerrar sesión con Auth0
+          prefetch={false}
           className="bg-slate-600 text-white font-bold py-2 px-6 rounded-full hover:bg-slate-800 transition-colors duration-300"
         >
           Cerrar Sesión
