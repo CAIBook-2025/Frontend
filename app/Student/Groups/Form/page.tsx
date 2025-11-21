@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -17,11 +17,15 @@ interface GroupFormData {
 
 export default function CreateGroupPage() {
   const params = useSearchParams();
+  const router = useRouter();
   const userId = Number(params.get('userId') ?? 0);
+  const { user } = useUser();
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
@@ -29,9 +33,60 @@ export default function CreateGroupPage() {
     logo: null,
   });
 
+  // Obtener access token
+  useEffect(() => {
+    async function fetchAccessToken() {
+      if (user) {
+        try {
+          const token = await getAccessToken();
+          setAccessToken(token || null);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
+        }
+      }
+    }
+
+    fetchAccessToken();
+  }, [user]);
+
+  // Función para validar cada etapa
+  const validateStep = (currentStep: number): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (currentStep === 1) {
+      // Validar Etapa 1: Información General
+      if (!formData.name.trim()) {
+        errors.name = 'El nombre del grupo es requerido';
+      }
+      if (!formData.description.trim()) {
+        errors.description = 'La descripción es requerida';
+      }
+    } else if (currentStep === 2) {
+      // Validar Etapa 2: Detalles y Objetivos
+      if (!formData.goal.trim()) {
+        errors.goal = 'El objetivo principal es requerido';
+      }
+    }
+    // Etapa 3 no requiere validación (logo es opcional)
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleNext = () => {
-    // TODO: Añadir validación antes de pasar al siguiente paso
-    if (step < 3) setStep(step + 1);
+    // Validar la etapa actual antes de avanzar
+    if (!validateStep(step)) {
+      setErrorMsg('Por favor completa todos los campos requeridos antes de continuar.');
+      return;
+    }
+
+    // Limpiar errores si la validación es exitosa
+    setErrorMsg(null);
+    setValidationErrors({});
+
+    if (step < 3) {
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -41,6 +96,20 @@ export default function CreateGroupPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Limpiar el error del campo cuando el usuario empiece a escribir
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
+    // Limpiar el mensaje de error general si todos los campos están completos
+    if (errorMsg) {
+      setErrorMsg(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +145,8 @@ export default function CreateGroupPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          // TODO: Add token authorization
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
           user_id: userId,
@@ -93,16 +163,12 @@ export default function CreateGroupPage() {
 
       const data = await res.json();
 
-      alert('¡Solicitud de grupo enviada con éxito!');
-      setFormData({ name: '', description: '', goal: '', logo: null });
-      setStep(1);
+      // Redirigir al dashboard con parámetro de éxito
+      router.push(`/Student?view=groups&success=true`);
     } catch (err: any) {
       setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
-    } finally {
       setSubmitting(false);
     }
-
-    alert('¡Solicitud de grupo enviada! Revisa la consola.');
   };
 
   return (
@@ -163,6 +229,7 @@ export default function CreateGroupPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    error={validationErrors.name}
                   />
                   <div>
                     <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
@@ -175,9 +242,16 @@ export default function CreateGroupPage() {
                       placeholder="Una breve descripción que invite a los estudiantes a unirse."
                       value={formData.description}
                       onChange={handleInputChange}
-                      className="resize-none block w-full rounded-md border-slate-300 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600"
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                        validationErrors.description
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-slate-300 focus:border-blue-600'
+                      }`}
                       required
                     />
+                    {validationErrors.description && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -198,9 +272,16 @@ export default function CreateGroupPage() {
                       placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
                       value={formData.goal}
                       onChange={handleInputChange}
-                      className="resize-none block w-full rounded-md border-slate-300 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600"
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                        validationErrors.goal
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-slate-300 focus:border-blue-600'
+                      }`}
                       required
                     />
+                    {validationErrors.goal && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
+                    )}
                   </div>
                 </div>
               </div>

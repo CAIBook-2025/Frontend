@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Loader2, AlertCircle, Calendar } from 'lucide-react';
 
 // Importamos los componentes, incluyendo el nuevo DaySelector
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -126,8 +127,41 @@ export default function BookRoomPage() {
     loadRooms();
   }, [selectedDate]); // Se vuelve a ejecutar si selectedDate cambia
 
+  // Verificar si el usuario ha alcanzado el límite de reservas activas
+  const activeSchedules = userProfile?.activeSchedules ?? 0;
+  const hasReachedLimit = activeSchedules >= 3;
+
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
+      {/* Banner de límite alcanzado */}
+      {hasReachedLimit && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="rounded-full bg-amber-100 p-2">
+                <AlertCircle className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">
+                Límite de reservas activas alcanzado
+              </h3>
+              <p className="text-sm text-amber-700 mb-4">
+                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa{activeSchedules !== 1 ? 's' : ''}. 
+                El límite máximo es de 3 reservas simultáneas. Para realizar una nueva reserva, 
+                por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
+              </p>
+              <Link
+                href="/Reservations"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+              >
+                <Calendar size={16} /> Ver Mis Reservas
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. Filtros de Búsqueda */}
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
@@ -173,7 +207,13 @@ export default function BookRoomPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
               rooms.map((room) => (
-                <RoomCard key={room.id} room={room} scheduleId={room.id} userId={userProfile?.user?.id} />
+                <RoomCard 
+                  key={room.id} 
+                  room={room} 
+                  scheduleId={room.id} 
+                  userId={userProfile?.user?.id}
+                  disabled={hasReachedLimit}
+                />
               ))
             ) : (
               <p>No hay salas disponibles.</p>

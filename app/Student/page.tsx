@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 
 // 1. IMPORTAMOS la función y los tipos de datos del perfil
@@ -36,10 +37,19 @@ const ViewSkeleton = () => (
 type ViewMode = 'personal' | 'groups';
 
 export default function StudentDashboardPage() {
+  const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('personal');
 
   // Renombramos 'isLoading' a 'authLoading' para evitar confusiones
   const { user, isLoading: authLoading } = useUser();
+
+  // Detectar el parámetro 'view' de la URL
+  useEffect(() => {
+    const viewParam = searchParams.get('view');
+    if (viewParam === 'groups') {
+      setViewMode('groups');
+    }
+  }, [searchParams]);
 
   // 3. NUEVOS ESTADOS para manejar los datos del perfil y su carga
   const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);

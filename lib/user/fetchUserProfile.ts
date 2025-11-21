@@ -41,6 +41,8 @@ export type UserProfileResponse = {
   upcomingEventsCount: number;
   attendances: unknown[];
   attendancesCount: number;
+  pendingGroupRequests?: number;
+  activeSchedules?: number;
 };
 
 export async function fetchUserProfile(accessToken: string | null): Promise<UserProfileResponse | null> {

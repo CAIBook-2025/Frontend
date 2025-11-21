@@ -22,12 +22,13 @@ type RoomCardProps = {
   room: Room;
   scheduleId: number;
   userId?: number | null;
+  disabled?: boolean;
 };
 
-export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
+export const RoomCard = ({ room, scheduleId, userId, disabled = false }: RoomCardProps) => {
   const { user } = useUser();
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const isAvailable = room.status === 'Disponible';
+  const isAvailable = room.status === 'Disponible' && !disabled;
   useEffect(() => {
     async function fetchAccessToken() {
       if (user) {
@@ -45,6 +46,9 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   // --- FUNCIÓN handleReservar COMPLETAMENTE ACTUALIZADA ---
   const handleReservar = async () => {
+    if (disabled) {
+      return;
+    }
     if (!user || !accessToken || !userId) {
       alert('Debes iniciar sesión y completar tu perfil para poder realizar una reserva.');
       return;
@@ -126,8 +130,9 @@ export const RoomCard = ({ room, scheduleId, userId }: RoomCardProps) => {
             ${isAvailable ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-slate-400 cursor-not-allowed'}
           `}
           onClick={handleReservar}
+          title={disabled ? 'Has alcanzado el límite de reservas activas' : undefined}
         >
-          {isAvailable ? 'Reservar' : 'No Disponible'}
+          {disabled ? 'Límite Alcanzado' : isAvailable ? 'Reservar' : 'No Disponible'}
         </button>
       </div>
 

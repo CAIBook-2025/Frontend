@@ -3,8 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown } from 'lucide-react';
+import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown, CheckCircle, X, Clock } from 'lucide-react';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 // --- Tipos basados en la response del backend ---
 interface GroupRequest {
@@ -55,20 +57,36 @@ type GroupsViewProps = {
 
 export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const { user, isLoading } = useUser();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [myGroups, setMyGroups] = useState<MyGroupRole[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(true);
   const [isLoadingMy, setIsLoadingMy] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-  // Obtener access token
+  // Detectar si hay un parámetro de éxito en la URL
+  useEffect(() => {
+    const success = searchParams.get('success');
+    if (success === 'true') {
+      setShowSuccessMessage(true);
+      // Limpiar el parámetro de la URL sin recargar la página
+      const newUrl = window.location.pathname + window.location.search.replace(/[?&]success=true/, '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams]);
+
+  // Obtener access token y perfil del usuario
   useEffect(() => {
     async function fetchAccessToken() {
       if (user) {
         try {
-          const accessToken = await getAccessToken();
-          setAccessToken(accessToken);
+          const token = await getAccessToken();
+          setAccessToken(token);
         } catch (error) {
           console.error('Error fetching access token:', error);
         }
@@ -77,6 +95,25 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
     fetchAccessToken();
   }, [user]);
+
+  // Obtener perfil del usuario cuando tengamos el access token
+  useEffect(() => {
+    async function loadUserProfile() {
+      if (!accessToken) return;
+
+      setIsLoadingProfile(true);
+      try {
+        const profile = await fetchUserProfile(accessToken);
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    if (accessToken) loadUserProfile();
+  }, [accessToken]);
 
   // Cargar todos los grupos
   useEffect(() => {
@@ -92,7 +129,8 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         });
 
         if (!response.ok) {
-          throw new Error('Error al cargar los grupos');
+          setAllGroups([]);
+          return;
         }
 
         const data = await response.json();
@@ -160,6 +198,14 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
     return 1 + group.moderators.length; // 1 representante + N moderadores
   };
 
+  const handleCreateAnother = () => {
+    setShowSuccessMessage(false);
+    router.push(`/Student/Groups/Form?userId=${userId}`);
+  };
+
+  // Verificar si el usuario tiene solicitudes pendientes
+  const hasPendingRequests = (userProfile?.pendingGroupRequests ?? 0) >= 1;
+
   if (error) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
@@ -170,6 +216,65 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
   return (
     <section className="space-y-10">
+      {/* Mensaje de solicitud pendiente */}
+      {!isLoadingProfile && hasPendingRequests && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <Clock className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">
+                Solicitud de grupo pendiente
+              </h3>
+              <p className="text-sm text-amber-700">
+                Ya tienes {userProfile?.pendingGroupRequests} solicitud{userProfile?.pendingGroupRequests !== 1 ? 'es' : ''} de grupo pendiente{userProfile?.pendingGroupRequests !== 1 ? 's' : ''}. 
+                Por favor espera a que se resuelva{userProfile?.pendingGroupRequests !== 1 ? 'n' : ''} antes de crear una nueva solicitud.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mensaje de éxito */}
+      {showSuccessMessage && (
+        <div className="rounded-xl border border-green-200 bg-green-50 p-6 shadow-sm animate-fade-in">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4 flex-1">
+              <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-green-800 mb-2">
+                  ¡Solicitud de grupo enviada con éxito!
+                </h3>
+                <p className="text-sm text-green-700 mb-4">
+                  Tu solicitud ha sido enviada y está siendo revisada. Puedes revisar el estado de tu solicitud en esta misma sección o realizar otra solicitud.
+                </p>
+                <div className="flex gap-3 flex-wrap">
+                  <button
+                    onClick={() => setShowSuccessMessage(false)}
+                    className="inline-flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+                  >
+                    Continuar Explorando
+                  </button>
+                  {!hasPendingRequests && (
+                    <button
+                      onClick={handleCreateAnother}
+                      className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-green-600 px-4 py-2 text-sm font-semibold text-green-600 transition-colors hover:bg-green-50"
+                    >
+                      <PlusCircle size={16} /> Realizar Otra Solicitud
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowSuccessMessage(false)}
+              className="text-green-600 hover:text-green-800 transition-colors flex-shrink-0"
+              aria-label="Cerrar mensaje"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Sección: Mis Grupos */}
       <div>
         <div className="flex justify-between items-center mb-6">
@@ -177,12 +282,18 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
             <h2 className="text-2xl font-bold text-gray-800">Mis Grupos</h2>
             <p className="text-sm text-slate-600 mt-1">Grupos donde eres representante o moderador</p>
           </div>
-          <Link
-            href={{ pathname: '/Student/Groups/Form', query: { userId } }}
-            className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-          >
-            <PlusCircle size={16} /> Crear Grupo
-          </Link>
+          {hasPendingRequests ? (
+            <div className="flex items-center gap-2 rounded-full bg-slate-400 px-4 py-2 text-sm font-semibold text-white cursor-not-allowed" title="Tienes solicitudes pendientes">
+              <PlusCircle size={16} /> Crear Grupo
+            </div>
+          ) : (
+            <Link
+              href={{ pathname: '/Student/Groups/Form', query: { userId } }}
+              className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              <PlusCircle size={16} /> Crear Grupo
+            </Link>
+          )}
         </div>
 
         {isLoadingMy ? (
@@ -193,12 +304,18 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
           <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
             <Users className="h-12 w-12 text-slate-300 mx-auto mb-3" />
             <p className="text-slate-600">Aún no eres parte de ningún grupo como representante o moderador</p>
-            <Link
-              href={{ pathname: '/Student/Groups/Form', query: { userId } }}
-              className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-semibold"
-            >
-              <PlusCircle size={16} /> Crear tu primer grupo
-            </Link>
+            {hasPendingRequests ? (
+              <p className="mt-4 text-sm text-amber-600 font-medium">
+                Tienes una solicitud pendiente. Espera a que se resuelva antes de crear otra.
+              </p>
+            ) : (
+              <Link
+                href={{ pathname: '/Student/Groups/Form', query: { userId } }}
+                className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                <PlusCircle size={16} /> Crear tu primer grupo
+              </Link>
+            )}
           </div>
         ) : (
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
