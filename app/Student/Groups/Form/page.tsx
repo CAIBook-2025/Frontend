@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, ArrowRight, UploadCloud, Send, AlertCircle, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -26,6 +28,8 @@ export default function CreateGroupPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
@@ -48,6 +52,31 @@ export default function CreateGroupPage() {
 
     fetchAccessToken();
   }, [user]);
+
+  // Obtener perfil del usuario para verificar solicitudes pendientes
+  useEffect(() => {
+    async function loadUserProfile() {
+      if (!accessToken) {
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      setIsLoadingProfile(true);
+      try {
+        const profile = await fetchUserProfile(accessToken);
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    if (accessToken) loadUserProfile();
+  }, [accessToken]);
+
+  // Verificar si el usuario tiene solicitudes pendientes
+  const hasPendingRequests = (userProfile?.pendingGroupRequests ?? 0) >= 1;
 
   // Función para validar cada etapa
   const validateStep = (currentStep: number): boolean => {
@@ -170,6 +199,78 @@ export default function CreateGroupPage() {
       setSubmitting(false);
     }
   };
+
+  // Si está cargando el perfil, mostrar loading
+  if (isLoadingProfile) {
+    return (
+      <main className="flex min-h-screen bg-slate-50 items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-slate-600">Verificando tu estado...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Si tiene solicitudes pendientes, mostrar mensaje y bloquear formulario
+  if (hasPendingRequests) {
+    return (
+      <main className="flex min-h-screen bg-slate-50">
+        <div className="hidden lg:block w-3/5 relative">
+          <Image
+            src="/PeopleForm.png"
+            alt="Estudiantes colaborando en un grupo"
+            width={500}
+            height={500}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gray-900/40" />
+          <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+            <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
+            <p className="mt-2 text-lg max-w-md text-white/90">
+              Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full lg:w-3/5 flex flex-col items-center justify-center h-full p-8">
+          <div className="max-w-2xl w-full">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="rounded-full bg-amber-100 p-3">
+                    <Clock className="h-8 w-8 text-amber-600" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-amber-800 mb-3">
+                    Solicitud de grupo pendiente
+                  </h2>
+                  <p className="text-amber-700 mb-6">
+                    Ya tienes {userProfile?.pendingGroupRequests} solicitud{userProfile?.pendingGroupRequests !== 1 ? 'es' : ''} de grupo pendiente{userProfile?.pendingGroupRequests !== 1 ? 's' : ''}. 
+                    Por favor espera a que se resuelva{userProfile?.pendingGroupRequests !== 1 ? 'n' : ''} antes de crear una nueva solicitud.
+                  </p>
+                  <div className="flex gap-3 flex-wrap">
+                    <Link
+                      href="/Student?view=groups"
+                      className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+                    >
+                      <ArrowLeft size={16} /> Volver a Grupos
+                    </Link>
+                    <a
+                      className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50"
+                    >
+                      <AlertCircle size={16} /> Ver Mis Solicitudes
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen bg-slate-50">

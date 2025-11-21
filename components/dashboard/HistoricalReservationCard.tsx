@@ -57,7 +57,7 @@ export const HistoricalReservationCard = ({ reservation }: { reservation: Reserv
         </div>
         <div className="flex items-center gap-2">
           <Clock size={16} />
-          <span>MÃ³dulo: {module}</span>
+          <span>Módulo: {module}</span>
         </div>
       </div>
     </div>
