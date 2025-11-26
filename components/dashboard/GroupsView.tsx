@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown, CheckCircle, X, Clock } from 'lucide-react';
+import { Users, PlusCircle, ArrowRight, Loader2, Crown, CheckCircle, X, Clock } from 'lucide-react';
 import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 // --- Tipos basados en la response del backend ---
@@ -25,30 +25,23 @@ interface Representative {
   email: string;
 }
 
-interface Moderator {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-}
-
 interface Group {
   id: number;
   reputation: string;
   repre_id: number;
   group_request_id: number;
-  moderators_ids: number[];
+  is_deleted: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
   groupRequest: GroupRequest;
-  representative: Representative;
-  moderators: Moderator[];
+  representative?: Representative;
   eventRequests?: any[];
 }
 
-interface MyGroupRole {
-  group: Group;
-  role: 'Representante' | 'Moderador';
+interface MyGroupsResponse {
+  total_groups: number;
+  groups: Group[];
 }
 
 type GroupsViewProps = {
@@ -60,7 +53,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [allGroups, setAllGroups] = useState<Group[]>([]);
-  const [myGroups, setMyGroups] = useState<MyGroupRole[]>([]);
+  const [myGroups, setMyGroups] = useState<Group[]>([]);
   const [isLoadingAll, setIsLoadingAll] = useState(true);
   const [isLoadingMy, setIsLoadingMy] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +139,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
     if (accessToken) loadAllGroups();
   }, [accessToken]);
 
-  // Cargar mis grupos (donde soy representante o moderador)
+  // Cargar mis grupos (donde soy representante)
   useEffect(() => {
     const loadMyGroups = async () => {
       if (!accessToken) return;
@@ -158,9 +151,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+        
         if (response.status === 403) {
-          const data = await response.json();
-          setMyGroups([]); // No es representante ni moderador de ningún grupo
+          setMyGroups([]); // No es representante de ningún grupo
           return;
         }
 
@@ -168,20 +161,8 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
           throw new Error('Error al cargar mis grupos');
         }
 
-        const data: Group[] = await response.json();
-
-        // Determinar el rol del usuario en cada grupo
-        const groupsWithRoles: MyGroupRole[] = data.map((group) => {
-          const isRepresentative = group.repre_id === userId;
-          const isModerator = group.moderators_ids.includes(userId!);
-
-          return {
-            group,
-            role: isRepresentative ? 'Representante' : 'Moderador',
-          };
-        });
-
-        setMyGroups(groupsWithRoles);
+        const data: MyGroupsResponse = await response.json();
+        setMyGroups(data.groups || []);
       } catch (error) {
         console.error('Error loading my groups:', error);
         setError('Error al cargar mis grupos');
@@ -192,11 +173,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
     if (accessToken && userId) loadMyGroups();
   }, [accessToken, userId]);
-
-  // Calcular el número total de miembros (representante + moderadores)
-  const getMemberCount = (group: Group): number => {
-    return 1 + group.moderators.length; // 1 representante + N moderadores
-  };
 
   const handleCreateAnother = () => {
     setShowSuccessMessage(false);
@@ -275,12 +251,13 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
           </div>
         </div>
       )}
+
       {/* Sección: Mis Grupos */}
       <div>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Mis Grupos</h2>
-            <p className="text-sm text-slate-600 mt-1">Grupos donde eres representante o moderador</p>
+            <p className="text-sm text-slate-600 mt-1">Grupos donde eres representante</p>
           </div>
           {hasPendingRequests ? (
             <div className="flex items-center gap-2 rounded-full bg-slate-400 px-4 py-2 text-sm font-semibold text-white cursor-not-allowed" title="Tienes solicitudes pendientes">
@@ -303,7 +280,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         ) : myGroups.length === 0 ? (
           <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
             <Users className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-600">Aún no eres parte de ningún grupo como representante o moderador</p>
+            <p className="text-slate-600">Aún no eres representante de ningún grupo</p>
             {hasPendingRequests ? (
               <p className="mt-4 text-sm text-amber-600 font-medium">
                 Tienes una solicitud pendiente. Espera a que se resuelva antes de crear otra.
@@ -320,7 +297,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         ) : (
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
             <ul className="divide-y divide-slate-200">
-              {myGroups.map(({ group, role }) => (
+              {myGroups.map((group) => (
                 <li key={group.id}>
                   <Link
                     href={`/Student/Groups/Representative/${group.id}`}
@@ -332,21 +309,13 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                           <h3 className="text-lg font-bold text-gray-800 group-hover:text-blue-600">
                             {group.groupRequest.name}
                           </h3>
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 ${
-                              role === 'Representante' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                            }`}
-                          >
-                            {role === 'Representante' ? <Crown size={12} /> : <Shield size={12} />}
-                            {role}
+                          <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 bg-amber-100 text-amber-800">
+                            <Crown size={12} />
+                            Representante
                           </span>
                         </div>
                         <p className="mt-2 text-sm text-slate-600 max-w-2xl">{group.groupRequest.description}</p>
                         <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
-                          <div className="flex items-center gap-1.5">
-                            <Users size={14} />
-                            <span>{getMemberCount(group)} miembros</span>
-                          </div>
                           <div className="flex items-center gap-1.5">
                             <span className="font-medium">Reputación:</span>
                             <span>{group.reputation}</span>
@@ -384,8 +353,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
             <ul className="divide-y divide-slate-200">
               {allGroups.map((group) => {
                 // Verificar si este grupo está en "Mis Grupos"
-                const myGroupData = myGroups.find((mg) => mg.group.id === group.id);
-                const isMyGroup = !!myGroupData;
+                const isMyGroup = myGroups.some((mg) => mg.id === group.id);
 
                 return (
                   <li key={group.id}>
@@ -400,34 +368,26 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                               {group.groupRequest.name}
                             </h3>
                             {isMyGroup && (
-                              <span
-                                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 ${
-                                  myGroupData.role === 'Representante'
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : 'bg-blue-100 text-blue-800'
-                                }`}
-                              >
-                                {myGroupData.role === 'Representante' ? <Crown size={12} /> : <Shield size={12} />}
-                                {myGroupData.role}
+                              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1 bg-amber-100 text-amber-800">
+                                <Crown size={12} />
+                                Representante
                               </span>
                             )}
                           </div>
                           <p className="mt-2 text-sm text-slate-600 max-w-2xl">{group.groupRequest.description}</p>
                           <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
                             <div className="flex items-center gap-1.5">
-                              <Users size={14} />
-                              <span>{getMemberCount(group)} miembros</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
                               <span className="font-medium">Reputación:</span>
                               <span>{group.reputation}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <Crown size={14} className="text-amber-600" />
-                              <span>
-                                {group.representative.first_name} {group.representative.last_name}
-                              </span>
-                            </div>
+                            {group.representative && (
+                              <div className="flex items-center gap-1.5">
+                                <Crown size={14} className="text-amber-600" />
+                                <span>
+                                  {group.representative.first_name} {group.representative.last_name}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <ArrowRight className="mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-blue-600 flex-shrink-0 ml-4" />
