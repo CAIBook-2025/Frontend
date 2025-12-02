@@ -5,6 +5,7 @@ import { EventRequest } from '@/types/eventRequest';
 import { getAccessToken } from '@auth0/nextjs-auth0/client';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { EventsFilterSearch } from './events-filter-search';
+import { updateEventRequest } from '@/lib/events/updateEventRequest';
 
 interface EventHistoryTableProps {
   events: EventRequest[];
@@ -54,14 +55,7 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
       const accessToken = resolveAccessToken(tokenResponse);
       if (!accessToken) return console.warn('Token no disponible');
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ status }),
-      });
+      await updateEventRequest(accessToken, id, { status });
 
       onUpdate?.();
     } catch (error) {
