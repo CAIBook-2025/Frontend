@@ -1,7 +1,3 @@
-import { mockUserProfileResponse } from '@/lib/mocks/mockUserProfile';
-
-const shouldUseMockApi = process.env.NEXT_PUBLIC_API_MODE === 'mock';
-
 export type UserProfile = {
   id: number;
   email: string;
@@ -10,61 +6,27 @@ export type UserProfile = {
   role: string | null;
   is_representative: boolean;
   is_moderator: boolean;
-  is_deleted?: boolean;
   createdAt: string;
   updatedAt: string;
-  deletedAt?: string | null;
   auth0_id: string;
   career: string | null;
   phone: string | null;
   student_number: string | null;
 };
 
-export type UserScheduleItem = {
-  id: number;
-  roomName: string;
-  location: string;
-  day: string;
-  module: number;
-  status: string;
-  available: string;
-  isFinished: boolean;
-};
-
-export type UserProfileResponse = {
+type UserProfileResponse = {
+  exists: boolean;
   user: UserProfile | null;
-  schedule: UserScheduleItem[];
-  scheduleCount: number;
-  strikes: unknown[];
-  strikesCount: number;
-  upcomingEvents: unknown[];
-  upcomingEventsCount: number;
-  attendances: unknown[];
-  attendancesCount: number;
-  pendingGroupRequests?: number;
-  activeSchedules?: number;
 };
 
-export async function fetchUserProfile(accessToken: string | null): Promise<UserProfileResponse | null> {
-  if (shouldUseMockApi) {
-    return mockUserProfileResponse;
-  }
-
+export async function fetchUserProfile(accessToken: string | null): Promise<UserProfile | null> {
   if (!accessToken) {
     console.warn('fetchUserProfile called without access token');
     return null;
   }
 
   try {
-    const profile_response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const profile = await profile_response.json();
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${profile.user.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -77,12 +39,12 @@ export async function fetchUserProfile(accessToken: string | null): Promise<User
 
     const data = (await response.json()) as UserProfileResponse;
 
-    if (!data.user) {
+    if (!data.exists || !data.user) {
       console.warn('User profile not found in response');
       return null;
     }
 
-    return data;
+    return data.user;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
