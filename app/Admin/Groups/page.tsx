@@ -4,218 +4,180 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TabNavigation } from '@/components/ui/tab-navigation';
 import { SearchBar } from '@/components/ui/search-bar';
-import { GroupRequestsTable, type GroupRequest } from '@/components/ui/admin/groups/group-requests-table';
+import { GroupRequestsTable } from '@/components/ui/admin/groups/group-requests-table';
 import { PageHeader } from '@/components/ui/page-header';
 import { GroupDetailsModal } from '@/components/ui/admin/groups/group-details-modal';
-
-const mockPendingRequests: GroupRequest[] = [
-  {
-    id: '1',
-    type: 'pending',
-    groupName: 'Club de Fotografía UC',
-    description: 'Grupo dedicado a la fotografía artística y documental',
-    applicantName: 'Ana García',
-    applicantEmail: 'ana.garcia@uc.cl',
-    date: '10/12/2024',
-    status: 'Pendiente',
-  },
-  {
-    id: '2',
-    type: 'pending',
-    groupName: 'Comité de Sustentabilidad',
-    description: 'Promovemos prácticas sustentables en el campus universitario',
-    applicantName: 'Carlos Mendoza',
-    applicantEmail: 'carlos.mendoza@uc.cl',
-    date: '08/12/2024',
-    status: 'Pendiente',
-  },
-  {
-    id: '3',
-    type: 'pending',
-    groupName: 'Grupo de Debate UC',
-    description: 'Espacio para practicar debate académico y competitivo',
-    applicantName: 'María López',
-    applicantEmail: 'maria.lopez@uc.cl',
-    date: '05/12/2024',
-    status: 'Pendiente',
-  },
-];
-
-const mockApprovedRequests: GroupRequest[] = [
-  {
-    id: '4',
-    type: 'approved',
-    groupName: 'Club de Programación UC',
-    description: 'Grupo dedicado a enseñar y practicar programación',
-    responsibleName: 'Juan Pérez',
-    responsibleEmail: 'juan.perez@uc.cl',
-    date: '15/11/2024',
-    approvalDate: '15/11/2024',
-    members: 45,
-    events: 8,
-  },
-  {
-    id: '5',
-    type: 'approved',
-    groupName: 'Club de Ajedrez UC',
-    description: 'Promoción y práctica del ajedrez universitario',
-    responsibleName: 'Sofía Ruiz',
-    responsibleEmail: 'sofia.ruiz@uc.cl',
-    date: '20/11/2024',
-    approvalDate: '20/11/2024',
-    members: 32,
-    events: 5,
-  },
-];
-
-const mockRejectedRequests: GroupRequest[] = [
-  {
-    id: '6',
-    type: 'rejected',
-    groupName: 'Club de Fiestas UC',
-    description: 'Organización de fiestas y eventos sociales',
-    applicantName: 'Pedro Silva',
-    applicantEmail: 'pedro.silva@uc.cl',
-    date: '10/11/2024',
-    rejectionDate: '10/11/2024',
-    reason: 'No cumple con los objetivos académicos de la universidad',
-  },
-];
+import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
+import { GroupRequest } from '@/types/groupRequest';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
+import { updateGroupRequest } from "@/lib/groups/updateGroupRequest";
 
 export default function AdminGroupsPage() {
   const searchParams = useSearchParams();
+
   const [activeTab, setActiveTab] = useState(0);
   const [searchValue, setSearchValue] = useState('');
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+
+  const [requests, setRequests] = useState<GroupRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [selectedRequest, setSelectedRequest] = useState<GroupRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+
+      const tokenResponse = await getAccessToken();
+      const accessToken = resolveAccessToken(tokenResponse);
+      const data = await fetchGroupRequests(accessToken);
+
+      if (data) {
+        const mapped: GroupRequest[] = data.map((req: any) => ({
+          id: req.id,
+          name: req.groupName ?? req.name ?? "",
+          goal: req.goal ?? "",
+          description: req.description ?? "",
+          logo: req.logo ?? null,
+          status: req.status ?? "PENDING",
+          user: {
+            id: req.user_id ?? 0,
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            email: req.user.email,
+            role: req.user.role,
+          },
+          group_created: req.group_created ?? false,
+          group_id: req.group_id ?? null,
+          createdAt: req.createdAt ?? req.date ?? new Date().toISOString(),
+          updatedAt: req.updatedAt ?? new Date().toISOString(),
+        }));
+
+        setRequests(mapped);
+      }
+    } catch (error) {
+      console.error("Error cargando solicitudes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   useEffect(() => {
-    const groupId = searchParams.get('groupId');
-    if (groupId) {
-      handleView(groupId);
-    }
-  }, [searchParams]);
+    loadData();
+  }, []);
 
-  const tabs = [
-    { label: 'Pendientes', count: 3, active: activeTab === 0 },
-    { label: 'Aprobados', count: 2, active: activeTab === 1 },
-    { label: 'Rechazados', count: 1, active: activeTab === 2 },
-  ];
 
-  const getCurrentRequests = () => {
-    switch (activeTab) {
-      case 0:
-        return mockPendingRequests;
-      case 1:
-        return mockApprovedRequests;
-      case 2:
-        return mockRejectedRequests;
-      default:
-        return [];
-    }
-  };
+  useEffect(() => {
+    const id = searchParams.get('groupId');
+    if (id) handleView(Number(id));
+  }, [searchParams, requests]);
 
-  const getTableType = () => {
-    switch (activeTab) {
-      case 0:
-        return 'pending' as const;
-      case 1:
-        return 'approved' as const;
-      case 2:
-        return 'rejected' as const;
-      default:
-        return 'pending' as const;
+
+  const updateStatus = async (id: number, status: "CONFIRMED" | "CANCELLED") => {
+    try {
+      setLoading(true);
+
+      const tokenResponse = await getAccessToken();
+      const accessToken = resolveAccessToken(tokenResponse);
+      if (!accessToken) return console.warn("Token no disponible");
+
+      await updateGroupRequest(accessToken, id, { status });
+
+      await loadData();
+    } catch (error) {
+      console.error("Error actualizando solicitud:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredRequests = getCurrentRequests().filter((request) => {
-    const searchLower = searchValue.toLowerCase();
-    const groupNameMatch = request.groupName.toLowerCase().includes(searchLower);
 
-    if (request.type === 'pending' || request.type === 'rejected') {
-      return groupNameMatch || request.applicantName.toLowerCase().includes(searchLower);
-    } else if (request.type === 'approved') {
-      return groupNameMatch || request.responsibleName.toLowerCase().includes(searchLower);
-    }
-
-    return groupNameMatch;
-  });
-
-  const getPageHeader = () => {
-    switch (activeTab) {
-      case 0:
-        return {
-          title: 'Administrar Grupos - Pendientes',
-          subtitle: 'Revisa y aprueba o rechaza las solicitudes de nuevos grupos',
-        };
-      case 1:
-        return {
-          title: 'Administrar Grupos - Aprobados',
-          subtitle: 'Gestiona los grupos que han sido aprobados',
-        };
-      case 2:
-        return {
-          title: 'Administrar Grupos - Rechazados',
-          subtitle: 'Historial de solicitudes que han sido rechazadas',
-        };
-      default:
-        return {
-          title: 'Administrar Grupos - Pendientes',
-          subtitle: 'Revisa y aprueba o rechaza las solicitudes de nuevos grupos',
-        };
-    }
-  };
-
-  const handleView = (id: string) => {
-    const allRequests = [...mockPendingRequests, ...mockApprovedRequests, ...mockRejectedRequests];
-    const request = allRequests.find((r) => r.id === id);
-    if (request) {
-      setSelectedRequest(request);
+  const handleView = (id: number) => {
+    const req = requests.find((r) => r.id === id);
+    if (req) {
+      setSelectedRequest(req);
       setIsModalOpen(true);
     }
   };
 
-  const handleApprove = (id: string) => {
-    setIsModalOpen(false);
-    setSelectedRequest(null);
-  };
+  const handleApprove = (id: number) => updateStatus(id, "CONFIRMED");
+  const handleReject = (id: number) => updateStatus(id, "CANCELLED");
 
-  const handleReject = (id: string) => {
-    setIsModalOpen(false);
-    setSelectedRequest(null);
-  };
-
-  const handleManage = (id: string) => {
+  const handleManage = (group_id: number | null) => {
+    if (!group_id) return;
+    console.log("Manage group:", group_id);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
     setSelectedRequest(null);
+    setIsModalOpen(false);
   };
 
-  const pageHeader = getPageHeader();
+
+  const requestsByStatus = {
+    pending: requests.filter((r) => r.status === 'PENDING'),
+    approved: requests.filter((r) => r.status === 'CONFIRMED'),
+    rejected: requests.filter((r) => r.status === 'CANCELLED'),
+  };
+
+  const tabs = [
+    { label: 'Pendientes', count: requestsByStatus.pending.length, active: activeTab === 0 },
+    { label: 'Aprobados', count: requestsByStatus.approved.length, active: activeTab === 1 },
+    { label: 'Rechazados', count: requestsByStatus.rejected.length, active: activeTab === 2 },
+  ];
+
+  const getTableType = () => {
+    if (activeTab === 0) return 'PENDING';
+    if (activeTab === 1) return 'CONFIRMED';
+    return 'CANCELLED';
+  };
+
+  const getCurrentRequests = () => {
+    if (activeTab === 0) return requestsByStatus.pending;
+    if (activeTab === 1) return requestsByStatus.approved;
+    return requestsByStatus.rejected;
+  };
+
+  const filteredRequests = getCurrentRequests().filter((r) => {
+    const t = searchValue.toLowerCase();
+    return (
+      r.name.toLowerCase().includes(t) ||
+      r.user.first_name.toLowerCase().includes(t)
+    );
+  });
+
+
+  const pageHeader =
+    activeTab === 0
+      ? { title: 'Administrar Grupos - Pendientes', subtitle: 'Revisa y aprueba o rechaza nuevas solicitudes' }
+      : activeTab === 1
+        ? { title: 'Administrar Grupos - Aprobados', subtitle: 'Gestiona los grupos aprobados' }
+        : { title: 'Administrar Grupos - Rechazados', subtitle: 'Historial de solicitudes rechazadas' };
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
         <PageHeader title={pageHeader.title} subtitle={pageHeader.subtitle} />
 
-        <TabNavigation tabs={tabs} onTabChange={setActiveTab} />
-
-        <SearchBar
-          placeholder="Buscar por nombre de grupo o solicitante..."
-          value={searchValue}
-          onChange={setSearchValue}
-        />
-
-        <GroupRequestsTable
-          requests={filteredRequests}
-          tableType={getTableType()}
-          onView={handleView}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onManage={handleManage}
-        />
+        {loading ? (
+          <p className="text-center text-gray-500 mt-8">Cargando solicitudes...</p>
+        ) : (
+          <>
+            <TabNavigation tabs={tabs} onTabChange={setActiveTab} />
+            <SearchBar placeholder="Buscar..." value={searchValue} onChange={setSearchValue} />
+            <GroupRequestsTable
+              requests={filteredRequests}
+              tableType={getTableType()}
+              onView={handleView}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onManage={handleManage}
+            />
+          </>
+        )}
 
         <GroupDetailsModal
           request={selectedRequest}
