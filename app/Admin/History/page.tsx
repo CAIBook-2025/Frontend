@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { TabNavigation } from '@/components/ui/tab-navigation';
-import { FilterComponent } from '@/components/ui/admin/history/filter-search';
 import { ReservationSection } from '@/components/ui/admin/history/reservation-section';
 import { EventSection } from '@/components/ui/admin/history/events-section';
 
@@ -24,9 +23,6 @@ export default function HistoryPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <PageHeader title={pageHeader.title} subtitle={pageHeader.subtitle} />
         <TabNavigation tabs={tabs} onTabChange={setActiveTab} />
-
-        <FilterComponent />
-
         {activeTab === 0 ? <ReservationSection /> : <EventSection />}
       </div>
     </div>
