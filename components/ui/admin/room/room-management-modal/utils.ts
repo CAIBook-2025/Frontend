@@ -81,8 +81,7 @@ export const parseModule = (moduleValue: string | number | null | undefined): Ma
   return MODULES.includes(moduleId) ? moduleId : null;
 };
 
-export const getModuleTimeLabel = (module: MaintenanceModule): string =>
-  MODULE_TIME_WINDOWS[module]?.label ?? '';
+export const getModuleTimeLabel = (module: MaintenanceModule): string => MODULE_TIME_WINDOWS[module]?.label ?? '';
 
 export const getModuleStartDate = (dayKey: string, module: MaintenanceModule): Date | null => {
   const window = MODULE_TIME_WINDOWS[module];
@@ -101,14 +100,17 @@ export const isSlotInPast = (dayKey: string, module: MaintenanceModule): boolean
 };
 
 export const buildEmptyDayStatus = (dayKey: string): Record<MaintenanceModule, SlotInfo> =>
-  MODULES.reduce<Record<MaintenanceModule, SlotInfo>>((acc, module) => {
-    acc[module] = {
-      status: 'AVAILABLE',
-      timeLabel: getModuleTimeLabel(module),
-      isPast: isSlotInPast(dayKey, module),
-    };
-    return acc;
-  }, {} as Record<MaintenanceModule, SlotInfo>);
+  MODULES.reduce<Record<MaintenanceModule, SlotInfo>>(
+    (acc, module) => {
+      acc[module] = {
+        status: 'AVAILABLE',
+        timeLabel: getModuleTimeLabel(module),
+        isPast: isSlotInPast(dayKey, module),
+      };
+      return acc;
+    },
+    {} as Record<MaintenanceModule, SlotInfo>
+  );
 
 export const getRoomIdentifier = (item: ScheduleItem): string => {
   const base = item.studyRoom?.id ?? item.sr_id ?? item.id;

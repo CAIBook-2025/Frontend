@@ -1,8 +1,11 @@
 // components/dashboard/PersonalView.tsx
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert } from 'lucide-react';
+import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert, Loader2, Sparkles } from 'lucide-react';
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserScheduleItem } from '@/lib/user/fetchUserProfile';
 
 type Stats = {
   reservasActivas: number;
@@ -51,7 +54,117 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
   </div>
 );
 
+// Función para formatear la fecha y hora
+const formatDateTime = (day: string, module: number) => {
+  const date = new Date(day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dateOnly = new Date(date);
+  dateOnly.setHours(0, 0, 0, 0);
+
+  // Mapeo de módulos a horas (ajusta según tu sistema)
+  const moduleTimes: Record<number, string> = {
+    1: '08:00 - 09:00',
+    2: '09:00 - 10:00',
+    3: '10:00 - 11:00',
+    4: '11:00 - 12:00',
+    5: '12:00 - 13:00',
+    6: '13:00 - 14:00',
+    7: '14:00 - 15:00',
+    8: '15:00 - 16:00',
+    9: '16:00 - 17:00',
+    10: '17:00 - 18:00',
+    11: '18:00 - 19:00',
+    12: '19:00 - 20:00',
+  };
+
+  const timeRange = moduleTimes[module] || `${module}:00`;
+
+  let dateLabel = '';
+  if (dateOnly.getTime() === today.getTime()) {
+    dateLabel = 'Hoy';
+  } else if (dateOnly.getTime() === tomorrow.getTime()) {
+    dateLabel = 'Mañana';
+  } else {
+    dateLabel = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    dateLabel = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
+  }
+
+  return `${dateLabel}, ${timeRange}`;
+};
+
+// Función para obtener el badge de estado
+const getStatusBadge = (status: string) => {
+  const statusMap: Record<string, { bg: string; text: string; label: string }> = {
+    PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pendiente' },
+    PRESENT: { bg: 'bg-green-100', text: 'text-green-800', label: 'Confirmada' },
+    ABSENT: { bg: 'bg-red-100', text: 'text-red-800', label: 'Ausente' },
+    CANCELED: { bg: 'bg-slate-100', text: 'text-slate-800', label: 'Cancelada' },
+  };
+
+  const statusInfo = statusMap[status] || { bg: 'bg-slate-100', text: 'text-slate-800', label: status };
+  return (
+    <span className={`rounded-full ${statusInfo.bg} px-3 py-1 text-xs font-medium ${statusInfo.text}`}>
+      {statusInfo.label}
+    </span>
+  );
+};
+
 export const PersonalView = ({ stats }: { stats: Stats }) => {
+  const { user } = useUser();
+  const [upcomingReservations, setUpcomingReservations] = useState<UserScheduleItem[]>([]);
+  const [isLoadingUpcoming, setIsLoadingUpcoming] = useState(true);
+
+  useEffect(() => {
+    async function loadUpcomingReservations() {
+      if (!user) {
+        setIsLoadingUpcoming(false);
+        return;
+      }
+
+      try {
+        const accessToken = await getAccessToken();
+        const profile = await fetchUserProfile(accessToken);
+
+        if (profile?.schedule) {
+          const now = new Date();
+          // Filtrar reservas que no están terminadas y están en el futuro o hoy
+          const upcoming = profile.schedule
+            .filter((reservation) => {
+              const reservationDate = new Date(reservation.day);
+              reservationDate.setHours(0, 0, 0, 0);
+              const today = new Date(now);
+              today.setHours(0, 0, 0, 0);
+              
+              return (
+                !reservation.isFinished &&
+                reservation.status !== 'CANCELED' &&
+                reservationDate >= today
+              );
+            })
+            .sort((a, b) => {
+              // Ordenar por fecha más cercana primero
+              const dateA = new Date(a.day).getTime();
+              const dateB = new Date(b.day).getTime();
+              if (dateA !== dateB) return dateA - dateB;
+              return a.module - b.module;
+            })
+            .slice(0, 5); // Mostrar máximo 5 próximas reservas
+
+          setUpcomingReservations(upcoming);
+        }
+      } catch (error) {
+        console.error('Error loading upcoming reservations:', error);
+      } finally {
+        setIsLoadingUpcoming(false);
+      }
+    }
+
+    loadUpcomingReservations();
+  }, [user]);
+
   return (
     <>
       {/* 2. Resumen Rápido (Stats) */}
@@ -87,31 +200,45 @@ export const PersonalView = ({ stats }: { stats: Stats }) => {
       <section>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Próximamente</h2>
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <ul className="space-y-4">
-            <li className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <p className="font-semibold text-gray-800">Sala de Estudio A1</p>
-                <p className="text-sm text-slate-500">Hoy, 16:00 - 17:00</p>
+          {isLoadingUpcoming ? (
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            </div>
+          ) : upcomingReservations.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="flex justify-center mb-4">
+                <div className="rounded-full bg-blue-100 p-4">
+                  <Sparkles className="h-8 w-8 text-blue-600" />
+                </div>
               </div>
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">Confirmada</span>
-            </li>
-            <li className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <p className="font-semibold text-gray-800">Taller de Python - Club de Programación</p>
-                <p className="text-sm text-slate-500">Mañana, 14:00</p>
-              </div>
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">Inscrito</span>
-            </li>
-            <li className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-gray-800">Sala Grupal C1</p>
-                <p className="text-sm text-slate-500">Viernes, 10:00 - 12:00</p>
-              </div>
-              <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
-                Pendiente
-              </span>
-            </li>
-          </ul>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">¡No tienes reservas próximas!</h3>
+              <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                ¡Encuentra el espacio perfecto para concentrarte y alcanzar tus objetivos!
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-4">
+              {upcomingReservations.map((reservation, index) => (
+                <li
+                  key={reservation.id}
+                  className={`flex items-center justify-between ${
+                    index < upcomingReservations.length - 1 ? 'border-b border-slate-100 pb-3' : ''
+                  }`}
+                >
+                  <div>
+                    <p className="font-semibold text-gray-800">{reservation.roomName}</p>
+                    <p className="text-sm text-slate-500">
+                      {formatDateTime(reservation.day, reservation.module)}
+                    </p>
+                    {reservation.location && (
+                      <p className="text-xs text-slate-400 mt-1">{reservation.location}</p>
+                    )}
+                  </div>
+                  {getStatusBadge(reservation.status)}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
     </>
