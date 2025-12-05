@@ -14,7 +14,7 @@ export type UserProfile = {
   student_number: string | null;
 };
 
-type UserProfileResponse = {
+export type UserProfileResponse = {
   exists: boolean;
   user: UserProfile | null;
 };
