@@ -5,15 +5,20 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
 import {
+  Settings,
   Users,
   Crown,
+  Shield,
   CalendarPlus,
   Trash2,
   ArrowRight,
   Star,
   Loader2,
   Edit3,
+  UserPlus,
   AlertTriangle,
+  LogOut,
+  UserCheck,
 } from 'lucide-react';
 
 // --- Tipos basados en la API ---
@@ -33,17 +38,24 @@ interface Representative {
   email: string;
 }
 
+interface Moderator {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
 interface GroupDetails {
   id: number;
   reputation: string;
   repre_id: number;
   group_request_id: number;
-  is_deleted: boolean;
+  moderators_ids: number[];
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
   groupRequest: GroupRequest;
   representative: Representative;
+  moderators: Moderator[];
   eventRequests?: any[];
 }
 
@@ -65,7 +77,7 @@ const ActionCard = ({
   icon: React.ReactNode;
   title: string;
   description: string;
-  variant?: 'default' | 'danger';
+  variant?: 'default' | 'danger' | 'warning';
   onClick?: () => void;
   disabled?: boolean;
 }) => {
@@ -73,6 +85,8 @@ const ActionCard = ({
   const variantClasses =
     variant === 'danger'
       ? 'border-red-200 bg-red-50 hover:border-red-500 hover:shadow-lg'
+      : variant === 'warning'
+      ? 'border-orange-200 bg-orange-50 hover:border-orange-500 hover:shadow-lg'
       : 'border-slate-200 bg-white hover:border-blue-500 hover:shadow-lg';
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
@@ -82,7 +96,11 @@ const ActionCard = ({
       <div>
         <div
           className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-            variant === 'danger' ? 'bg-red-100' : 'bg-blue-100'
+            variant === 'danger'
+              ? 'bg-red-100'
+              : variant === 'warning'
+              ? 'bg-orange-100'
+              : 'bg-blue-100'
           }`}
         >
           {icon}
@@ -93,7 +111,11 @@ const ActionCard = ({
       </div>
       <ArrowRight
         className={`mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 ${
-          variant === 'danger' ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'
+          variant === 'danger'
+            ? 'group-hover:text-red-500'
+            : variant === 'warning'
+            ? 'group-hover:text-orange-500'
+            : 'group-hover:text-blue-500'
         }`}
       />
     </div>
@@ -140,10 +162,14 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   // Determinar el rol del usuario
   const isRepresentative = groupDetails?.repre_id === user?.id;
+  const isModerator = groupDetails?.moderators_ids.includes(user?.id);
+  const userRole = isRepresentative ? 'Representante' : isModerator ? 'Moderador' : 'Miembro';
 
   // Obtener access token
   useEffect(() => {
@@ -169,8 +195,10 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
       setIsLoading(true);
       try {
+        console.log('Fetching group details for groupId:', groupId);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
           headers: {
+            method: 'GET',
             Authorization: `Bearer ${accessToken}`,
           },
         });
@@ -219,6 +247,18 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
     }
   };
 
+  // Salir del grupo (moderador)
+  const handleLeaveGroup = async () => {
+    // TODO: Implementar cuando el endpoint esté disponible
+    console.log('Salir del grupo - Endpoint pendiente');
+    setShowLeaveConfirm(false);
+  };
+
+  const getMemberCount = (): number => {
+    if (!groupDetails) return 0;
+    return 1 + groupDetails.moderators.length; // 1 representante + N moderadores
+  };
+
   if (isLoading || isUserLoading) {
     return (
       <div className="flex justify-center items-center py-10">
@@ -253,79 +293,115 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                 <span>Creado el {new Date(groupDetails.createdAt).toLocaleDateString('es-CL')}</span>
               </div>
             </div>
-            {isRepresentative && (
-              <div className="flex items-center gap-2">
-                <Crown className="h-6 w-6 text-amber-500" />
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
-                  Representante
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {isRepresentative ? (
+                <>
+                  <Crown className="h-6 w-6 text-amber-500" />
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+                    Representante
+                  </span>
+                </>
+              ) : isModerator ? (
+                <>
+                  <Shield className="h-6 w-6 text-blue-500" />
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+                    Moderador
+                  </span>
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
 
       {/* 2. Estadísticas del Grupo */}
-      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard icon={<Users size={20} />} value={getMemberCount()} label="Miembros Totales" />
+        <StatCard icon={<Shield size={20} />} value={groupDetails.moderators.length} label="Moderadores" />
         <StatCard icon={<Star size={20} />} value={groupDetails.reputation} label="Reputación" />
-        <StatCard 
-          icon={<CalendarPlus size={20} />} 
-          value={groupDetails.eventRequests?.length || 0} 
-          label="Eventos Creados" 
-        />
       </section>
 
       {/* 3. Acciones según el rol */}
-      {isRepresentative && (
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Acciones Disponibles</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <ActionCard
-              icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
-              title="Crear Evento"
-              description="Organiza y reserva espacios para eventos del grupo."
-              disabled={true}
-            />
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Acciones Disponibles</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* Acciones para todos (Moderadores y Representantes) */}
+          <ActionCard
+            icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
+            title="Crear Evento"
+            description="Organiza y reserva espacios para eventos del grupo."
+            disabled={true}
+          />
 
-            <ActionCard
-              icon={<Edit3 className="h-6 w-6 text-blue-500" />}
-              title="Editar Grupo"
-              description="Modifica la descripción, logo y configuración del grupo."
-              disabled={true}
-            />
+          <ActionCard
+            icon={<UserPlus className="h-6 w-6 text-blue-500" />}
+            title="Agregar Moderador"
+            description="Convierte a un miembro en moderador del grupo."
+            disabled={true}
+          />
 
-            <ActionCard
-              variant="danger"
-              icon={<Trash2 className="h-6 w-6 text-red-500" />}
-              title="Eliminar Grupo"
-              description="Elimina permanentemente el grupo y todos sus datos."
-              onClick={() => setShowDeleteConfirm(true)}
-            />
-          </div>
-        </section>
-      )}
+          {/* Acciones exclusivas del Representante */}
+          {isRepresentative && (
+            <>
+              <ActionCard
+                icon={<Edit3 className="h-6 w-6 text-blue-500" />}
+                title="Editar Grupo"
+                description="Modifica la descripción, logo y configuración del grupo."
+                disabled={true}
+              />
 
-      {/* 4. Información del Representante */}
+              <ActionCard
+                icon={<Crown className="h-6 w-6 text-blue-500" />}
+                title="Transferir Liderazgo"
+                description="Cede la posición de representante a un moderador."
+                disabled={true}
+              />
+
+              <ActionCard
+                variant="danger"
+                icon={<Trash2 className="h-6 w-6 text-red-500" />}
+                title="Eliminar Grupo"
+                description="Elimina permanentemente el grupo y todos sus datos."
+                onClick={() => setShowDeleteConfirm(true)}
+              />
+            </>
+          )}
+
+          {/* Acción para Moderadores (no Representantes) */}
+          {isModerator && !isRepresentative && (
+            <ActionCard
+              variant="warning"
+              icon={<LogOut className="h-6 w-6 text-orange-500" />}
+              title="Salir del Grupo"
+              description="Renuncia a tu rol de moderador en este grupo."
+              onClick={() => setShowLeaveConfirm(true)}
+            />
+          )}
+        </div>
+      </section>
+
+      {/* 4. Información del Equipo */}
       <section>
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Representante del Grupo</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Equipo de Gestión</h2>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* Representante */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-sm mb-4">
           <div className="p-6 bg-gradient-to-r from-amber-50 to-white border-b border-slate-200">
             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
               <Crown className="h-5 w-5 text-amber-500" />
               Representante
             </h3>
           </div>
-          <div className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
-                <span className="text-amber-600 font-bold text-2xl">
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <span className="text-amber-600 font-bold text-lg">
                   {groupDetails.representative.first_name[0]}
                   {groupDetails.representative.last_name[0]}
                 </span>
               </div>
               <div>
-                <p className="font-semibold text-gray-800 text-lg">
+                <p className="font-semibold text-gray-800">
                   {groupDetails.representative.first_name} {groupDetails.representative.last_name}
                 </p>
                 <p className="text-sm text-slate-500">{groupDetails.representative.email}</p>
@@ -333,6 +409,38 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
             </div>
           </div>
         </div>
+
+        {/* Moderadores */}
+        {groupDetails.moderators.length > 0 && (
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-white border-b border-slate-200">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-500" />
+                Moderadores ({groupDetails.moderators.length})
+              </h3>
+            </div>
+            <ul className="divide-y divide-slate-200">
+              {groupDetails.moderators.map((moderator) => (
+                <li key={moderator.id} className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-lg">
+                        {moderator.first_name[0]}
+                        {moderator.last_name[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {moderator.first_name} {moderator.last_name}
+                      </p>
+                      <p className="text-sm text-slate-500">{moderator.email}</p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       {/* Modal de Confirmación para Eliminar Grupo */}
@@ -344,8 +452,8 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
               <h3 className="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.groupRequest.name}&quot;? Esta acción no
-              se puede deshacer y se perderán todos los datos del grupo.
+              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.groupRequest.name}&quot;? Esta acción
+              no se puede deshacer y se perderán todos los datos del grupo.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -367,6 +475,45 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                   </>
                 ) : (
                   'Eliminar Grupo'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación para Salir del Grupo */}
+      {showLeaveConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <AlertTriangle className="h-6 w-6 text-orange-500" />
+              <h3 className="text-lg font-bold text-gray-800">Confirmar Salida</h3>
+            </div>
+            <p className="text-slate-600 mb-6">
+              ¿Estás seguro de que deseas salir del grupo &quot;{groupDetails.groupRequest.name}&quot;? Perderás tu rol
+              de moderador.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowLeaveConfirm(false)}
+                disabled={isLeaving}
+                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLeaveGroup}
+                disabled={isLeaving}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isLeaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saliendo...
+                  </>
+                ) : (
+                  'Salir del Grupo'
                 )}
               </button>
             </div>

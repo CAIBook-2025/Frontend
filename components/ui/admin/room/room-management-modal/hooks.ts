@@ -18,7 +18,12 @@ import {
   parseModule,
   sortModules,
 } from './utils';
-import type { MaintenanceActionMode, MaintenanceSelectionMap, ScheduleStatusMap, WeekDay } from './types';
+import type {
+  MaintenanceActionMode,
+  MaintenanceSelectionMap,
+  ScheduleStatusMap,
+  WeekDay,
+} from './types';
 
 export const useAdminSession = (isOpen: boolean) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -48,11 +53,11 @@ export const useAdminSession = (isOpen: boolean) => {
         const profile = await fetchUserProfile(resolvedToken);
         if (cancelled) return;
 
-        if (!profile?.user) {
+        if (!profile) {
           setAdminId(null);
           setSessionError('No se pudo identificar al administrador.');
         } else {
-          setAdminId(profile.user.id);
+          setAdminId(profile.id);
           setSessionError(null);
         }
       } catch (error) {
@@ -95,7 +100,9 @@ export const useScheduleMatrix = (
       setScheduleLoading(true);
       setScheduleError(null);
       try {
-        const results = await Promise.allSettled(dayKeys.map((day) => fetchSchedule(accessToken, { day, take: 200 })));
+        const results = await Promise.allSettled(
+          dayKeys.map((day) => fetchSchedule(accessToken, { day, take: 200 }))
+        );
         if (cancelled) return;
 
         const nextMap: ScheduleStatusMap = {};
@@ -112,10 +119,10 @@ export const useScheduleMatrix = (
             if (roomItems.length > 0) {
               foundAny = true;
               roomItems.forEach((item) => {
-                const moduleKey = parseModule(item.module);
-                if (!moduleKey) return;
-                dayStatus[moduleKey] = {
-                  ...dayStatus[moduleKey],
+                const module = parseModule(item.module);
+                if (!module) return;
+                dayStatus[module] = {
+                  ...dayStatus[module],
                   status: getSlotStatus(item.available),
                   scheduleId: Number(item.id),
                   attendanceStatus: item.status ?? item.attendanceStatus ?? null,
@@ -180,7 +187,10 @@ export const useMaintenanceSelections = (
     setFreeSelectionMap((prev) => filterSelectionToWeek(prev, allowedKeys));
   }, [visibleDays]);
 
-  const normalizedBlockSelection = useMemo(() => normalizeMaintenanceBlocks(blockSelectionMap), [blockSelectionMap]);
+  const normalizedBlockSelection = useMemo(
+    () => normalizeMaintenanceBlocks(blockSelectionMap),
+    [blockSelectionMap]
+  );
 
   const selectedModulesCount = useMemo(() => {
     const sourceMap = actionMode === 'block' ? blockSelectionMap : freeSelectionMap;
@@ -229,19 +239,15 @@ export const useMaintenanceSelections = (
 };
 
 export const useVisibleWeekDays = (isOpen: boolean) => {
-  return useMemo(() => {
-    // Recompute the current week when the modal opens or closes
-    if (isOpen) {
-      return generateCurrentWeekDays();
-    }
-    return generateCurrentWeekDays();
-  }, [isOpen]);
+  return useMemo(() => generateCurrentWeekDays(), [isOpen]);
 };
 
 export const useActionMode = (selectedStatus: Room['status']) => {
   return useMemo(() => {
     const editableStatus =
-      selectedStatus === 'MAINTENANCE' || selectedStatus === 'AVAILABLE' ? selectedStatus : 'AVAILABLE';
+      selectedStatus === 'MAINTENANCE' || selectedStatus === 'AVAILABLE'
+        ? selectedStatus
+        : 'AVAILABLE';
 
     return getActionMode(editableStatus);
   }, [selectedStatus]);

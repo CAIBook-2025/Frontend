@@ -33,7 +33,9 @@ export const InfoModal = ({ isOpen, onClose, title, children }: InfoModalProps) 
         </div>
 
         {/* Contenido del Modal */}
-        <div className="mt-4 text-slate-600">{children}</div>
+        <div className="mt-4 text-slate-600">
+          {children}
+        </div>
 
         {/* Pie del Modal con un solo botón */}
         <div className="mt-6 flex justify-end">

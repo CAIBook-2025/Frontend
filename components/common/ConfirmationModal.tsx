@@ -12,14 +12,7 @@ type ConfirmationModalProps = {
   children: React.ReactNode;
 };
 
-export const ConfirmationModal = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  isLoading = false,
-  children,
-}: ConfirmationModalProps) => {
+export const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, isLoading = false, children }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -40,7 +33,9 @@ export const ConfirmationModal = ({
           </button>
         </div>
 
-        <div className="mt-4 text-slate-600">{children}</div>
+        <div className="mt-4 text-slate-600">
+          {children}
+        </div>
 
         {/* Botones de Acción */}
         <div className="mt-6 flex justify-end gap-3">

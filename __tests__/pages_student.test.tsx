@@ -6,7 +6,6 @@ import CreateGroupPage from '../app/Student/Groups/Form/page';
 import StudyRoomBookerPage from '../app/Student/StudyRoomBooker/page';
 
 const getAccessTokenMock = jest.fn();
-const fetchUserProfileMock = jest.fn();
 const mockFetch = jest.fn();
 const searchParamsMock = new URLSearchParams({ userId: '1' });
 
@@ -22,10 +21,6 @@ jest.mock('next/link', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt, ...props }: any) => <img alt={alt} {...props} />,
-}));
-
-jest.mock('@/lib/user/fetchUserProfile', () => ({
-  fetchUserProfile: (...args: unknown[]) => fetchUserProfileMock(...args),
 }));
 
 jest.mock('next/navigation', () => ({
@@ -100,34 +95,6 @@ const mockProfile = {
   strikesCount: 0,
 };
 
-const mockUserProfile = {
-  user: {
-    id: 1,
-    email: 'user@uc.cl',
-    first_name: 'Juan',
-    last_name: 'Perez',
-    role: 'STUDENT',
-    is_representative: false,
-    is_moderator: false,
-    is_deleted: false,
-    createdAt: '2025-01-01T00:00:00.000Z',
-    updatedAt: '2025-01-01T00:00:00.000Z',
-    deletedAt: null,
-    auth0_id: 'auth0|123',
-    career: 'Ingenieria',
-    phone: '123456789',
-    student_number: '20201234',
-  },
-  schedule: [],
-  scheduleCount: 0,
-  strikes: [],
-  strikesCount: 0,
-  upcomingEvents: [],
-  upcomingEventsCount: 0,
-  attendances: [],
-  attendancesCount: 0,
-};
-
 beforeAll(() => {
   process.env.NEXT_PUBLIC_API_URL = 'https://example.com';
   globalThis.fetch = mockFetch as unknown as typeof fetch;
@@ -135,7 +102,6 @@ beforeAll(() => {
 
 beforeEach(() => {
   getAccessTokenMock.mockResolvedValue('fake-token');
-  fetchUserProfileMock.mockResolvedValue(mockUserProfile);
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url;
 
@@ -233,8 +199,6 @@ describe('StudyRoomBookerPage', () => {
     });
 
     expect(roomCardMock).toHaveBeenCalled();
-    const emittedUserIds = roomCardMock.mock.calls.map((call) => call[0].userId);
-    expect(emittedUserIds).toContain(mockUserProfile.user.id);
     expect(screen.getAllByTestId('room-card').length).toBeGreaterThan(0);
   });
 });

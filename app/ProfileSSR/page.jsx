@@ -6,8 +6,7 @@ export default async function UserInfo() {
   const user = session?.user;
   const accessToken = session?.tokenSet?.accessToken;
 
-  const profileResponse = accessToken ? await fetchUserProfile(accessToken) : null;
-  const userData = profileResponse?.user ?? null;
+  const userData = accessToken ? await fetchUserProfile(accessToken) : null;
 
   return (
     <div>

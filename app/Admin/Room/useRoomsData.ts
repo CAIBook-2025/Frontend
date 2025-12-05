@@ -8,18 +8,6 @@ import type { Room } from '@/types/room';
 import { DEFAULT_DAY } from './constants';
 import { adaptStudyRoomsToView, mergeRoomsWithScheduleData, resolveAccessToken } from './room-utils';
 
-type Auth0User = ReturnType<typeof useUser>['user'];
-
-const isMockMode = process.env.NEXT_PUBLIC_API_MODE === 'mock';
-const MOCK_AUTH_USER: Auth0User = isMockMode
-  ? ({
-      sub: 'auth0|local-mock-user',
-      email: 'admin@example.com',
-      name: 'Mock Admin',
-    } as Auth0User)
-  : undefined;
-const MOCK_ACCESS_TOKEN = 'mock-admin-access-token';
-
 export const useRoomsData = () => {
   const { user, isLoading: isUserLoading } = useUser();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -27,21 +15,13 @@ export const useRoomsData = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadRooms = useCallback(async () => {
-    const activeUser = user ?? MOCK_AUTH_USER;
-    if (!activeUser) return;
-
+    if (!user) return;
     setIsLoadingRooms(true);
     setLoadError(null);
 
     try {
-      let accessToken: string | null = null;
-
-      if (isMockMode) {
-        accessToken = MOCK_ACCESS_TOKEN;
-      } else {
-        const tokenResponse = await getAccessToken();
-        accessToken = resolveAccessToken(tokenResponse);
-      }
+      const tokenResponse = await getAccessToken();
+      const accessToken = resolveAccessToken(tokenResponse);
 
       if (!accessToken) {
         throw new Error('Access token not available');
@@ -58,7 +38,8 @@ export const useRoomsData = () => {
 
       const baseRooms = adaptStudyRoomsToView(studyRooms);
       const scheduleItems = schedule?.items ?? [];
-      const mergedRooms = scheduleItems.length > 0 ? mergeRoomsWithScheduleData(baseRooms, scheduleItems) : baseRooms;
+      const mergedRooms =
+        scheduleItems.length > 0 ? mergeRoomsWithScheduleData(baseRooms, scheduleItems) : baseRooms;
 
       if (scheduleItems.length === 0) {
         console.warn('fetchSchedule returned no items; occupancy metrics may not be accurate');
@@ -77,9 +58,7 @@ export const useRoomsData = () => {
   useEffect(() => {
     if (isUserLoading) return;
 
-    const activeUser = user ?? MOCK_AUTH_USER;
-
-    if (!activeUser) {
+    if (!user) {
       setRooms([]);
       setLoadError('Debes iniciar sesión para ver las salas.');
       setIsLoadingRooms(false);
@@ -97,3 +76,4 @@ export const useRoomsData = () => {
     refresh: loadRooms,
   };
 };
+
