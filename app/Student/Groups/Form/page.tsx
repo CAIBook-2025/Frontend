@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
+import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
@@ -22,7 +23,7 @@ export default function CreateGroupPage() {
   const params = useSearchParams();
   const router = useRouter();
   const userIdParam = params.get('userId');
-  const userId = userIdParam !== null ? Number(userIdParam) : null;
+  const [userId, setUserId] = useState<number | null>(userIdParam !== null ? Number(userIdParam) : null);
   const { user } = useUser();
 
   const [step, setStep] = useState(1);
@@ -39,21 +40,26 @@ export default function CreateGroupPage() {
     logo: null,
   });
 
-  // Obtener access token
+  // Obtener access token y perfil de usuario
   useEffect(() => {
-    async function fetchToken() {
+    async function fetchData() {
       if (user) {
         try {
           const tokenResponse = await getAccessToken();
           const resolvedToken = resolveAccessToken(tokenResponse);
           setAccessToken(resolvedToken);
+
+          const profile = await fetchUserProfile(resolvedToken);
+          if (profile?.user?.id) {
+            setUserId(profile.user.id);
+          }
         } catch (error) {
-          console.error('Error fetching access token:', error);
+          console.error('Error fetching data:', error);
         }
       }
     }
 
-    fetchToken();
+    fetchData();
   }, [user]);
 
   // Obtener solicitudes pendientes del usuario
@@ -66,9 +72,9 @@ export default function CreateGroupPage() {
 
       setIsLoadingPendingRequests(true);
       try {
-        const requests = await fetchGroupRequests(accessToken, { 
-          status: 'PENDING', 
-          user_id: userId 
+        const requests = await fetchGroupRequests(accessToken, {
+          status: 'PENDING',
+          user_id: userId
         });
         setPendingRequestsCount(requests?.length ?? 0);
       } catch (error) {
@@ -131,7 +137,7 @@ export default function CreateGroupPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
     // Limpiar el error del campo cuando el usuario empiece a escribir
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
@@ -140,7 +146,7 @@ export default function CreateGroupPage() {
         return newErrors;
       });
     }
-    
+
     // Limpiar el mensaje de error general si todos los campos están completos
     if (errorMsg) {
       setErrorMsg(null);
@@ -253,7 +259,7 @@ export default function CreateGroupPage() {
                     Límite de solicitudes alcanzado
                   </h2>
                   <p className="text-amber-700 mb-6">
-                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes. 
+                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes.
                     El límite máximo es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
                   </p>
                   <div className="flex gap-3 flex-wrap">
@@ -307,9 +313,8 @@ export default function CreateGroupPage() {
             {[1, 2, 3].map((s) => (
               <div key={s} className="text-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
-                    step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}
                 >
                   {s}
                 </div>
@@ -349,11 +354,10 @@ export default function CreateGroupPage() {
                       placeholder="Una breve descripción que invite a los estudiantes a unirse."
                       value={formData.description}
                       onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
-                        validationErrors.description
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.description
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-slate-300 focus:border-blue-600'
-                      }`}
+                        }`}
                       required
                     />
                     {validationErrors.description && (
@@ -379,11 +383,10 @@ export default function CreateGroupPage() {
                       placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
                       value={formData.goal}
                       onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
-                        validationErrors.goal
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.goal
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-slate-300 focus:border-blue-600'
-                      }`}
+                        }`}
                       required
                     />
                     {validationErrors.goal && (
@@ -463,9 +466,8 @@ export default function CreateGroupPage() {
                   type="button" // Cambiado de 'submit' a 'button'
                   onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
                   disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
-                  }`}
+                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                    }`}
                 >
                   {submitting ? (
                     'Enviando…'

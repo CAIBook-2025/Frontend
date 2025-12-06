@@ -63,7 +63,7 @@ export default function EventsPage() {
 
         // Cargar perfil del usuario
         const profile = await fetchUserProfile(token);
-        setProfileData(profile);
+        setProfileData(profile?.user ?? null);
 
         // Cargar eventos
         const eventsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`, {
@@ -190,8 +190,8 @@ export default function EventsPage() {
         <button
           onClick={() => setFilterStatus('all')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
         >
           Todos
@@ -199,8 +199,8 @@ export default function EventsPage() {
         <button
           onClick={() => setFilterStatus('confirmed')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'confirmed'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
         >
           Activos
@@ -208,8 +208,8 @@ export default function EventsPage() {
         <button
           onClick={() => setFilterStatus('finished')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'finished'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
         >
           Finalizados
@@ -217,8 +217,8 @@ export default function EventsPage() {
         <button
           onClick={() => setFilterStatus('cancelled')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${filterStatus === 'cancelled'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
         >
           Cancelados
