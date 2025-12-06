@@ -5,12 +5,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown, CheckCircle, X, Clock } from 'lucide-react';
+import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown, CheckCircle, X, Clock, FileText, Trash2, Edit3, AlertCircle, XCircle, CheckCircle2 } from 'lucide-react';
 import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
+import { GroupRequest } from '@/types/groupRequest';
 
 // --- Tipos basados en la response del backend ---
-interface GroupRequest {
+interface GroupRequestInfo {
   id: number;
   name: string;
   description: string;
@@ -41,7 +42,7 @@ interface Group {
   moderators_ids: number[];
   createdAt: string;
   updatedAt: string;
-  groupRequest: GroupRequest;
+  groupRequest: GroupRequestInfo;
   representative: Representative;
   moderators: Moderator[];
   eventRequests?: any[];
@@ -69,6 +70,10 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
   const [isLoadingPendingRequests, setIsLoadingPendingRequests] = useState(true);
+  const [myRequests, setMyRequests] = useState<GroupRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+  const [deletingRequestId, setDeletingRequestId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
   // Detectar si hay un parámetro de éxito en la URL
   useEffect(() => {
@@ -101,11 +106,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   // Obtener solicitudes pendientes del usuario
   useEffect(() => {
     async function loadPendingRequests() {
-      if (!accessToken || !userId) {
-        setIsLoadingPendingRequests(false);
-        return;
-      }
-
       setIsLoadingPendingRequests(true);
       try {
         const requests = await fetchGroupRequests(accessToken, { 
@@ -120,8 +120,121 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
       }
     }
 
-    if (accessToken && userId) loadPendingRequests();
-  }, [accessToken, userId]);
+    if (accessToken && userId > 0) {
+      loadPendingRequests();
+    } else if (!isLoading && userId === 0) {
+      setIsLoadingPendingRequests(false);
+    }
+  }, [accessToken, userId, isLoading]);
+
+  // Obtener todas las solicitudes del usuario
+  useEffect(() => {
+    async function loadMyRequests() {
+      console.log('[GroupsView] Cargando solicitudes para userId:', userId);
+      setIsLoadingRequests(true);
+      try {
+        const requests = await fetchGroupRequests(accessToken, { user_id: userId });
+        console.log('[GroupsView] Solicitudes recibidas:', requests);
+        setMyRequests(requests ?? []);
+      } catch (error) {
+        console.error('[GroupsView] Error loading my requests:', error);
+      } finally {
+        setIsLoadingRequests(false);
+      }
+    }
+
+    console.log('[GroupsView] Estado actual - accessToken:', !!accessToken, 'userId:', userId, 'isLoading:', isLoading);
+    
+    if (accessToken && userId !== undefined && userId !== null && userId > 0) {
+      loadMyRequests();
+    } else if (!isLoading && (!accessToken || userId === 0)) {
+      // Si Auth0 terminó de cargar pero no hay token o userId válido
+      console.log('[GroupsView] No hay token o userId válido, deteniendo loading');
+      setIsLoadingRequests(false);
+    }
+  }, [accessToken, userId, isLoading]);
+
+  // Función para eliminar una solicitud
+  const handleDeleteRequest = async (requestId: number) => {
+    if (!accessToken) return;
+
+    setDeletingRequestId(requestId);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/group-requests/${requestId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Actualizar la lista de solicitudes
+        setMyRequests((prev) => prev.filter((req) => req.id !== requestId));
+        // Actualizar el contador de pendientes si era una solicitud pendiente
+        const deletedRequest = myRequests.find((req) => req.id === requestId);
+        if (deletedRequest?.status === 'PENDING') {
+          setPendingRequestsCount((prev) => Math.max(0, prev - 1));
+        }
+        setShowDeleteConfirm(null);
+      } else {
+        console.error('Error al eliminar la solicitud');
+      }
+    } catch (error) {
+      console.error('Error deleting request:', error);
+    } finally {
+      setDeletingRequestId(null);
+    }
+  };
+
+  // Obtener el ícono y estilos según el estado
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return {
+          icon: Clock,
+          label: 'Pendiente',
+          bgColor: 'bg-amber-100',
+          textColor: 'text-amber-800',
+          borderColor: 'border-amber-200',
+        };
+      case 'CONFIRMED':
+        return {
+          icon: CheckCircle2,
+          label: 'Aprobada',
+          bgColor: 'bg-green-100',
+          textColor: 'text-green-800',
+          borderColor: 'border-green-200',
+        };
+      case 'CANCELLED':
+        return {
+          icon: XCircle,
+          label: 'Rechazada',
+          bgColor: 'bg-red-100',
+          textColor: 'text-red-800',
+          borderColor: 'border-red-200',
+        };
+      default:
+        return {
+          icon: AlertCircle,
+          label: status,
+          bgColor: 'bg-slate-100',
+          textColor: 'text-slate-800',
+          borderColor: 'border-slate-200',
+        };
+    }
+  };
+
+  // Formatear fecha
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   // Cargar todos los grupos
   useEffect(() => {
@@ -197,13 +310,13 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
       }
     };
 
-    if (accessToken && userId !== undefined) {
+    if (accessToken && userId > 0) {
       loadMyGroups();
-    } else if (!accessToken) {
-      // Si no hay token, no podemos cargar
+    } else if (!isLoading && (!accessToken || userId === 0)) {
+      // Si no hay token o userId válido, no podemos cargar
       setIsLoadingMy(false);
     }
-  }, [accessToken, userId]);
+  }, [accessToken, userId, isLoading]);
 
   // Calcular el número total de miembros (representante + moderadores)
   const getMemberCount = (group: Group): number => {
@@ -370,6 +483,147 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Sección: Mis Solicitudes */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Mis Solicitudes</h2>
+          <p className="text-sm text-slate-600 mt-1">Historial de solicitudes de creación de grupos</p>
+        </div>
+
+        {isLoadingRequests ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          </div>
+        ) : myRequests.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-600">No tienes solicitudes de grupos</p>
+            <Link
+              href={{ pathname: '/Student/Groups/Form', query: { userId } }}
+              className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700 font-semibold"
+            >
+              <PlusCircle size={16} /> Crear tu primera solicitud
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <ul className="divide-y divide-slate-200">
+              {myRequests.map((request) => {
+                const statusConfig = getStatusConfig(request.status);
+                const StatusIcon = statusConfig.icon;
+                const isPending = request.status === 'PENDING';
+                const isConfirmed = request.status === 'CONFIRMED';
+
+                return (
+                  <li key={request.id} className="relative">
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h3 className="text-lg font-bold text-gray-800 truncate">
+                              {request.name}
+                            </h3>
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1.5 ${statusConfig.bgColor} ${statusConfig.textColor}`}
+                            >
+                              <StatusIcon size={12} />
+                              {statusConfig.label}
+                            </span>
+                          </div>
+                          
+                          <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+                            {request.description}
+                          </p>
+                          
+                          <div className="mt-3 flex items-center gap-4 text-sm text-slate-500 flex-wrap">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-medium">Objetivo:</span>
+                              <span className="truncate max-w-[200px]">{request.goal}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Clock size={14} />
+                              <span>Creada: {formatDate(request.createdAt)}</span>
+                            </div>
+                            {isConfirmed && request.group_id && (
+                              <Link
+                                href={`/Student/Groups/Representative/${request.group_id}`}
+                                className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-medium"
+                              >
+                                <ArrowRight size={14} />
+                                Ver grupo creado
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Acciones */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isPending && (
+                            <>
+                              <Link
+                                href={{ pathname: '/Student/Groups/Form', query: { userId, requestId: request.id, edit: 'true' } }}
+                                className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                title="Editar solicitud"
+                              >
+                                <Edit3 size={18} />
+                              </Link>
+                              <button
+                                onClick={() => setShowDeleteConfirm(request.id)}
+                                className="p-2 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar solicitud"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Modal de confirmación de eliminación */}
+                      {showDeleteConfirm === request.id && (
+                        <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 animate-fade-in">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-red-800">
+                                ¿Estás seguro de eliminar esta solicitud?
+                              </p>
+                              <p className="text-sm text-red-600 mt-1">
+                                Esta acción no se puede deshacer.
+                              </p>
+                              <div className="flex gap-2 mt-3">
+                                <button
+                                  onClick={() => handleDeleteRequest(request.id)}
+                                  disabled={deletingRequestId === request.id}
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                                >
+                                  {deletingRequestId === request.id ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                  Eliminar
+                                </button>
+                                <button
+                                  onClick={() => setShowDeleteConfirm(null)}
+                                  className="px-3 py-1.5 rounded-lg bg-white text-slate-700 text-sm font-medium border border-slate-300 hover:bg-slate-50 transition-colors"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

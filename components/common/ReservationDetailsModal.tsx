@@ -8,6 +8,7 @@ const statusStyles: { [key in ReservationStatus]: string } = {
   Confirmada: 'bg-green-100 text-green-800',
   Pendiente: 'bg-yellow-100 text-yellow-800',
   Cancelada: 'bg-red-100 text-red-800',
+  Ausente: 'bg-slate-100 text-slate-800',
 };
 
 type DetailsModalProps = {

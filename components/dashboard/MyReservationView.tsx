@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Info } from 'lucide-react';
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 
 // Importaciones de todos los componentes que hemos creado
 import { ReservationCard } from './ReservationCard';
@@ -17,6 +18,8 @@ import { getReservations, cancelReservation, Reservation } from '../../app/servi
 
 export const MyReservationsView = () => {
   // --- ESTADOS DEL COMPONENTE ---
+  const { user, isLoading: authLoading } = useUser();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   // Estado para la lista de reservas obtenidas de la API
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -37,22 +40,51 @@ export const MyReservationsView = () => {
 
   // --- EFECTOS Y LÓGICA DE DATOS ---
 
-  // useEffect se ejecuta una vez cuando el componente se monta para obtener las reservas
+  // Obtener el access token cuando el usuario está disponible
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (user) {
+        try {
+          const token = await getAccessToken();
+          setAccessToken(token);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
+          setError('Error de autenticación. Por favor, recarga la página.');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    if (!authLoading) {
+      if (user) {
+        fetchToken();
+      } else {
+        setIsLoading(false);
+        setError('Debes iniciar sesión para ver tus reservas.');
+      }
+    }
+  }, [user, authLoading]);
+
+  // Obtener las reservas cuando el token está disponible
   useEffect(() => {
     const fetchReservations = async () => {
+      if (!accessToken) return;
+
       try {
-        const data = await getReservations();
+        const data = await getReservations(accessToken);
         setReservations(data);
       } catch (err) {
         setError('No se pudieron cargar las reservas. Intenta de nuevo más tarde.');
         console.error("Error al obtener las reservas:", err);
       } finally {
-        setIsLoading(false); // Termina el estado de carga, con o sin éxito
+        setIsLoading(false);
       }
     };
 
-    fetchReservations();
-  }, []); // El array vacío [] asegura que esto se ejecute solo una vez
+    if (accessToken) {
+      fetchReservations();
+    }
+  }, [accessToken]);
 
   // --- FUNCIONES MANEJADORAS (HANDLERS) PARA LOS MODALES ---
 
@@ -60,14 +92,18 @@ export const MyReservationsView = () => {
   const handleOpenCancelModal = (reservation: Reservation) => setReservationToCancel(reservation);
   const handleCloseCancelModal = () => setReservationToCancel(null);
   const handleConfirmCancellation = async () => {
-    if (!reservationToCancel) return;
+    if (!reservationToCancel || !accessToken) return;
     setIsCancelling(true);
     try {
-      await cancelReservation(reservationToCancel.id);
-      setReservations(current => current.map(res => 
-        res.id === reservationToCancel.id ? { ...res, status: 'Cancelada' } : res
-      ));
-      handleCloseCancelModal();
+      const result = await cancelReservation(reservationToCancel.id, accessToken);
+      if (result.success) {
+        setReservations(current => current.map(res => 
+          res.id === reservationToCancel.id ? { ...res, status: 'Cancelada' } : res
+        ));
+        handleCloseCancelModal();
+      } else {
+        alert(result.message || "Hubo un error al cancelar la reserva.");
+      }
     } catch (err) {
       console.error("Error al cancelar la reserva:", err);
       alert("Hubo un error al cancelar la reserva.");

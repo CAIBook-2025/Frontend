@@ -4,11 +4,12 @@
 import { Calendar, Clock, MapPin, XCircle, Eye } from "lucide-react"; // Importamos el ícono 'Eye'
 import { Reservation, ReservationStatus } from "../../app/services/reservationApi";
 
-// ... (statusStyles se mantiene igual)
+// Estilos según el estado de la reserva
 const statusStyles: { [key in ReservationStatus]: string } = {
   Confirmada: 'bg-green-100 text-green-800',
   Pendiente: 'bg-yellow-100 text-yellow-800',
   Cancelada: 'bg-red-100 text-red-800',
+  Ausente: 'bg-slate-100 text-slate-800',
 };
 
 type ReservationCardProps = {
@@ -45,7 +46,7 @@ export const ReservationCard = ({ reservation, onCancelClick, onDetailsClick }: 
           Ver Detalles
         </button>
 
-        {status !== 'Cancelada' && (
+        {status !== 'Cancelada' && status !== 'Ausente' && !reservation.isFinished && (
           <button 
             onClick={() => onCancelClick(reservation)} 
             className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-700 transition-colors"
