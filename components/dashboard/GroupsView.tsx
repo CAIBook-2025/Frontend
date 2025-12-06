@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 import { Users, PlusCircle, ArrowRight, Loader2, Crown, CheckCircle, X, Clock } from 'lucide-react';
 
 // --- Tipos basados en la response del backend ---
@@ -48,12 +49,9 @@ interface MyGroupsResponse {
   groups: Group[];
 }
 
-type GroupsViewProps = {
-  userId: number;
-};
-
-export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
+export const GroupsView: React.FC = () => {
   const { user, isLoading } = useUser();
+  const [userId, setUserId] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const [allGroups, setAllGroups] = useState<Group[]>([]);
@@ -65,6 +63,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   const [error, setError] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [profileData, setProfileData] = useState<UserProfileResponse["user"] | null>(null);
 
   // Detectar si hay un parámetro de éxito en la URL
   useEffect(() => {
@@ -84,6 +83,10 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
         try {
           const token = await getAccessToken();
           setAccessToken(token);
+          const userProfile = await fetchUserProfile(token);
+          setProfileData(userProfile);
+          // fetchUserProfile retorna directamente el objeto usuario (UserProfile), no UserProfileResponse completo
+          setUserId(userProfile?.id || null);
         } catch (error) {
           console.error('Error fetching access token:', error);
         }
@@ -99,8 +102,13 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
       if (!accessToken || !userId) return;
 
       setIsLoadingPending(true);
+      console.log('⚡ Fetching pending requests for user:', userId);
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/group-requests?user_id=${userId}&status=PENDING`;
+      // console.log('🔗 URL:', url);
+
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests?user_id=${userId}&status=PENDING`, {
+        const response = await fetch(url, {
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -108,7 +116,6 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
         if (!response.ok) {
           console.error('Error fetching pending requests:', response.status);
-          // No bloqueamos la UI si falla esto, solo asumimos 0 pendientes o manejamos error silenciosamente
           return;
         }
 
@@ -158,7 +165,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   // Cargar mis grupos (donde soy representante)
   useEffect(() => {
     const loadMyGroups = async () => {
-      if (!accessToken) return;
+      if (!accessToken || !userId) return;
 
       setIsLoadingMy(true);
       try {
@@ -192,12 +199,14 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
   const handleCreateAnother = () => {
     setShowSuccessMessage(false);
-    router.push(`/Student/Groups/Form?userId=${userId}`);
+    if (userId) {
+      router.push(`/Student/Groups/Form?userId=${userId}`);
+    }
   };
 
   // Verificar si el usuario tiene solicitudes pendientes
   const pendingCount = pendingRequests.length;
-  const hasPendingRequests = pendingCount >= 1;
+  const hasPendingRequests = pendingCount >= 3;
 
   if (error) {
     return (

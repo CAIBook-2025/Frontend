@@ -107,10 +107,10 @@ export default function StudentDashboardPage() {
       <div>
         {viewMode === 'personal' ? (
           <PersonalView
-            stats={{ reservasActivas: 1, strikes: 1, userId: 123 }}
+            stats={{ reservasActivas: 1, strikes: 1, userId: user?.id }}
           />
         ) : (
-          <GroupsView userId={123} />
+          <GroupsView />
         )}
       </div>
 
