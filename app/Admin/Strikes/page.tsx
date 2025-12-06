@@ -16,19 +16,6 @@ import { Strike as ApiStrike } from '@/types/strike';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 
-type StrikeType = 'NO_SHOW' | 'DAMAGE' | 'MISUSE' | 'OTHER';
-
-interface Strike {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  type: StrikeType;
-  reason: string;
-  appliedBy: string;
-  date: string;
-}
-
 interface UserStrike {
   id: string;
   name: string;
@@ -38,7 +25,7 @@ interface UserStrike {
   lastStrike: string;
   status: 'Activo' | 'Advertencia' | 'Suspendido';
   suspendedUntil?: string;
-  strikesHistory: Strike[];
+  strikesHistory: ApiStrike[];
 }
 
 const pageHeader = {
@@ -96,22 +83,6 @@ export default function StrikesPage() {
       const userName = strike.student?.first_name + ' ' + strike.student?.last_name;
       const userEmail = strike.student?.email || 'N/A';
 
-      let uiType: StrikeType = 'OTHER';
-      if (['NO_SHOW', 'DAMAGE', 'MISUSE'].includes(strike.type)) {
-        uiType = strike.type as StrikeType;
-      }
-
-      const uiStrike: Strike = {
-        id: strike.id.toString(),
-        userId: userId.toString(),
-        userName: userName,
-        userEmail: userEmail,
-        type: uiType,
-        reason: strike.description || 'Sin descripción',
-        appliedBy: strike.admin?.first_name + ' ' + strike.admin?.last_name,
-        date: new Date(strike.date).toLocaleDateString(),
-      };
-
       if (!usersMap.has(userId)) {
         usersMap.set(userId, {
           id: userId.toString(),
@@ -127,7 +98,7 @@ export default function StrikesPage() {
 
       const user = usersMap.get(userId)!;
       user.strikes += 1;
-      user.strikesHistory.push(uiStrike);
+      user.strikesHistory.push(strike);
 
     });
 
@@ -135,7 +106,7 @@ export default function StrikesPage() {
       user.strikesHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       if (user.strikesHistory.length > 0) {
-        user.lastStrike = user.strikesHistory[0].date;
+        user.lastStrike = new Date(user.strikesHistory[0].date).toLocaleDateString();
       }
 
       if (user.strikes >= 3) user.status = 'Suspendido';
@@ -163,8 +134,9 @@ export default function StrikesPage() {
   const allStrikes = usersWithStrikes.flatMap(u => u.strikesHistory);
   const filteredStrikes = allStrikes.filter(
     (strike) =>
-      strike.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      strike.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+      strike.student?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      strike.student?.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      strike.student?.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredStrikes.length / ITEMS_PER_PAGE);
@@ -219,7 +191,7 @@ export default function StrikesPage() {
             <Plus className="h-6 w-6" />
           </button>
 
-          {loading && !userToLiftSuspension ? ( // Don't hide table if loading for modal action (kinda hacky but ok for now, or use dedicated loading state for modal)
+          {loading && !userToLiftSuspension ? (
             <div className="text-center py-8">Cargando...</div>
           ) : (
             <>
