@@ -1,7 +1,7 @@
 'use client';
 
 import { XIcon } from 'lucide-react';
-import { Strike } from '@/app/Admin/Strikes/page';
+import { Strike } from '@/types/strike';
 
 interface UserStrikesHistoryModalProps {
   isOpen: boolean;
@@ -37,16 +37,21 @@ export function UserStrikesHistoryModal({
 
   const getTypeBadge = (type: Strike['type']) => {
     const typeStyles = {
-      'No-show': 'bg-red-600 text-white',
-      Misuse: 'bg-yellow-600 text-white',
-      'Late-cancellation': 'bg-yellow-500 text-white',
+      NO_SHOW: 'bg-red-600 text-white',
+      MISUSE: 'bg-yellow-600 text-white',
+      DAMAGE: 'bg-orange-600 text-white',
+      OTHER: 'bg-gray-500 text-white',
     };
     const typeText = {
-      'No-show': 'No Show',
-      Misuse: 'Mal Uso',
-      'Late-cancellation': 'Cancelación Tardía',
+      NO_SHOW: 'No Show',
+      MISUSE: 'Mal Uso',
+      DAMAGE: 'Daño',
+      OTHER: 'Otro',
     };
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${typeStyles[type]}`}>{typeText[type]}</span>;
+    const style = typeStyles[type] || 'bg-gray-500 text-white';
+    const text = typeText[type] || type;
+
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>{text}</span>;
   };
 
   return (
@@ -84,10 +89,16 @@ export function UserStrikesHistoryModal({
               <div key={strike.id} className="border-l-4 border-blue-500 bg-gray-50 rounded-lg p-4">
                 <div className="flex items-start justify-between mb-2">
                   {getTypeBadge(strike.type)}
-                  <span className="text-sm text-gray-600">{strike.date}</span>
+                  <span className="text-sm text-gray-600">
+                    {new Date(strike.date).toLocaleDateString('es-CL', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    }).replace(/\//g, '-')}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-900 mb-2">{strike.reason}</p>
-                <p className="text-xs text-gray-500">Aplicado por: {strike.appliedBy}</p>
+                <p className="text-sm text-gray-900 mb-2">{strike.description}</p>
+                <p className="text-xs text-gray-500">Aplicado por: {strike.admin?.first_name + ' ' + strike.admin?.last_name}</p>
               </div>
             ))
           )}
