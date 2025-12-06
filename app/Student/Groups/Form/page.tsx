@@ -6,6 +6,9 @@ import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import { useUser } from '@auth0/nextjs-auth0';
+import { useRouter } from 'next/navigation';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -18,16 +21,42 @@ interface GroupFormData {
 export default function CreateGroupPage() {
   const params = useSearchParams();
   const userId = Number(params.get('userId') ?? 0);
-
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { user, isLoading: authLoading } = useUser();
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
     goal: '',
     logo: null,
   });
+
+  useEffect(() => {
+      if (authLoading) return;
+      if (!user) {
+        router.push('/auth/login');
+        return;
+      }
+  
+      const loadData = async () => {
+        
+        try {
+          const token = await getAccessToken();
+          if (!token) {
+            throw new Error('No se pudo obtener el token de autenticación');
+          }
+          setAccessToken(token);
+  
+        } catch (err) {
+          console.error('Failed to load event:', err);
+        }
+      };
+  
+      loadData();
+    }, [user, authLoading, router]);
 
 
   const handleNext = () => {
@@ -77,7 +106,7 @@ export default function CreateGroupPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           user_id: userId,
