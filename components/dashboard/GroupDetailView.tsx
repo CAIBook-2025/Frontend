@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { fetchUserProfile, UserProfile } from '@/lib/user/fetchUserProfile';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 import {
   Users,
   Crown,
@@ -151,7 +151,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   const router = useRouter();
   const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -159,7 +159,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   const [recentEvents, setRecentEvents] = useState<EventRequest[]>([]);
 
   // Determinar el rol del usuario (comparar ID del perfil con repre_id del grupo)
-  const isRepresentative = userProfile && groupDetails ? groupDetails.repre_id === userProfile.id : false;
+  const isRepresentative = userProfile?.user && groupDetails ? groupDetails.repre_id === userProfile.user.id : false;
 
   // Obtener access token
   useEffect(() => {

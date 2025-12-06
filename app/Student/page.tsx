@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 
 // 1. IMPORTAMOS la función y los tipos de datos del perfil
-import { fetchUserProfile, UserProfile } from '@/lib/user/fetchUserProfile';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 // 2. IMPORTAMOS los componentes de vista
 import { PersonalView } from '@/components/dashboard/PersonalView';
@@ -52,7 +52,7 @@ export default function StudentDashboardPage() {
   }, [searchParams]);
 
   // 3. NUEVOS ESTADOS para manejar los datos del perfil y su carga
-  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  const [profileData, setProfileData] = useState<UserProfileResponse | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   // 4. useEffect para OBTENER los datos del perfil cuando el usuario esté listo
@@ -92,10 +92,10 @@ export default function StudentDashboardPage() {
 
   const strikesCount = profileData?.strikesCount ?? 0;
 
-  const userId = profileData?.id ?? 0; // profileData YA es el usuario
+  const userId = profileData?.user?.id ?? 0;
 
   // 6. OBTENEMOS el nombre del usuario desde nuestro backend para mayor consistencia
-  const userName = profileData?.first_name || user?.name || 'Usuario';
+  const userName = profileData?.user?.first_name || user?.name || 'Usuario';
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
