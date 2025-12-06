@@ -195,7 +195,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
   // Calcular el número total de miembros (representante + moderadores)
   const getMemberCount = (group: Group): number => {
-    return 1 + group.moderators.length; // 1 representante + N moderadores
+    return 1 + (group.moderators?.length ?? 0); // 1 representante + N moderadores
   };
 
   const handleCreateAnother = () => {
@@ -425,7 +425,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                             <div className="flex items-center gap-1.5">
                               <Crown size={14} className="text-amber-600" />
                               <span>
-                                {group.representative.first_name} {group.representative.last_name}
+                                {group.representative?.first_name ?? ''} {group.representative?.last_name ?? ''}
                               </span>
                             </div>
                           </div>
