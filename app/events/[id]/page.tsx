@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Calendar, MapPin, Users, Clock, ArrowLeft, Edit, Trash2, Target, AlertCircle } from 'lucide-react';
+import EventFeedback from '@/components/dashboard/EventFeedback';
 import { useUser } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 import { getAccessToken } from '@auth0/nextjs-auth0';
@@ -77,7 +78,7 @@ export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isLoading: authLoading } = useUser();
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [profileData, setProfileData] = useState<UserProfileResponse["user"] | null>(null);
   const [groupData, setGroupData] = useState<GroupData | null>(null);
@@ -97,7 +98,7 @@ export default function EventDetailPage() {
     const loadData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const token = await getAccessToken();
         if (!token) {
@@ -233,8 +234,9 @@ export default function EventDetailPage() {
   };
 
   const isRepresentative = profileData?.role === 'REPRESENTATIVE';
-  const canManageEvent = isRepresentative && 
-                         groupData?.representative?.id === profileData?.id;
+  const isAdmin = profileData?.role === 'ADMIN';
+  const canManageEvent = isRepresentative &&
+    groupData?.representative?.id === profileData?.id;
 
   if (isLoading) {
     return (
@@ -298,6 +300,10 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-3">
                   <Users size={20} />
                   <span className="text-lg">Organizado por {event.group.name}</span>
+                  <div className="flex items-center bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/30" title="Reputación del grupo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#FCD34D" stroke="#FCD34D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                    <span className="font-bold">{event.group.reputation}</span>
+                  </div>
                 </div>
               </div>
               {getStatusBadge(event.status)}
@@ -381,10 +387,7 @@ export default function EventDetailPage() {
                   <span className="text-gray-500">Última actualización:</span>
                   <span className="ml-2 text-gray-900">{formatDateTime(event.updatedAt)}</span>
                 </div>
-                <div>
-                  <span className="text-gray-500">Reputación del grupo:</span>
-                  <span className="ml-2 text-gray-900">{event.group.reputation}</span>
-                </div>
+
               </div>
             </div>
 
@@ -406,6 +409,17 @@ export default function EventDetailPage() {
                   Eliminar Evento
                 </button>
               </div>
+            )}
+
+            {/* Event Feedback Section */}
+            {profileData && (
+              <EventFeedback
+                eventId={event.id}
+                isAdmin={isAdmin}
+                isGroupRep={canManageEvent} // Since canManageEvent is true only if they are the rep of THIS group
+                userId={profileData.id}
+                accessToken={accessToken}
+              />
             )}
           </div>
         </div>
