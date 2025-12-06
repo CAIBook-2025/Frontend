@@ -107,7 +107,7 @@ export default function EventDetailPage() {
 
         // Cargar perfil del usuario
         const profile = await fetchUserProfile(token);
-        setProfileData(profile);
+        setProfileData(profile?.user ?? null);
 
         // Cargar evento específico
         const eventResponse = await fetch(

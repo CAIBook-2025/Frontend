@@ -62,7 +62,7 @@ export default function EventsPage() {
 
         // Cargar perfil del usuario
         const profile = await fetchUserProfile(token);
-        setProfileData(profile);
+        setProfileData(profile?.user ?? null);
 
         // Cargar eventos
         const eventsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`, {
