@@ -1,7 +1,7 @@
 // components/ui/Input.tsx
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   id: string;
   error?: string;
 }
@@ -9,9 +9,11 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = ({ label, id, error, ...props }: InputProps) => {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
+          {label}
+        </label>
+      )}
       <input
         id={id}
         {...props}
