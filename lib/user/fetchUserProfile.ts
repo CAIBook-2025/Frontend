@@ -1,3 +1,13 @@
+export type UserScheduleItem = {
+  id: number;
+  day: string;
+  module: number;
+  status: string;
+  isFinished: boolean;
+  roomName: string;
+  location?: string;
+};
+
 export type UserProfile = {
   id: number;
   email: string;
@@ -12,6 +22,8 @@ export type UserProfile = {
   career: string | null;
   phone: string | null;
   student_number: string | null;
+  pendingGroupRequests?: number;
+  schedule?: UserScheduleItem[];
 };
 
 export type UserProfileResponse = {
