@@ -81,8 +81,8 @@ export default function CreateGroupPage() {
     if (accessToken && userId !== null) loadPendingRequests();
   }, [accessToken, userId]);
 
-  // Verificar si el usuario tiene solicitudes pendientes
-  const hasPendingRequests = pendingRequestsCount >= 1;
+  // Verificar si el usuario tiene 3 o más solicitudes pendientes
+  const hasPendingRequests = pendingRequestsCount >= 3;
 
   // Función para validar cada etapa
   const validateStep = (currentStep: number): boolean => {
@@ -250,11 +250,11 @@ export default function CreateGroupPage() {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-amber-800 mb-3">
-                    Solicitud de grupo pendiente
+                    Límite de solicitudes alcanzado
                   </h2>
                   <p className="text-amber-700 mb-6">
-                    Ya tienes {pendingRequestsCount} solicitud{pendingRequestsCount !== 1 ? 'es' : ''} de grupo pendiente{pendingRequestsCount !== 1 ? 's' : ''}. 
-                    Por favor espera a que se resuelva{pendingRequestsCount !== 1 ? 'n' : ''} antes de crear una nueva solicitud.
+                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes. 
+                    El límite máximo es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     <Link

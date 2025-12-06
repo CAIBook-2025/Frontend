@@ -288,10 +288,12 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
           throw new Error('Error al cargar mis grupos');
         }
 
-        const data: Group[] = await response.json();
+        const data = await response.json();
+        // El backend devuelve { total_groups, groups }, extraemos el array
+        const groups: Group[] = data.groups ?? data;
 
         // Determinar el rol del usuario en cada grupo
-        const groupsWithRoles: MyGroupRole[] = data.map((group) => {
+        const groupsWithRoles: MyGroupRole[] = groups.map((group) => {
           const isRepresentative = group.repre_id === userId;
           const isModerator = group.moderators_ids?.includes(userId!) ?? false;
 
@@ -329,7 +331,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   };
 
   // Verificar si el usuario tiene solicitudes pendientes
-  const hasPendingRequests = pendingRequestsCount >= 1;
+  const hasPendingRequests = pendingRequestsCount >= 3;
 
   if (error) {
     return (

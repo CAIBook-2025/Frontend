@@ -1,7 +1,8 @@
 // components/book-room/RoomCard.tsx
 'use client';
 
-import { MapPin, Users, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Users, Clock, Loader2, CheckCircle2 } from 'lucide-react';
 
 // Reutilizamos los tipos que definimos en la página
 type RoomStatus = 'Disponible' | 'Ocupada';
@@ -16,26 +17,63 @@ export interface Room {
   status: RoomStatus;
   equipment: Equipment[];
   module: number;
+  day?: string;
 }
 
-export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: number; scheduleId: number }) => {
-  const isAvailable = room.status === 'Disponible';
+interface RoomCardProps {
+  room: Room;
+  scheduleId: number;
+  userId: number | null;
+  accessToken: string | null;
+  onReservationSuccess?: () => void;
+}
+
+export const RoomCard = ({ room, scheduleId, userId, accessToken, onReservationSuccess }: RoomCardProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReserved, setIsReserved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const isAvailable = room.status === 'Disponible' && !isReserved;
 
   const handleReservar = async () => {
+    if (!accessToken) {
+      setError('Debes iniciar sesión para reservar');
+      return;
+    }
+
+    if (!userId) {
+      setError('No se pudo obtener tu información de usuario');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/${scheduleId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ 
+          id: scheduleId,  // ID del horario (número entero)
+          userId: userId   // ID del usuario (número entero)
+        }),
       });
+
       if (!res.ok) {
-        const { error } = await res.json();
-        throw new Error(error || 'Error al reservar');
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || data.message || 'Error al reservar');
       }
-      const data = await res.json();
-      // refresca estado/UI
-    } catch (e) {
-      console.error(e);
+
+      setIsReserved(true);
+      onReservationSuccess?.();
+    } catch (e: any) {
+      console.error('Error reservando:', e);
+      setError(e.message || 'Error al reservar la sala');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,20 +117,51 @@ export const RoomCard = ({ room, userId, scheduleId }: { room: Room; userId: num
         </div>
       </div>
 
+      {/* Error message */}
+      {error && (
+        <div className="mt-4 p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Success message */}
+      {isReserved && (
+        <div className="mt-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4" />
+          ¡Reserva exitosa!
+        </div>
+      )}
+
       {/* --- BOTÓN CORREGIDO CON COLORES ESTÁNDAR Y CURSOR --- */}
       <button
-        disabled={!isAvailable}
+        disabled={!isAvailable || isLoading || isReserved}
         className={`
-          mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300
+          mt-4 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300 flex items-center justify-center gap-2
           ${
-            isAvailable
-              ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' // Estilo para el estado HABILITADO
-              : 'bg-slate-400 cursor-not-allowed' // Estilo para el estado DESHABILITADO
+            isReserved
+              ? 'bg-green-600 cursor-default'
+              : isAvailable && !isLoading
+              ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+              : 'bg-slate-400 cursor-not-allowed'
           }
         `}
         onClick={handleReservar}
       >
-        {isAvailable ? 'Reservar' : 'No Disponible'}
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Reservando...
+          </>
+        ) : isReserved ? (
+          <>
+            <CheckCircle2 className="h-4 w-4" />
+            Reservado
+          </>
+        ) : isAvailable ? (
+          'Reservar'
+        ) : (
+          'No Disponible'
+        )}
       </button>
     </div>
   );

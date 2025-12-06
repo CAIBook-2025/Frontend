@@ -1,8 +1,10 @@
-// app/book-room/page.tsx
+// app/Student/StudyRoomBooker/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
 
 // Importamos los componentes, incluyendo el nuevo DaySelector
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -50,17 +52,45 @@ function normalizeEquipment(equ: any): string[] {
 }
 
 export default function BookRoomPage() {
+  const { user } = useUser();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   // --- NUEVO ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
+  // Obtener access token y perfil de usuario
   useEffect(() => {
-    const loadRooms = async () => {
-      setIsLoading(true);
-      // TODO: En el futuro, la API debería recibir la fecha seleccionada: fakeApiFetchRooms(selectedDate)
+    async function fetchTokenAndProfile() {
+      if (user) {
+        try {
+          const token = await getAccessToken();
+          setAccessToken(token);
+          
+          // Obtener el userId del perfil
+          const profile = await fetchUserProfile(token);
+          if (profile) {
+            setUserId(profile.id);
+          }
+        } catch (error) {
+          console.error('Error fetching access token or profile:', error);
+        }
+      }
+    }
+    fetchTokenAndProfile();
+  }, [user]);
 
+  // Función para recargar las salas después de una reserva exitosa
+  const reloadRooms = () => {
+    loadRoomsData();
+  };
+
+  const loadRoomsData = async () => {
+    setIsLoading(true);
+
+    try {
       const params = new URLSearchParams({
         day: selectedDate, // "YYYY-MM-DD"
         take: '30',
@@ -70,7 +100,6 @@ export default function BookRoomPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule?${params.toString()}`, {
         cache: 'no-store',
       });
-
 
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}`);
@@ -85,7 +114,7 @@ export default function BookRoomPage() {
           name: r.name ?? `Sala ${s.sr_id}`,
           location: r.location ?? '',
           capacity: r.capacity ?? 0,
-          equipment: normalizeEquipment(r.equipment), // 👈 aquí
+          equipment: normalizeEquipment(r.equipment),
           status: s.available === 'AVAILABLE' ? 'Disponible' : 'Ocupada',
           nextAvailable: '—',
           day: s.day,
@@ -94,9 +123,15 @@ export default function BookRoomPage() {
       });
 
       setRooms(roomsAdapted);
+    } catch (error) {
+      console.error('Error loading rooms:', error);
+    } finally {
       setIsLoading(false);
-    };
-    loadRooms();
+    }
+  };
+
+  useEffect(() => {
+    loadRoomsData();
   }, [selectedDate]); // Se vuelve a ejecutar si selectedDate cambia
 
   return (
@@ -145,7 +180,16 @@ export default function BookRoomPage() {
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
-              rooms.map((room) => <RoomCard key={room.id} room={room} userId={10} scheduleId={room.id} />)
+              rooms.map((room) => (
+                <RoomCard 
+                  key={room.id} 
+                  room={room} 
+                  scheduleId={room.id}
+                  userId={userId}
+                  accessToken={accessToken}
+                  onReservationSuccess={reloadRooms}
+                />
+              ))
             ) : (
               <p>No hay salas disponibles.</p>
             )}
