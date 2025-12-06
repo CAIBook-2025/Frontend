@@ -21,7 +21,7 @@ export async function postStrike(accessToken: string, data: PostStrikeData) {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
 
-        if (response.status === 409) { // P2002 handled in backend as 409
+        if (response.status === 409) {
             throw new Error(errorData.error || 'Ya existe un strike similar');
         }
 

@@ -169,7 +169,7 @@ export default function StrikesPage() {
 
       await Promise.all(deletePromises);
       await loadData();
-      setUserToLiftSuspension(null); // Close modal
+      setUserToLiftSuspension(null);
     } catch (error) {
       console.error("Error lifting suspension:", error);
       alert("Hubo un error al levantar la suspensión. Revisa la consola.");
