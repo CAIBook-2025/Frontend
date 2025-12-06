@@ -1,6 +1,6 @@
 import { UserProfile } from '@/types/userProfile';
 
-type UserProfileResponse = {
+export type UserProfileResponse = {
   exists: boolean;
   user: UserProfile | null;
 };

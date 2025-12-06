@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
+import { useRouter } from 'next/navigation';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -16,18 +17,49 @@ interface GroupFormData {
 }
 
 export default function CreateGroupPage() {
-  const params = useSearchParams();
-  const userId = Number(params.get('userId') ?? 0);
-
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useUser();
+  const [userId, setUserId] = useState<number | null>(null);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
     goal: '',
     logo: null,
   });
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    const loadData = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) {
+          throw new Error('No se pudo obtener el token de autenticación');
+        }
+        setAccessToken(token);
+
+        const userProfile = await fetchUserProfile(token);
+        if (userProfile) {
+          setUserId(userProfile.id);
+        } else {
+          console.error('No se pudo obtener el perfil del usuario');
+        }
+
+      } catch (err) {
+        console.error('Failed to load data:', err);
+      }
+    };
+
+    loadData();
+  }, [user, authLoading, router]);
 
 
   const handleNext = () => {
@@ -72,12 +104,13 @@ export default function CreateGroupPage() {
         setErrorMsg('No se detectó el usuario. Reintenta desde el Dashboard.');
         return;
       }
+      console.log('User ID:', userId);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           user_id: userId,
@@ -135,9 +168,8 @@ export default function CreateGroupPage() {
             {[1, 2, 3].map((s) => (
               <div key={s} className="text-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
-                    step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}
                 >
                   {s}
                 </div>
@@ -276,9 +308,8 @@ export default function CreateGroupPage() {
                   type="button" // Cambiado de 'submit' a 'button'
                   onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
                   disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
-                  }`}
+                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                    }`}
                 >
                   {submitting ? (
                     'Enviando…'
