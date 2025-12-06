@@ -7,7 +7,7 @@ export const LoadingRooms = () => (
     <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
     <div>
       <p className="font-medium text-gray-800">Procesando datos de salas</p>
-      <p className="text-sm text-gray-500">Cargando salas, horarios y ocupaci��n...</p>
+      <p className="text-sm text-gray-500">Cargando salas, horarios y ocupación...</p>
     </div>
   </div>
 );
