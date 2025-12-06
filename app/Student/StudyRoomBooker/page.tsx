@@ -1,36 +1,17 @@
-// app/Student/StudyRoomBooker/page.tsx
+// app/book-room/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
-import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
+import Link from 'next/link';
+import { Loader2, AlertCircle, Calendar } from 'lucide-react';
 
 // Importamos los componentes, incluyendo el nuevo DaySelector
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Room, RoomCard } from '@/components/book-room/RoomCard';
 import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
-
-// --- SIMULACIÓN DE API (sin cambios) ---
-// const fakeApiFetchRooms = (): Promise<Room[]> => {
-//   return new Promise(resolve => {
-//     setTimeout(() => {
-//       const allEquipment: Room['equipment'] = ['Pizarra', 'Proyector', 'WiFi', 'Enchufes', 'Mesa grande'];
-//       const sampleRooms: Room[] = Array.from({ length: 15 }, (_, i) => ({
-//         id: i + 1,
-//         name: `Sala ${i % 3 === 0 ? 'Grupal' : 'de Estudio'} ${String.fromCharCode(65 + i)}`,
-//         location: i % 2 === 0 ? `Biblioteca Central - Piso ${i % 4 + 1}` : `Centro de Estudiantes - Piso ${i % 2 + 1}`,
-//         capacity: 2 + Math.floor(Math.random() * 8),
-//         nextAvailable: `${(new Date().getHours() + 1 + Math.floor(Math.random() * 5)) % 24}:00`.padStart(5, '0'),
-//         status: Math.random() > 0.3 ? 'Disponible' : 'Ocupada',
-//         equipment: allEquipment.filter(() => Math.random() > 0.5).slice(0, 4),
-//         module:
-//       }));
-//       resolve(sampleRooms);
-//     }, 1500);
-//   });
-// };
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 
 function normalizeEquipment(equ: any): string[] {
   try {
@@ -52,45 +33,62 @@ function normalizeEquipment(equ: any): string[] {
 }
 
 export default function BookRoomPage() {
-  const { user } = useUser();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<number | null>(null);
-  // --- NUEVO ESTADO PARA LA FECHA SELECCIONADA ---
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
+
+  const { user } = useUser();
+  // --- ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-  // Obtener access token y perfil de usuario
   useEffect(() => {
-    async function fetchTokenAndProfile() {
-      if (user) {
-        try {
-          const token = await getAccessToken();
-          setAccessToken(token);
-          
-          // Obtener el userId del perfil
-          const profile = await fetchUserProfile(token);
-          if (profile) {
-            setUserId(profile.id);
-          }
-        } catch (error) {
-          console.error('Error fetching access token or profile:', error);
+    if (!user) return;
+    let isMounted = true;
+
+    const loadAccessToken = async () => {
+      try {
+        const token = await getAccessToken();
+        if (isMounted) {
+          setAccessToken(token ?? null);
         }
+      } catch (error) {
+        console.error('Error fetching access token:', error);
       }
-    }
-    fetchTokenAndProfile();
+    };
+
+    loadAccessToken();
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
-  // Función para recargar las salas después de una reserva exitosa
-  const reloadRooms = () => {
-    loadRoomsData();
-  };
+  useEffect(() => {
+    if (!accessToken) return;
+    let isMounted = true;
 
-  const loadRoomsData = async () => {
-    setIsLoading(true);
+    const loadUserProfile = async () => {
+      try {
+        const profile = await fetchUserProfile(accessToken);
+        if (isMounted) {
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
 
-    try {
+    loadUserProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, [accessToken]);
+
+  useEffect(() => {
+    const loadRooms = async () => {
+      setIsLoading(true);
+
       const params = new URLSearchParams({
         day: selectedDate, // "YYYY-MM-DD"
         take: '30',
@@ -114,7 +112,7 @@ export default function BookRoomPage() {
           name: r.name ?? `Sala ${s.sr_id}`,
           location: r.location ?? '',
           capacity: r.capacity ?? 0,
-          equipment: normalizeEquipment(r.equipment),
+          equipment: normalizeEquipment(r.equipment), // 👈 aquí
           status: s.available === 'AVAILABLE' ? 'Disponible' : 'Ocupada',
           nextAvailable: '—',
           day: s.day,
@@ -123,19 +121,46 @@ export default function BookRoomPage() {
       });
 
       setRooms(roomsAdapted);
-    } catch (error) {
-      console.error('Error loading rooms:', error);
-    } finally {
       setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRoomsData();
+    };
+    loadRooms();
   }, [selectedDate]); // Se vuelve a ejecutar si selectedDate cambia
+
+  // Verificar si el usuario ha alcanzado el límite de reservas activas
+  const activeSchedules = userProfile?.activeSchedules ?? 0;
+  const hasReachedLimit = activeSchedules >= 3;
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
+      {/* Banner de límite alcanzado */}
+      {hasReachedLimit && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="rounded-full bg-amber-100 p-2">
+                <AlertCircle className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">
+                Límite de reservas activas alcanzado
+              </h3>
+              <p className="text-sm text-amber-700 mb-4">
+                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa{activeSchedules !== 1 ? 's' : ''}. 
+                El límite máximo es de 3 reservas simultáneas. Para realizar una nueva reserva, 
+                por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
+              </p>
+              <Link
+                href="/Reservations"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+              >
+                <Calendar size={16} /> Ver Mis Reservas
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. Filtros de Búsqueda */}
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
@@ -184,10 +209,9 @@ export default function BookRoomPage() {
                 <RoomCard 
                   key={room.id} 
                   room={room} 
-                  scheduleId={room.id}
-                  userId={userId}
-                  accessToken={accessToken}
-                  onReservationSuccess={reloadRooms}
+                  scheduleId={room.id} 
+                  userId={userProfile?.user?.id}
+                  disabled={hasReachedLimit}
                 />
               ))
             ) : (

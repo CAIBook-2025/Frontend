@@ -1,13 +1,13 @@
 // components/book-room/RoomCard.tsx
 'use client';
+import { useState, useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0';
+import { MapPin, Users, Clock, CheckCircle } from 'lucide-react';
+import { getAccessToken } from '@auth0/nextjs-auth0';
 
-import { useState } from 'react';
-import { MapPin, Users, Clock, Loader2, CheckCircle2 } from 'lucide-react';
-
-// Reutilizamos los tipos que definimos en la página
+// --- Tipos ---
 type RoomStatus = 'Disponible' | 'Ocupada';
 type Equipment = 'Pizarra' | 'Proyector' | 'WiFi' | 'Enchufes' | 'Mesa grande';
-
 export interface Room {
   id: number;
   name: string;
@@ -17,152 +17,143 @@ export interface Room {
   status: RoomStatus;
   equipment: Equipment[];
   module: number;
-  day?: string;
 }
-
-interface RoomCardProps {
+type RoomCardProps = {
   room: Room;
   scheduleId: number;
-  userId: number | null;
-  accessToken: string | null;
-  onReservationSuccess?: () => void;
-}
+  userId?: number | null;
+  disabled?: boolean;
+};
 
-export const RoomCard = ({ room, scheduleId, userId, accessToken, onReservationSuccess }: RoomCardProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isReserved, setIsReserved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const RoomCard = ({ room, scheduleId, userId, disabled = false }: RoomCardProps) => {
+  const { user } = useUser();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const isAvailable = room.status === 'Disponible' && !disabled;
   
-  const isAvailable = room.status === 'Disponible' && !isReserved;
+  useEffect(() => {
+    async function fetchAccessToken() {
+      if (user) {
+        try {
+          const accessToken = await getAccessToken();
+          setAccessToken(accessToken);
+        } catch (error) {
+          console.error('Error fetching access token:', error);
+        }
+      }
+    }
+    fetchAccessToken();
+  }, [user]);
 
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // --- FUNCIÓN handleReservar ---
   const handleReservar = async () => {
-    if (!accessToken) {
-      setError('Debes iniciar sesión para reservar');
+    if (disabled) {
       return;
     }
-
-    if (!userId) {
-      setError('No se pudo obtener tu información de usuario');
+    if (!user || !accessToken || !userId) {
+      alert('Debes iniciar sesión y completar tu perfil para poder realizar una reserva.');
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
-
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/book`, {
         method: 'PATCH',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ 
-          id: scheduleId,  // ID del horario (número entero)
-          userId: userId   // ID del usuario (número entero)
-        }),
+        body: JSON.stringify({ id: scheduleId, userId }),
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || data.message || 'Error al reservar');
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Error al realizar la reserva');
       }
-
-      setIsReserved(true);
-      onReservationSuccess?.();
-    } catch (e: any) {
-      console.error('Error reservando:', e);
-      setError(e.message || 'Error al reservar la sala');
-    } finally {
-      setIsLoading(false);
+      setShowSuccessModal(true);
+    } catch (e) {
+      console.error(e);
+      const errorMessage = e instanceof Error ? e.message : 'Ocurrió un error inesperado.';
+      alert(`Error al reservar: ${errorMessage}`);
     }
   };
 
+  const handleCloseModal = () => {
+    setShowSuccessModal(false);
+    window.location.reload();
+  };
+
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
-      <div>
-        <div className="flex items-start justify-between">
-          <h3 className="text-xl font-bold text-gray-800">{room.name}</h3>
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${isAvailable ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}
-          >
-            {room.status}
-          </span>
-        </div>
-        <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-          <MapPin size={14} /> {room.location}
-        </p>
-
-        <div className="my-4 flex items-center gap-6 border-y border-slate-100 py-3 text-sm text-slate-600">
-          <div className="flex items-center gap-2">
-            <Users size={16} /> {room.capacity} personas
-          </div>
-          <div className="flex items-center gap-2">
-            <Clock size={16} /> Módulo: {room.module}
-          </div>
-        </div>
-
+    <>
+      <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md">
         <div>
-          <h4 className="mb-2 text-sm font-medium text-slate-600">Equipamiento:</h4>
-          <div className="flex flex-wrap gap-2">
-            {room.equipment.length > 0 ? (
-              room.equipment.map((item) => (
-                <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
-                  {item}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs text-slate-500">No especificado</span>
-            )}
+          <div className="flex items-start justify-between">
+            <h3 className="text-xl font-bold text-gray-800">{room.name}</h3>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${isAvailable ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}
+            >
+              {room.status}
+            </span>
+          </div>
+          <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
+            <MapPin size={14} /> {room.location}
+          </p>
+          <div className="my-4 flex items-center gap-6 border-y border-slate-100 py-3 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <Users size={16} /> {room.capacity} personas
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock size={16} /> Módulo: {room.module}
+            </div>
+          </div>
+          <div>
+            <h4 className="mb-2 text-sm font-medium text-slate-600">Equipamiento:</h4>
+            <div className="flex flex-wrap gap-2">
+              {room.equipment.length > 0 ? (
+                room.equipment.map((item) => (
+                  <span key={item} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
+                    {item}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-slate-500">No especificado</span>
+              )}
+            </div>
           </div>
         </div>
+
+        <button
+          disabled={!isAvailable}
+          className={`
+            mt-6 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300
+            ${isAvailable ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-slate-400 cursor-not-allowed'}
+          `}
+          onClick={handleReservar}
+          title={disabled ? 'Has alcanzado el límite de reservas activas' : undefined}
+        >
+          {disabled ? 'Límite Alcanzado' : isAvailable ? 'Reservar' : 'No Disponible'}
+        </button>
       </div>
 
-      {/* Error message */}
-      {error && (
-        <div className="mt-4 p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="m-4 max-w-sm rounded-lg bg-white p-6 text-center shadow-xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+            <h3 className="mt-4 text-xl font-bold text-gray-900">¡Reserva Confirmada!</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Has agendado la <span className="font-semibold">{room.name}</span> para el Módulo{' '}
+              <span className="font-semibold">{room.module}</span>.
+            </p>
+            <button
+              onClick={handleCloseModal}
+              className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700"
+            >
+              Entendido
+            </button>
+          </div>
         </div>
       )}
-
-      {/* Success message */}
-      {isReserved && (
-        <div className="mt-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4" />
-          ¡Reserva exitosa!
-        </div>
-      )}
-
-      {/* --- BOTÓN CORREGIDO CON COLORES ESTÁNDAR Y CURSOR --- */}
-      <button
-        disabled={!isAvailable || isLoading || isReserved}
-        className={`
-          mt-4 w-full rounded-lg px-4 py-2.5 font-semibold text-white transition-colors duration-300 flex items-center justify-center gap-2
-          ${
-            isReserved
-              ? 'bg-green-600 cursor-default'
-              : isAvailable && !isLoading
-              ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-              : 'bg-slate-400 cursor-not-allowed'
-          }
-        `}
-        onClick={handleReservar}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Reservando...
-          </>
-        ) : isReserved ? (
-          <>
-            <CheckCircle2 className="h-4 w-4" />
-            Reservado
-          </>
-        ) : isAvailable ? (
-          'Reservar'
-        ) : (
-          'No Disponible'
-        )}
-      </button>
-    </div>
+    </>
   );
 };

@@ -1,18 +1,8 @@
-// app/services/reservationApi.ts
+// app/services/ReservationApi.ts
 
-// 1. Definimos el "contrato" o la estructura de una reserva del backend
-export interface BackendReservation {
-  id: number;
-  day: string;
-  module: number;
-  status: string;
-  isFinished: boolean;
-  roomName: string;
-  location?: string;
-}
-
-// 2. Estructura adaptada para el frontend
-export type ReservationStatus = 'Confirmada' | 'Pendiente' | 'Cancelada' | 'Ausente';
+// 1. Definimos el "contrato" o la estructura de una reserva.
+//    Esto nos ayuda a mantener la consistencia en toda la app.
+export type ReservationStatus = 'Confirmada' | 'Pendiente' | 'Cancelada';
 
 export interface Reservation {
   id: number;
@@ -21,139 +11,196 @@ export interface Reservation {
   date: string;
   time: string;
   status: ReservationStatus;
-  isFinished: boolean;
-  module: number;
 }
 
-// 3. Mapeo de módulos a horarios (ajusta según tu sistema)
-const MODULE_TIMES: Record<number, string> = {
-  1: '08:00 - 09:30',
-  2: '09:45 - 11:15',
-  3: '11:30 - 13:00',
-  4: '14:00 - 15:30',
-  5: '15:45 - 17:15',
-  6: '17:30 - 19:00',
-  7: '19:15 - 20:45',
+// 2. Mantenemos nuestros datos de prueba aquí.
+const mockReservations: Reservation[] = [
+  {
+    id: 1,
+    roomName: 'Sala de Estudio A1',
+    location: 'Piso 1, Edificio A',
+    date: 'Hoy, 25 de Octubre',
+    time: '16:00 - 17:00',
+    status: 'Confirmada',
+  },
+  {
+    id: 2,
+    roomName: 'Sala Grupal C1',
+    location: 'Piso 3, Edificio C',
+    date: 'Viernes, 27 de Octubre',
+    time: '10:00 - 12:00',
+    status: 'Pendiente',
+  },
+  {
+    id: 3,
+    roomName: 'Sala de Reuniones B2',
+    location: 'Piso 2, Edificio B',
+    date: 'Lunes, 30 de Octubre',
+    time: '09:00 - 10:00',
+    status: 'Confirmada',
+  },
+  {
+    id: 4,
+    roomName: 'Sala Silenciosa D4',
+    location: 'Piso 4, Edificio D',
+    date: 'Miércoles, 1 de Noviembre',
+    time: '14:00 - 16:00',
+    status: 'Confirmada',
+  },
+  {
+    id: 5,
+    roomName: 'Sala de Estudio A2',
+    location: 'Piso 1, Edificio A',
+    date: 'Pasado: 20 de Octubre',
+    time: '11:00 - 12:00',
+    status: 'Cancelada',
+  },
+];
+
+// 3. Creamos la función que simula la llamada a la API.
+export const getReservations = (): Promise<Reservation[]> => {
+  return new Promise((resolve) => {
+    // Simulamos un retraso de red de 1.5 segundos (1500 ms)
+    setTimeout(() => {
+      resolve(mockReservations);
+    }, 1500);
+  });
 };
 
-// 4. Mapeo de estados del backend a estados del frontend
-const mapStatus = (backendStatus: string, isFinished: boolean): ReservationStatus => {
-  if (isFinished && backendStatus === 'ABSENT') return 'Ausente';
-  if (backendStatus === 'CANCELLED') return 'Cancelada';
-  if (backendStatus === 'PRESENT' || backendStatus === 'CONFIRMED') return 'Confirmada';
-  return 'Pendiente';
-};
-
-// 5. Formatear fecha para mostrar
-const formatDate = (dateString: string): string => {
-  try {
-    const date = new Date(dateString);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Comparar solo las fechas (sin hora)
-    const isToday = date.toDateString() === today.toDateString();
-    const isTomorrow = date.toDateString() === tomorrow.toDateString();
-
-    if (isToday) return 'Hoy';
-    if (isTomorrow) return 'Mañana';
-
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-  } catch {
-    return dateString;
-  }
-};
-
-// 6. Transformar reserva del backend al formato del frontend
-const transformReservation = (backendRes: BackendReservation): Reservation => ({
-  id: backendRes.id,
-  roomName: backendRes.roomName || 'Sala sin nombre',
-  location: backendRes.location || 'Ubicación no especificada',
-  date: formatDate(backendRes.day),
-  time: MODULE_TIMES[backendRes.module] || `Módulo ${backendRes.module}`,
-  status: mapStatus(backendRes.status, backendRes.isFinished),
-  isFinished: backendRes.isFinished,
-  module: backendRes.module,
-});
-
-// 7. Función principal para obtener las reservas del usuario
-export const getReservations = async (accessToken: string | null): Promise<Reservation[]> => {
-  if (!accessToken) {
-    console.warn('getReservations called without access token');
-    return [];
-  }
-
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch reservations', response.status, response.statusText);
-      return [];
-    }
-
-    const data = await response.json();
-    
-    if (!data.exists || !data.user?.schedule) {
-      return [];
-    }
-
-    // Transformar y devolver las reservas
-    const reservations: Reservation[] = data.user.schedule.map(transformReservation);
-    
-    // Ordenar: primero las no terminadas, luego por fecha
-    return reservations.sort((a, b) => {
-      if (a.isFinished !== b.isFinished) {
-        return a.isFinished ? 1 : -1;
-      }
-      return 0;
-    });
-
-  } catch (error) {
-    console.error('Error fetching reservations:', error);
-    return [];
-  }
-};
-
-// 8. Función para cancelar una reserva
+// --- FUNCIÓN PARA CANCELAR RESERVA ---
+// La función ahora necesita tanto el ID de la reserva como el ID del usuario
 export const cancelReservation = async (
   reservationId: number,
-  accessToken: string | null
+  userId: number
 ): Promise<{ success: boolean; message: string }> => {
-  if (!accessToken) {
-    return { success: false, message: 'No hay token de autenticación' };
+  // Verificación para asegurar que tenemos un userId válido
+  if (!userId) {
+    throw new Error('El ID del usuario es requerido para cancelar la reserva.');
   }
 
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/reservations/${reservationId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+  // Construimos la URL dinámicamente usando la variable de entorno y el ID de la reserva
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/cancel`;
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return { 
-        success: false, 
-        message: errorData.message || 'Error al cancelar la reserva' 
-      };
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scheduleId: reservationId, userId }),
+    });
+
+    // Si la respuesta no es exitosa (ej. 400, 404, 500), lanzamos un error
+    if (!res.ok) {
+      // Intentamos leer el mensaje de error del cuerpo de la respuesta de la API
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor: ${res.status}`);
     }
 
-    return { success: true, message: 'Reserva cancelada con éxito.' };
+    // Si la respuesta es exitosa, la procesamos
+    const responseData = await res.json();
+
+    return {
+      success: true,
+      message: responseData.message || 'Reserva cancelada con éxito.',
+    };
   } catch (error) {
-    console.error('Error cancelling reservation:', error);
-    return { success: false, message: 'Error de conexión al cancelar la reserva' };
+    console.error('Error en la llamada a la API para cancelar la reserva:', error);
+    // Re-lanzamos el error para que el componente que llamó a la función pueda manejarlo
+    // y mostrar un mensaje al usuario.
+    throw error;
+  }
+};
+
+// --- FUNCIÓN PARA CONFIRMAR CHECK-IN ---
+/**
+ * Realiza una llamada a la API para confirmar el check-in de una reserva.
+ * @param scheduleId - El ID de la reserva (schedule).
+ * @param userId - El ID del usuario que realiza el check-in.
+ * @param accessToken - El token de autenticación de Auth0.
+ * @returns Una promesa que se resuelve con el resultado de la operación.
+ */
+export const confirmCheckIn = async (
+  scheduleId: number,
+  userId: number,
+  accessToken: string
+): Promise<{ success: boolean; message: string }> => {
+  // Verificaciones para asegurar que tenemos todos los datos necesarios
+  if (!scheduleId || !userId || !accessToken) {
+    throw new Error('Faltan datos requeridos (scheduleId, userId, o accessToken) para realizar el check-in.');
+  }
+
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkin`;
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        // ¡Este es el paso clave! Añadimos el token de autorización.
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ userId, scheduleId }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor al hacer check-in: ${res.status}`);
+    }
+
+    const responseData = await res.json();
+
+    return {
+      success: true,
+      message: responseData.message || 'Check-in realizado con éxito.',
+    };
+  } catch (error) {
+    console.error('Error en la llamada a la API para confirmar el check-in:', error);
+    throw error;
+  }
+};
+
+// --- FUNCIÓN PARA CONFIRMAR CHECK-OUT ---
+/**
+ * Realiza una llamada a la API para confirmar el check-out de una reserva.
+ * @param scheduleId - El ID de la reserva (schedule).
+ * @param userId - El ID del usuario que realiza el check-out.
+ * @param accessToken - El token de autenticación de Auth0.
+ * @returns Una promesa que se resuelve con el resultado de la operación.
+ */
+export const confirmCheckOut = async (
+  scheduleId: number,
+  userId: number,
+  accessToken: string
+): Promise<{ success: boolean; message: string }> => {
+  if (!scheduleId || !userId || !accessToken) {
+    throw new Error('Faltan datos requeridos (scheduleId, userId, o accessToken) para realizar el check-out.');
+  }
+
+  // Usamos el endpoint que especificaste
+  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule/checkout`;
+
+  try {
+    const res = await fetch(apiUrl, {
+      method: 'PATCH', // Usamos PATCH como lo especificaste
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`, // Token de autorización
+      },
+      body: JSON.stringify({ scheduleId, userId }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Error del servidor al hacer check-out: ${res.status}`);
+    }
+
+    const responseData = await res.json();
+
+    return {
+      success: true,
+      message: responseData.message || 'Check-out realizado con éxito.',
+    };
+  } catch (error) {
+    console.error('Error en la llamada a la API para confirmar el check-out:', error);
+    throw error;
   }
 };
