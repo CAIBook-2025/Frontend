@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, UploadCloud, Send } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, ArrowRight, UploadCloud, Send, AlertCircle, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { useRouter } from 'next/navigation';
-import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
+import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
+import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 
 // --- TIPOS Y DATOS DEL FORMULARIO ---
 interface GroupFormData {
@@ -17,13 +20,19 @@ interface GroupFormData {
 }
 
 export default function CreateGroupPage() {
+  const params = useSearchParams();
   const router = useRouter();
-  const { user, isLoading: authLoading } = useUser();
-  const [userId, setUserId] = useState<number | null>(null);
+  const userIdParam = params.get('userId');
+  const [userId, setUserId] = useState<number | null>(userIdParam !== null ? Number(userIdParam) : null);
+  const { user } = useUser();
+
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
+  const [isLoadingPendingRequests, setIsLoadingPendingRequests] = useState(true);
   const [formData, setFormData] = useState<GroupFormData>({
     name: '',
     description: '',
@@ -31,40 +40,94 @@ export default function CreateGroupPage() {
     logo: null,
   });
 
+  // Obtener access token y perfil de usuario
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
-      router.push('/auth/login');
+    async function fetchData() {
+      if (user) {
+        try {
+          const tokenResponse = await getAccessToken();
+          const resolvedToken = resolveAccessToken(tokenResponse);
+          setAccessToken(resolvedToken);
+
+          const profile = await fetchUserProfile(resolvedToken);
+          if (profile?.user?.id) {
+            setUserId(profile.user.id);
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+    }
+
+    fetchData();
+  }, [user]);
+
+  // Obtener solicitudes pendientes del usuario
+  useEffect(() => {
+    async function loadPendingRequests() {
+      if (!accessToken || userId === null) {
+        setIsLoadingPendingRequests(false);
+        return;
+      }
+
+      setIsLoadingPendingRequests(true);
+      try {
+        const requests = await fetchGroupRequests(accessToken, {
+          status: 'PENDING',
+          user_id: userId
+        });
+        setPendingRequestsCount(requests?.length ?? 0);
+      } catch (error) {
+        console.error('Error loading pending requests:', error);
+      } finally {
+        setIsLoadingPendingRequests(false);
+      }
+    }
+
+    if (accessToken && userId !== null) loadPendingRequests();
+  }, [accessToken, userId]);
+
+  // Verificar si el usuario tiene 3 o más solicitudes pendientes
+  const hasPendingRequests = pendingRequestsCount >= 3;
+
+  // Función para validar cada etapa
+  const validateStep = (currentStep: number): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (currentStep === 1) {
+      // Validar Etapa 1: Información General
+      if (!formData.name.trim()) {
+        errors.name = 'El nombre del grupo es requerido';
+      }
+      if (!formData.description.trim()) {
+        errors.description = 'La descripción es requerida';
+      }
+    } else if (currentStep === 2) {
+      // Validar Etapa 2: Detalles y Objetivos
+      if (!formData.goal.trim()) {
+        errors.goal = 'El objetivo principal es requerido';
+      }
+    }
+    // Etapa 3 no requiere validación (logo es opcional)
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    // Validar la etapa actual antes de avanzar
+    if (!validateStep(step)) {
+      setErrorMsg('Por favor completa todos los campos requeridos antes de continuar.');
       return;
     }
 
-    const loadData = async () => {
-      try {
-        const token = await getAccessToken();
-        if (!token) {
-          throw new Error('No se pudo obtener el token de autenticación');
-        }
-        setAccessToken(token);
+    // Limpiar errores si la validación es exitosa
+    setErrorMsg(null);
+    setValidationErrors({});
 
-        const userProfile = await fetchUserProfile(token);
-        if (userProfile) {
-          setUserId(userProfile.id);
-        } else {
-          console.error('No se pudo obtener el perfil del usuario');
-        }
-
-      } catch (err) {
-        console.error('Failed to load data:', err);
-      }
-    };
-
-    loadData();
-  }, [user, authLoading, router]);
-
-
-  const handleNext = () => {
-    // TODO: Añadir validación antes de pasar al siguiente paso
-    if (step < 3) setStep(step + 1);
+    if (step < 3) {
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -74,6 +137,20 @@ export default function CreateGroupPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Limpiar el error del campo cuando el usuario empiece a escribir
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Limpiar el mensaje de error general si todos los campos están completos
+    if (errorMsg) {
+      setErrorMsg(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,17 +177,17 @@ export default function CreateGroupPage() {
         return;
       }
 
-      if (!userId) {
+      if (userId === null) {
         setErrorMsg('No se detectó el usuario. Reintenta desde el Dashboard.');
         return;
       }
-      console.log('User ID:', userId);
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+          // TODO: Add token authorization
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
           user_id: userId,
@@ -127,17 +204,85 @@ export default function CreateGroupPage() {
 
       const data = await res.json();
 
-      alert('¡Solicitud de grupo enviada con éxito!');
-      setFormData({ name: '', description: '', goal: '', logo: null });
-      setStep(1);
+      // Redirigir al dashboard con parámetro de éxito
+      router.push(`/Student?view=groups&success=true`);
     } catch (err: any) {
       setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
-    } finally {
       setSubmitting(false);
     }
-
-    alert('¡Solicitud de grupo enviada! Revisa la consola.');
   };
+
+  // Si está cargando las solicitudes pendientes, mostrar loading
+  if (isLoadingPendingRequests) {
+    return (
+      <main className="flex min-h-screen bg-slate-50 items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+          <p className="mt-4 text-slate-600">Verificando tu estado...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Si tiene solicitudes pendientes, mostrar mensaje y bloquear formulario
+  if (hasPendingRequests) {
+    return (
+      <main className="flex min-h-screen bg-slate-50">
+        <div className="hidden lg:block w-3/5 relative">
+          <Image
+            src="/PeopleForm.png"
+            alt="Estudiantes colaborando en un grupo"
+            width={500}
+            height={500}
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gray-900/40" />
+          <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+            <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
+            <p className="mt-2 text-lg max-w-md text-white/90">
+              Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full lg:w-3/5 flex flex-col items-center justify-center h-full p-8">
+          <div className="max-w-2xl w-full">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  <div className="rounded-full bg-amber-100 p-3">
+                    <Clock className="h-8 w-8 text-amber-600" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-amber-800 mb-3">
+                    Límite de solicitudes alcanzado
+                  </h2>
+                  <p className="text-amber-700 mb-6">
+                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes.
+                    El límite máximo es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
+                  </p>
+                  <div className="flex gap-3 flex-wrap">
+                    <Link
+                      href="/Student?view=groups"
+                      className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+                    >
+                      <ArrowLeft size={16} /> Volver a Grupos
+                    </Link>
+                    <a
+                      className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50"
+                    >
+                      <AlertCircle size={16} /> Ver Mis Solicitudes
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen bg-slate-50">
@@ -196,6 +341,7 @@ export default function CreateGroupPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    error={validationErrors.name}
                   />
                   <div>
                     <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
@@ -208,9 +354,15 @@ export default function CreateGroupPage() {
                       placeholder="Una breve descripción que invite a los estudiantes a unirse."
                       value={formData.description}
                       onChange={handleInputChange}
-                      className="resize-none block w-full rounded-md border-slate-300 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600"
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.description
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-slate-300 focus:border-blue-600'
+                        }`}
                       required
                     />
+                    {validationErrors.description && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -231,9 +383,15 @@ export default function CreateGroupPage() {
                       placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
                       value={formData.goal}
                       onChange={handleInputChange}
-                      className="resize-none block w-full rounded-md border-slate-300 shadow-sm placeholder:text-slate-400 focus:border-blue-600 focus:ring-blue-600"
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.goal
+                          ? 'border-red-300 focus:border-red-500'
+                          : 'border-slate-300 focus:border-blue-600'
+                        }`}
                       required
                     />
+                    {validationErrors.goal && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
+                    )}
                   </div>
                 </div>
               </div>

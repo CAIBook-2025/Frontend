@@ -3,7 +3,7 @@
 import { useUser } from '@auth0/nextjs-auth0';
 import { useEffect, useState } from 'react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
-import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
+import { fetchUserProfile, UseProfileResponse } from '@/lib/user/fetchUserProfile';
 import { UserProfile } from '@/types/userProfile';
 import { useRouter } from 'next/navigation';
 
@@ -54,15 +54,15 @@ export default function ProfilePage() {
     async function fetchUserData() {
       if (accessToken) {
         try {
-          const profile = await fetchUserProfile(accessToken);
-          if (profile) {
-            setUserData(profile);
+          const profileResponse = await fetchUserProfile(accessToken);
+          if (profileResponse?.user) {
+            setUserData(profileResponse.user);
             setFormData({
-              first_name: profile.first_name || '',
-              last_name: profile.last_name || '',
-              phone: profile.phone || '',
-              career: profile.career || '',
-              student_number: profile.student_number || ''
+              first_name: profileResponse.user.first_name || '',
+              last_name: profileResponse.user.last_name || '',
+              phone: profileResponse.user.phone || '',
+              career: profileResponse.user.career || '',
+              student_number: profileResponse.user.student_number || ''
             });
           }
         } catch (error) {
