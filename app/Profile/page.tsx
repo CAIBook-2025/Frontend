@@ -3,7 +3,7 @@
 import { useUser } from '@auth0/nextjs-auth0';
 import { useEffect, useState } from 'react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
-import { fetchUserProfile, UseProfileResponse } from '@/lib/user/fetchUserProfile';
+import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
 import { UserProfile } from '@/types/userProfile';
 import { useRouter } from 'next/navigation';
 
