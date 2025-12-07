@@ -1,18 +1,58 @@
 import { UserProfile } from '@/types/userProfile';
 
-export type UserProfileResponse = {
-  exists: boolean;
-  user: UserProfile | null;
+export type UserScheduleItem = {
+  id: number;
+  roomName: string;
+  location: string;
+  day: string;
+  module: number;
+  status: string;
+  available: string;
+  isFinished: boolean;
 };
 
-export async function fetchUserProfile(accessToken: string | null): Promise<UserProfile | null> {
+export type UserProfileResponse = {
+  user: UserProfile | null;
+  schedule: UserScheduleItem[];
+  scheduleCount: number;
+  strikes: unknown[];
+  strikesCount: number;
+  upcomingEvents: unknown[];
+  upcomingEventsCount: number;
+  attendances: unknown[];
+  attendancesCount: number;
+  pendingGroupRequests?: number;
+  activeSchedules?: number;
+};
+
+export async function fetchUserProfile(accessToken: string | null): Promise<UserProfileResponse | null> {
   if (!accessToken) {
     console.warn('fetchUserProfile called without access token');
     return null;
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
+    // Primer paso: obtener el ID del usuario
+    const profile_response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/check`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!profile_response.ok) {
+      console.error('Failed to fetch user check', profile_response.status, profile_response.statusText);
+      return null;
+    }
+
+    const profile = await profile_response.json();
+
+    if (!profile.user?.id) {
+      console.warn('User ID not found in check response');
+      return null;
+    }
+
+    // Segundo paso: obtener el perfil completo con schedule, activeSchedules, etc.
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${profile.user.id}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -25,12 +65,12 @@ export async function fetchUserProfile(accessToken: string | null): Promise<User
 
     const data = (await response.json()) as UserProfileResponse;
 
-    if (!data.exists || !data.user) {
+    if (!data.user) {
       console.warn('User profile not found in response');
       return null;
     }
 
-    return data.user;
+    return data;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
