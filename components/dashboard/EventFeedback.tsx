@@ -51,7 +51,7 @@ export default function EventFeedback({
     const canSeeAll = isAdmin || isGroupRep;
 
     // Helper to fetch user details
-    const fetchUserDetails = async (studentId: number) => {
+    const fetchUserDetails = useCallback(async (studentId: number) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${studentId}`, {
                 headers: {
@@ -66,7 +66,7 @@ export default function EventFeedback({
             console.error(`Failed to fetch user ${studentId}`, error);
         }
         return null;
-    };
+    }, [accessToken]);
 
     const fetchFeedbacks = useCallback(async () => {
         if (!accessToken) return;
@@ -106,7 +106,7 @@ export default function EventFeedback({
         } finally {
             setIsLoading(false);
         }
-    }, [eventId, accessToken]);
+    }, [eventId, accessToken, fetchUserDetails]);
 
     useEffect(() => {
         fetchFeedbacks();
