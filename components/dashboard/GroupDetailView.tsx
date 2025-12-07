@@ -24,11 +24,7 @@ import {
 } from 'lucide-react';
 
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
-import {
-  EventRequest,
-  EVENT_STATUS_CONFIG,
-  getModuleTimeLabel,
-} from '@/types/eventRequest';
+import { EventRequest, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 // --- Tipos basados en la API ---
 interface GroupRequest {
@@ -221,8 +217,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
           const sorted = [...events].sort((a, b) => {
             const statusOrder = { PENDING: 0, CONFIRMED: 1, CANCELLED: 2 };
             const statusDiff =
-              statusOrder[a.status as keyof typeof statusOrder] -
-              statusOrder[b.status as keyof typeof statusOrder];
+              statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
             if (statusDiff !== 0) return statusDiff;
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
@@ -315,10 +310,10 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
       {/* 2. Estadísticas del Grupo */}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard icon={<Star size={20} />} value={groupDetails.reputation} label="Reputación" />
-        <StatCard 
-          icon={<CalendarPlus size={20} />} 
-          value={groupDetails.eventRequests?.length || 0} 
-          label="Eventos Creados" 
+        <StatCard
+          icon={<CalendarPlus size={20} />}
+          value={groupDetails.eventRequests?.length || 0}
+          label="Eventos Creados"
         />
       </section>
 
@@ -338,11 +333,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
             {recentEvents.map((event) => {
               const statusConfig = EVENT_STATUS_CONFIG[event.status];
               const StatusIcon =
-                event.status === 'PENDING'
-                  ? Clock
-                  : event.status === 'CONFIRMED'
-                  ? CheckCircle2
-                  : XCircle;
+                event.status === 'PENDING' ? Clock : event.status === 'CONFIRMED' ? CheckCircle2 : XCircle;
 
               return (
                 <div

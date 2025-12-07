@@ -126,9 +126,9 @@ export const UserView = ({ groupId }: UserViewProps) => {
         setGroupDetails(data);
 
         // Cargar eventos CONFIRMADOS del grupo (eventos públicos)
-        const events = await fetchEventRequests(accessToken, { 
+        const events = await fetchEventRequests(accessToken, {
           group_id: parseInt(groupId),
-          status: 'CONFIRMED'
+          status: 'CONFIRMED',
         });
         if (events) {
           // Ordenar por fecha más cercana primero
@@ -261,23 +261,25 @@ export const UserView = ({ groupId }: UserViewProps) => {
                   key={event.id}
                   href={`/events/${event.id}`}
                   className={`group block rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-lg cursor-pointer ${
-                    isUpcoming ? 'border-green-200 bg-gradient-to-r from-green-50 to-white hover:border-green-300' : 'border-slate-200 hover:border-blue-300'
+                    isUpcoming
+                      ? 'border-green-200 bg-gradient-to-r from-green-50 to-white hover:border-green-300'
+                      : 'border-slate-200 hover:border-blue-300'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-bold text-gray-800 text-lg group-hover:text-blue-600 transition-colors">{event.name}</h3>
+                        <h3 className="font-bold text-gray-800 text-lg group-hover:text-blue-600 transition-colors">
+                          {event.name}
+                        </h3>
                         {isUpcoming && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Próximamente
                           </span>
                         )}
                       </div>
-                      
-                      {event.goal && (
-                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">{event.goal}</p>
-                      )}
+
+                      {event.goal && <p className="text-slate-600 text-sm mb-3 line-clamp-2">{event.goal}</p>}
 
                       <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                         <span className="flex items-center gap-1.5">
@@ -398,9 +400,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
       <section className="mt-8">
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
           <Users className="h-10 w-10 text-blue-600 mx-auto mb-3" />
-          <p className="text-slate-700 font-medium mb-2">
-            ¿Te interesa este grupo?
-          </p>
+          <p className="text-slate-700 font-medium mb-2">¿Te interesa este grupo?</p>
           <p className="text-sm text-slate-600">
             Contacta al representante o a los moderadores para obtener más información sobre cómo participar.
           </p>

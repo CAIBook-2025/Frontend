@@ -11,7 +11,7 @@ import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
 import { GroupRequest } from '@/types/groupRequest';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
-import { updateGroupRequest } from "@/lib/groups/updateGroupRequest";
+import { updateGroupRequest } from '@/lib/groups/updateGroupRequest';
 
 export default function AdminGroupsPage() {
   const searchParams = useSearchParams();
@@ -36,11 +36,11 @@ export default function AdminGroupsPage() {
       if (data) {
         const mapped: GroupRequest[] = data.map((req: any) => ({
           id: req.id,
-          name: req.groupName ?? req.name ?? "",
-          goal: req.goal ?? "",
-          description: req.description ?? "",
+          name: req.groupName ?? req.name ?? '',
+          goal: req.goal ?? '',
+          description: req.description ?? '',
           logo: req.logo ?? null,
-          status: req.status ?? "PENDING",
+          status: req.status ?? 'PENDING',
           user: {
             id: req.user_id ?? 0,
             first_name: req.user.first_name,
@@ -57,66 +57,62 @@ export default function AdminGroupsPage() {
         setRequests(mapped);
       }
     } catch (error) {
-      console.error("Error cargando solicitudes:", error);
+      console.error('Error cargando solicitudes:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleView = useCallback((id: number) => {
-    const req = requests.find((r) => r.id === id);
-    if (req) {
-      setSelectedRequest(req);
-      setIsModalOpen(true);
-    }
-  }, [requests]);
-
+  const handleView = useCallback(
+    (id: number) => {
+      const req = requests.find((r) => r.id === id);
+      if (req) {
+        setSelectedRequest(req);
+        setIsModalOpen(true);
+      }
+    },
+    [requests]
+  );
 
   useEffect(() => {
     loadData();
   }, []);
-
 
   useEffect(() => {
     const id = searchParams.get('groupId');
     if (id) handleView(Number(id));
   }, [searchParams, requests, handleView]);
 
-
-  const updateStatus = async (id: number, status: "CONFIRMED" | "CANCELLED") => {
+  const updateStatus = async (id: number, status: 'CONFIRMED' | 'CANCELLED') => {
     try {
       setLoading(true);
 
       const tokenResponse = await getAccessToken();
       const accessToken = resolveAccessToken(tokenResponse);
-      if (!accessToken) return console.warn("Token no disponible");
+      if (!accessToken) return console.warn('Token no disponible');
 
       await updateGroupRequest(accessToken, id, { status });
 
       await loadData();
     } catch (error) {
-      console.error("Error actualizando solicitud:", error);
+      console.error('Error actualizando solicitud:', error);
     } finally {
       setLoading(false);
     }
   };
 
-
-
-
-  const handleApprove = (id: number) => updateStatus(id, "CONFIRMED");
-  const handleReject = (id: number) => updateStatus(id, "CANCELLED");
+  const handleApprove = (id: number) => updateStatus(id, 'CONFIRMED');
+  const handleReject = (id: number) => updateStatus(id, 'CANCELLED');
 
   const handleManage = (group_id: number | null) => {
     if (!group_id) return;
-    console.log("Manage group:", group_id);
+    console.log('Manage group:', group_id);
   };
 
   const handleCloseModal = () => {
     setSelectedRequest(null);
     setIsModalOpen(false);
   };
-
 
   const requestsByStatus = {
     pending: requests.filter((r) => r.status === 'PENDING'),
@@ -144,12 +140,8 @@ export default function AdminGroupsPage() {
 
   const filteredRequests = getCurrentRequests().filter((r) => {
     const t = searchValue.toLowerCase();
-    return (
-      r.name.toLowerCase().includes(t) ||
-      r.user.first_name.toLowerCase().includes(t)
-    );
+    return r.name.toLowerCase().includes(t) || r.user.first_name.toLowerCase().includes(t);
   });
-
 
   const pageHeader =
     activeTab === 0
@@ -157,7 +149,6 @@ export default function AdminGroupsPage() {
       : activeTab === 1
         ? { title: 'Administrar Grupos - Aprobados', subtitle: 'Gestiona los grupos aprobados' }
         : { title: 'Administrar Grupos - Rechazados', subtitle: 'Historial de solicitudes rechazadas' };
-
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

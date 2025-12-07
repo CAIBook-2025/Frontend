@@ -1,12 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { MODULES, SLOT_STATUS_STYLES } from './constants';
 import type { MaintenanceModule } from '@/types/room';
-import type {
-  MaintenanceActionMode,
-  MaintenanceSelectionMap,
-  ScheduleStatusMap,
-  WeekDay,
-} from './types';
+import type { MaintenanceActionMode, MaintenanceSelectionMap, ScheduleStatusMap, WeekDay } from './types';
 import { isActionAllowed } from './utils';
 
 interface ScheduleGridProps {
@@ -46,9 +41,7 @@ export const ScheduleGrid = ({
       </div>
       <span className="text-xs text-gray-500">{selectedModulesCount} modulos seleccionados</span>
     </div>
-    <p className="text-xs text-gray-500">
-      Selecciona los modulos que aplicaran el cambio segun el estado elegido.
-    </p>
+    <p className="text-xs text-gray-500">Selecciona los modulos que aplicaran el cambio segun el estado elegido.</p>
     {scheduleLoading ? (
       <div className="mt-3 flex items-center gap-2 text-xs text-blue-600">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -87,17 +80,15 @@ export const ScheduleGrid = ({
                         ? slotInfo?.isPast
                           ? 'No se pueden modificar modulos en el pasado'
                           : mode === 'block'
-                          ? 'Solo se pueden bloquear modulos disponibles'
-                          : 'Solo se pueden liberar modulos en mantenimiento'
+                            ? 'Solo se pueden bloquear modulos disponibles'
+                            : 'Solo se pueden liberar modulos en mantenimiento'
                         : null;
                     return (
                       <td key={`${module}-${key}`} className="py-2 px-2 text-center">
                         <button
                           className={`group w-full min-w-[110px] rounded border px-3 py-3 text-xs font-medium transition flex flex-col gap-1 ${slotStyles.baseClass} ${
                             isSelected ? 'ring-2 ring-orange-400 shadow-md text-orange-800' : 'hover:shadow-sm'
-                          } ${
-                            saveLoading || !allowed ? 'opacity-60 cursor-not-allowed' : ''
-                          }`}
+                          } ${saveLoading || !allowed ? 'opacity-60 cursor-not-allowed' : ''}`}
                           type="button"
                           onClick={() => onToggle(key, module)}
                           disabled={saveLoading || !allowed}
@@ -107,9 +98,7 @@ export const ScheduleGrid = ({
                           {slotInfo?.timeLabel && (
                             <span className="text-[10px] text-gray-500 font-medium">{slotInfo.timeLabel}</span>
                           )}
-                          <span className="text-[11px] font-semibold uppercase">
-                            {isSelected ? actionLabel : ''}
-                          </span>
+                          <span className="text-[11px] font-semibold uppercase">{isSelected ? actionLabel : ''}</span>
                           <span className={`text-[10px] font-medium ${slotStyles.labelClass}`}>{slotStyles.label}</span>
                           {slotStatus === 'UNAVAILABLE' && (attendanceHint || restrictionHint) && (
                             <span className="relative inline-flex justify-center w-full">

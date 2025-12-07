@@ -55,7 +55,9 @@ export function StrikeHistoryTable({ strikes }: StrikeHistoryTableProps) {
               <tr key={strike.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="py-4 px-4">
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">{strike.student?.first_name} {strike.student?.last_name}</p>
+                    <p className="font-medium text-gray-900 text-sm">
+                      {strike.student?.first_name} {strike.student?.last_name}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">{strike.student?.email}</p>
                   </div>
                 </td>
@@ -70,7 +72,9 @@ export function StrikeHistoryTable({ strikes }: StrikeHistoryTableProps) {
                   <div className="text-sm">{strike.description || 'Sin descripción'}</div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-sm">{strike.admin?.first_name} {strike.admin?.last_name}</div>
+                  <div className="text-sm">
+                    {strike.admin?.first_name} {strike.admin?.last_name}
+                  </div>
                 </td>
                 <td className="py-4 px-4">
                   <div className="text-sm">{new Date(strike.date).toLocaleDateString()}</div>

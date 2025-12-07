@@ -24,12 +24,7 @@ import {
 } from 'lucide-react';
 import { fetchEventById } from '@/lib/events/fetchEventById';
 import { deleteEventRequest } from '@/lib/events/deleteEventRequest';
-import {
-  EventRequestDetail,
-  EventRequestStatus,
-  EVENT_STATUS_CONFIG,
-  getModuleTimeLabel,
-} from '@/types/eventRequest';
+import { EventRequestDetail, EventRequestStatus, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 interface EventDetailPageProps {
   params: Promise<{ groupId: string; eventId: string }>;
@@ -207,8 +202,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               event.status === 'PENDING'
                 ? 'bg-gradient-to-r from-amber-500 to-amber-600'
                 : event.status === 'CONFIRMED'
-                ? 'bg-gradient-to-r from-green-500 to-green-600'
-                : 'bg-gradient-to-r from-red-500 to-red-600'
+                  ? 'bg-gradient-to-r from-green-500 to-green-600'
+                  : 'bg-gradient-to-r from-red-500 to-red-600'
             } text-white`}
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -297,9 +292,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                     </div>
                     <div className="flex items-center gap-3">
                       <Users className="h-5 w-5 text-blue-500" />
-                      <span className="text-slate-700">
-                        Capacidad: {event.public_space.capacity} personas
-                      </span>
+                      <span className="text-slate-700">Capacidad: {event.public_space.capacity} personas</span>
                     </div>
                   </div>
                 </div>
@@ -381,8 +374,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 <div className="flex gap-3">
                   <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
                   <p className="text-sm text-amber-800">
-                    Los eventos confirmados no pueden ser editados ni eliminados. Si necesitas
-                    hacer cambios, contacta a un administrador.
+                    Los eventos confirmados no pueden ser editados ni eliminados. Si necesitas hacer cambios, contacta a
+                    un administrador.
                   </p>
                 </div>
               </div>
@@ -402,8 +395,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <h3 className="text-xl font-bold text-gray-800">Eliminar Solicitud</h3>
             </div>
             <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar la solicitud del evento{' '}
-              <strong>&quot;{event.name}&quot;</strong>? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar la solicitud del evento <strong>&quot;{event.name}&quot;</strong>?
+              Esta acción no se puede deshacer.
             </p>
 
             {deleteError && (
@@ -441,4 +434,3 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     </main>
   );
 }
-

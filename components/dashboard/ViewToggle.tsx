@@ -30,4 +30,3 @@ export const ViewToggle = ({ currentView, onViewChange }: ViewToggleProps) => {
     </div>
   );
 };
-

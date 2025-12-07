@@ -3,10 +3,7 @@ import type { SlotStatus } from './types';
 
 export const MODULES: MaintenanceModule[] = ['M1', 'M2', 'M3', 'M4'];
 
-export const MODULE_TIME_WINDOWS: Record<
-  MaintenanceModule,
-  { start: string; end: string; label: string }
-> = {
+export const MODULE_TIME_WINDOWS: Record<MaintenanceModule, { start: string; end: string; label: string }> = {
   M1: { start: '08:20', end: '09:30', label: '08:20 - 09:30' },
   M2: { start: '09:40', end: '10:50', label: '09:40 - 10:50' },
   M3: { start: '11:00', end: '12:10', label: '11:00 - 12:10' },

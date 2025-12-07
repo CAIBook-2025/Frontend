@@ -3,7 +3,16 @@
 
 import { useState, useEffect } from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { BookMarked, CalendarDays, ArrowRight, CalendarClock, PartyPopper, ShieldAlert, Loader2, Sparkles } from 'lucide-react';
+import {
+  BookMarked,
+  CalendarDays,
+  ArrowRight,
+  CalendarClock,
+  PartyPopper,
+  ShieldAlert,
+  Loader2,
+  Sparkles,
+} from 'lucide-react';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserScheduleItem } from '@/lib/user/fetchUserProfile';
 
@@ -137,12 +146,8 @@ export const PersonalView = ({ stats }: { stats: Stats }) => {
               reservationDate.setHours(0, 0, 0, 0);
               const today = new Date(now);
               today.setHours(0, 0, 0, 0);
-              
-              return (
-                !reservation.isFinished &&
-                reservation.status !== 'CANCELED' &&
-                reservationDate >= today
-              );
+
+              return !reservation.isFinished && reservation.status !== 'CANCELED' && reservationDate >= today;
             })
             .sort((a, b) => {
               // Ordenar por fecha más cercana primero
@@ -227,12 +232,8 @@ export const PersonalView = ({ stats }: { stats: Stats }) => {
                 >
                   <div>
                     <p className="font-semibold text-gray-800">{reservation.roomName}</p>
-                    <p className="text-sm text-slate-500">
-                      {formatDateTime(reservation.day, reservation.module)}
-                    </p>
-                    {reservation.location && (
-                      <p className="text-xs text-slate-400 mt-1">{reservation.location}</p>
-                    )}
+                    <p className="text-sm text-slate-500">{formatDateTime(reservation.day, reservation.module)}</p>
+                    {reservation.location && <p className="text-xs text-slate-400 mt-1">{reservation.location}</p>}
                   </div>
                   {getStatusBadge(reservation.status)}
                 </li>

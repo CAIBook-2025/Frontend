@@ -105,9 +105,7 @@ export function ApplyStrikeModal({ isOpen, onClose, accessToken, onSuccess }: Ap
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
+          <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">{error}</div>
         )}
 
         {/* Form */}

@@ -61,7 +61,6 @@ export function ReservationSection() {
         // Client-side filtering: only keep schedules with a user
         const filteredItems = fetchedItems.filter((item) => item.user);
         setAllData(filteredItems);
-
       } catch (err) {
         console.error('Error fetching reservations:', err);
         setError('No se pudieron cargar las reservas.');
@@ -104,14 +103,14 @@ export function ReservationSection() {
           />
           <StatCard
             icon={<CheckCircle2 className="h-4 w-4" />}
-            value={allData.filter(i => i.attendanceStatus === 'PRESENT').length}
+            value={allData.filter((i) => i.attendanceStatus === 'PRESENT').length}
             label="Completadas"
             footer="En total"
             variant="yellow"
           />
           <StatCard
             icon={<UserX className="h-4 w-4" />}
-            value={allData.filter(i => i.attendanceStatus === 'ABSENT' || i.attendanceStatus === 'No Show').length}
+            value={allData.filter((i) => i.attendanceStatus === 'ABSENT' || i.attendanceStatus === 'No Show').length}
             label="No Show"
             footer="En total"
             variant="red"
@@ -157,7 +156,9 @@ export function ReservationSection() {
             <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-700">
-                  Mostrando <span className="font-medium">{Math.min(startIndex + 1, total)}</span> a <span className="font-medium">{Math.min(endIndex, total)}</span> de <span className="font-medium">{total}</span> resultados
+                  Mostrando <span className="font-medium">{Math.min(startIndex + 1, total)}</span> a{' '}
+                  <span className="font-medium">{Math.min(endIndex, total)}</span> de{' '}
+                  <span className="font-medium">{total}</span> resultados
                 </p>
               </div>
               <div>

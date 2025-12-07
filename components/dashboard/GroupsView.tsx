@@ -5,7 +5,23 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import { Users, PlusCircle, ArrowRight, Loader2, Shield, Crown, CheckCircle, X, Clock, FileText, Trash2, Edit3, AlertCircle, XCircle, CheckCircle2 } from 'lucide-react';
+import {
+  Users,
+  PlusCircle,
+  ArrowRight,
+  Loader2,
+  Shield,
+  Crown,
+  CheckCircle,
+  X,
+  Clock,
+  FileText,
+  Trash2,
+  Edit3,
+  AlertCircle,
+  XCircle,
+  CheckCircle2,
+} from 'lucide-react';
 import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { GroupRequest } from '@/types/groupRequest';
@@ -108,9 +124,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
     async function loadPendingRequests() {
       setIsLoadingPendingRequests(true);
       try {
-        const requests = await fetchGroupRequests(accessToken, { 
-          status: 'PENDING', 
-          user_id: userId 
+        const requests = await fetchGroupRequests(accessToken, {
+          status: 'PENDING',
+          user_id: userId,
         });
         setPendingRequestsCount(requests?.length ?? 0);
       } catch (error) {
@@ -144,7 +160,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
     }
 
     console.log('[GroupsView] Estado actual - accessToken:', !!accessToken, 'userId:', userId, 'isLoading:', isLoading);
-    
+
     if (accessToken && userId !== undefined && userId !== null && userId > 0) {
       loadMyRequests();
     } else if (!isLoading && (!accessToken || userId === 0)) {
@@ -160,15 +176,12 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
 
     setDeletingRequestId(requestId);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/group-requests/${requestId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (response.ok) {
         // Actualizar la lista de solicitudes
@@ -349,12 +362,11 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
           <div className="flex items-start gap-4">
             <Clock className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">
-                Solicitud de grupo pendiente
-              </h3>
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">Solicitud de grupo pendiente</h3>
               <p className="text-sm text-amber-700">
-                Ya tienes {pendingRequestsCount} solicitud{pendingRequestsCount !== 1 ? 'es' : ''} de grupo pendiente{pendingRequestsCount !== 1 ? 's' : ''}. 
-                Por favor espera a que se resuelva{pendingRequestsCount !== 1 ? 'n' : ''} antes de crear una nueva solicitud.
+                Ya tienes {pendingRequestsCount} solicitud{pendingRequestsCount !== 1 ? 'es' : ''} de grupo pendiente
+                {pendingRequestsCount !== 1 ? 's' : ''}. Por favor espera a que se resuelva
+                {pendingRequestsCount !== 1 ? 'n' : ''} antes de crear una nueva solicitud.
               </p>
             </div>
           </div>
@@ -368,11 +380,10 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
             <div className="flex items-start gap-4 flex-1">
               <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  ¡Solicitud de grupo enviada con éxito!
-                </h3>
+                <h3 className="text-lg font-semibold text-green-800 mb-2">¡Solicitud de grupo enviada con éxito!</h3>
                 <p className="text-sm text-green-700 mb-4">
-                  Tu solicitud ha sido enviada y está siendo revisada. Puedes revisar el estado de tu solicitud en esta misma sección o realizar otra solicitud.
+                  Tu solicitud ha sido enviada y está siendo revisada. Puedes revisar el estado de tu solicitud en esta
+                  misma sección o realizar otra solicitud.
                 </p>
                 <div className="flex gap-3 flex-wrap">
                   <button
@@ -410,7 +421,10 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
             <p className="text-sm text-slate-600 mt-1">Grupos donde eres representante o moderador</p>
           </div>
           {hasPendingRequests ? (
-            <div className="flex items-center gap-2 rounded-full bg-slate-400 px-4 py-2 text-sm font-semibold text-white cursor-not-allowed" title="Tienes solicitudes pendientes">
+            <div
+              className="flex items-center gap-2 rounded-full bg-slate-400 px-4 py-2 text-sm font-semibold text-white cursor-not-allowed"
+              title="Tienes solicitudes pendientes"
+            >
               <PlusCircle size={16} /> Crear Grupo
             </div>
           ) : (
@@ -527,9 +541,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 flex-wrap">
-                            <h3 className="text-lg font-bold text-gray-800 truncate">
-                              {request.name}
-                            </h3>
+                            <h3 className="text-lg font-bold text-gray-800 truncate">{request.name}</h3>
                             <span
                               className={`rounded-full px-2.5 py-0.5 text-xs font-semibold flex items-center gap-1.5 ${statusConfig.bgColor} ${statusConfig.textColor}`}
                             >
@@ -537,11 +549,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                               {statusConfig.label}
                             </span>
                           </div>
-                          
-                          <p className="mt-2 text-sm text-slate-600 line-clamp-2">
-                            {request.description}
-                          </p>
-                          
+
+                          <p className="mt-2 text-sm text-slate-600 line-clamp-2">{request.description}</p>
+
                           <div className="mt-3 flex items-center gap-4 text-sm text-slate-500 flex-wrap">
                             <div className="flex items-center gap-1.5">
                               <span className="font-medium">Objetivo:</span>
@@ -568,7 +578,10 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                           {isPending && (
                             <>
                               <Link
-                                href={{ pathname: '/Student/Groups/Form', query: { userId, requestId: request.id, edit: 'true' } }}
+                                href={{
+                                  pathname: '/Student/Groups/Form',
+                                  query: { userId, requestId: request.id, edit: 'true' },
+                                }}
                                 className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                 title="Editar solicitud"
                               >
@@ -595,9 +608,7 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                               <p className="text-sm font-medium text-red-800">
                                 ¿Estás seguro de eliminar esta solicitud?
                               </p>
-                              <p className="text-sm text-red-600 mt-1">
-                                Esta acción no se puede deshacer.
-                              </p>
+                              <p className="text-sm text-red-600 mt-1">Esta acción no se puede deshacer.</p>
                               <div className="flex gap-2 mt-3">
                                 <button
                                   onClick={() => handleDeleteRequest(request.id)}
@@ -680,7 +691,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
                               </span>
                             )}
                           </div>
-                          <p className="mt-2 text-sm text-slate-600 max-w-2xl">{group.groupRequest?.description ?? ''}</p>
+                          <p className="mt-2 text-sm text-slate-600 max-w-2xl">
+                            {group.groupRequest?.description ?? ''}
+                          </p>
                           <div className="mt-3 flex items-center gap-4 text-sm text-slate-500">
                             <div className="flex items-center gap-1.5">
                               <Users size={14} />

@@ -65,7 +65,7 @@ export default function StrikesPage() {
       setStrikes(data);
       processStrikesData(data);
     } catch (error) {
-      console.error("Error loading strikes:", error);
+      console.error('Error loading strikes:', error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ export default function StrikesPage() {
   const processStrikesData = (data: ApiStrike[]) => {
     const usersMap = new Map<number, UserStrike>();
 
-    data.forEach(strike => {
+    data.forEach((strike) => {
       const userId = strike.student_id;
       const userName = strike.student?.first_name + ' ' + strike.student?.last_name;
       const userEmail = strike.student?.email || 'N/A';
@@ -92,17 +92,16 @@ export default function StrikesPage() {
           maxStrikes: 3,
           lastStrike: '',
           status: 'Activo',
-          strikesHistory: []
+          strikesHistory: [],
         });
       }
 
       const user = usersMap.get(userId)!;
       user.strikes += 1;
       user.strikesHistory.push(strike);
-
     });
 
-    const processedUsers = Array.from(usersMap.values()).map(user => {
+    const processedUsers = Array.from(usersMap.values()).map((user) => {
       user.strikesHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       if (user.strikesHistory.length > 0) {
@@ -124,14 +123,13 @@ export default function StrikesPage() {
     setCurrentPage(1);
   };
 
-
   const filteredUsers = usersWithStrikes.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const allStrikes = usersWithStrikes.flatMap(u => u.strikesHistory);
+  const allStrikes = usersWithStrikes.flatMap((u) => u.strikesHistory);
   const filteredStrikes = allStrikes.filter(
     (strike) =>
       strike.student?.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -140,10 +138,7 @@ export default function StrikesPage() {
   );
 
   const totalPages = Math.ceil(filteredStrikes.length / ITEMS_PER_PAGE);
-  const paginatedStrikes = filteredStrikes.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedStrikes = filteredStrikes.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const handleViewHistory = (user: UserStrike) => {
     setSelectedUser(user);
@@ -163,7 +158,7 @@ export default function StrikesPage() {
 
     try {
       setLoading(true);
-      const deletePromises = userToLiftSuspension.strikesHistory.map(strike =>
+      const deletePromises = userToLiftSuspension.strikesHistory.map((strike) =>
         deleteStrike(accessToken, Number(strike.id))
       );
 
@@ -171,8 +166,8 @@ export default function StrikesPage() {
       await loadData();
       setUserToLiftSuspension(null);
     } catch (error) {
-      console.error("Error lifting suspension:", error);
-      alert("Hubo un error al levantar la suspensión. Revisa la consola.");
+      console.error('Error lifting suspension:', error);
+      alert('Hubo un error al levantar la suspensión. Revisa la consola.');
     } finally {
       setLoading(false);
     }
@@ -225,7 +220,11 @@ export default function StrikesPage() {
                   variant="blue"
                 />
               </div>
-              <SearchBar placeholder="Buscar por nombre de usuario..." value={searchQuery} onChange={handleSearchChange} />
+              <SearchBar
+                placeholder="Buscar por nombre de usuario..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
 
               <UserStrikesTable
                 users={filteredUsers}
@@ -246,7 +245,7 @@ export default function StrikesPage() {
               {totalPages > 1 && (
                 <div className="flex justify-center items-center space-x-4 mt-4">
                   <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                     className="p-2 rounded-md border border-gray-300 disabled:opacity-50 hover:bg-gray-100"
                   >
@@ -256,7 +255,7 @@ export default function StrikesPage() {
                     Página {currentPage} de {totalPages}
                   </span>
                   <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                     className="p-2 rounded-md border border-gray-300 disabled:opacity-50 hover:bg-gray-100"
                   >

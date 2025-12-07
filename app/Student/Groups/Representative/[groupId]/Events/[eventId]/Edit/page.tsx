@@ -5,15 +5,7 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
-  AlertCircle,
-  Target,
-  FileText,
-  Info,
-} from 'lucide-react';
+import { ArrowLeft, Save, Loader2, AlertCircle, Target, FileText, Info } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { fetchEventById } from '@/lib/events/fetchEventById';
 import { updateEventRequest } from '@/lib/events/updateEventRequest';
@@ -187,9 +179,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
   // Verificar si hay cambios
   const hasChanges =
-    formData.name !== event.name ||
-    formData.goal !== event.goal ||
-    formData.description !== (event.description || '');
+    formData.name !== event.name || formData.goal !== event.goal || formData.description !== (event.description || '');
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
@@ -207,9 +197,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       {/* Header */}
       <section className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Editar Evento</h1>
-        <p className="text-slate-600">
-          Modifica la información de tu solicitud de evento
-        </p>
+        <p className="text-slate-600">Modifica la información de tu solicitud de evento</p>
       </section>
 
       {/* Formulario */}
@@ -222,8 +210,8 @@ export default function EditEventPage({ params }: EditEventPageProps) {
               <div className="text-sm text-blue-800">
                 <p className="font-medium mb-1">Campos editables</p>
                 <p>
-                  Como representante puedes modificar el nombre, objetivo y descripción del evento.
-                  La fecha, horario y espacio no pueden ser modificados una vez creada la solicitud.
+                  Como representante puedes modificar el nombre, objetivo y descripción del evento. La fecha, horario y
+                  espacio no pueden ser modificados una vez creada la solicitud.
                 </p>
               </div>
             </div>
@@ -248,10 +236,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
             {/* Objetivo */}
             <div>
-              <label
-                htmlFor="goal"
-                className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2"
-              >
+              <label htmlFor="goal" className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
                 <Target className="h-4 w-4 text-blue-500" />
                 Objetivo
               </label>
@@ -268,17 +253,12 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                     : 'border-slate-300 focus:border-blue-600'
                 }`}
               />
-              {validationErrors.goal && (
-                <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
-              )}
+              {validationErrors.goal && <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>}
             </div>
 
             {/* Descripción */}
             <div>
-              <label
-                htmlFor="description"
-                className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2"
-              >
+              <label htmlFor="description" className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
                 <FileText className="h-4 w-4 text-blue-500" />
                 Descripción
               </label>
@@ -340,14 +320,9 @@ export default function EditEventPage({ params }: EditEventPageProps) {
             </button>
           </div>
 
-          {!hasChanges && (
-            <p className="mt-3 text-center text-sm text-slate-500">
-              No hay cambios para guardar
-            </p>
-          )}
+          {!hasChanges && <p className="mt-3 text-center text-sm text-slate-500">No hay cambios para guardar</p>}
         </div>
       </section>
     </main>
   );
 }
-

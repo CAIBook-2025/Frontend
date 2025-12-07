@@ -90,15 +90,19 @@ export function UserStrikesHistoryModal({
                 <div className="flex items-start justify-between mb-2">
                   {getTypeBadge(strike.type)}
                   <span className="text-sm text-gray-600">
-                    {new Date(strike.date).toLocaleDateString('es-CL', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    }).replace(/\//g, '-')}
+                    {new Date(strike.date)
+                      .toLocaleDateString('es-CL', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                      .replace(/\//g, '-')}
                   </span>
                 </div>
                 <p className="text-sm text-gray-900 mb-2">{strike.description}</p>
-                <p className="text-xs text-gray-500">Aplicado por: {strike.admin?.first_name + ' ' + strike.admin?.last_name}</p>
+                <p className="text-xs text-gray-500">
+                  Aplicado por: {strike.admin?.first_name + ' ' + strike.admin?.last_name}
+                </p>
               </div>
             ))
           )}

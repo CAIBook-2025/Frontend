@@ -29,7 +29,7 @@ export const RoomCard = ({ room, scheduleId, userId, disabled = false }: RoomCar
   const { user } = useUser();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const isAvailable = room.status === 'Disponible' && !disabled;
-  
+
   useEffect(() => {
     async function fetchAccessToken() {
       if (user) {
@@ -45,7 +45,7 @@ export const RoomCard = ({ room, scheduleId, userId, disabled = false }: RoomCar
   }, [user]);
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
+
   // --- FUNCIÓN handleReservar ---
   const handleReservar = async () => {
     if (disabled) {

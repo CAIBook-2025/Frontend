@@ -38,8 +38,7 @@ export const useRoomsData = () => {
 
       const baseRooms = adaptStudyRoomsToView(studyRooms);
       const scheduleItems = schedule?.items ?? [];
-      const mergedRooms =
-        scheduleItems.length > 0 ? mergeRoomsWithScheduleData(baseRooms, scheduleItems) : baseRooms;
+      const mergedRooms = scheduleItems.length > 0 ? mergeRoomsWithScheduleData(baseRooms, scheduleItems) : baseRooms;
 
       if (scheduleItems.length === 0) {
         console.warn('fetchSchedule returned no items; occupancy metrics may not be accurate');
@@ -76,4 +75,3 @@ export const useRoomsData = () => {
     refresh: loadRooms,
   };
 };
-

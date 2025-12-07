@@ -65,7 +65,9 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
                   <div>
                     {item.user ? (
                       <>
-                        <p className="font-medium text-gray-900 text-sm">{item.user.first_name} {item.user.last_name}</p>
+                        <p className="font-medium text-gray-900 text-sm">
+                          {item.user.first_name} {item.user.last_name}
+                        </p>
                         <p className="text-gray-600 text-xs mt-1">{item.user.email}</p>
                       </>
                     ) : (

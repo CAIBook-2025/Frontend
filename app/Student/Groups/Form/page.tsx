@@ -74,7 +74,7 @@ export default function CreateGroupPage() {
       try {
         const requests = await fetchGroupRequests(accessToken, {
           status: 'PENDING',
-          user_id: userId
+          user_id: userId,
         });
         setPendingRequestsCount(requests?.length ?? 0);
       } catch (error) {
@@ -255,12 +255,10 @@ export default function CreateGroupPage() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-amber-800 mb-3">
-                    Límite de solicitudes alcanzado
-                  </h2>
+                  <h2 className="text-2xl font-bold text-amber-800 mb-3">Límite de solicitudes alcanzado</h2>
                   <p className="text-amber-700 mb-6">
-                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes.
-                    El límite máximo es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
+                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes. El límite máximo es de 3
+                    solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     <Link
@@ -269,9 +267,7 @@ export default function CreateGroupPage() {
                     >
                       <ArrowLeft size={16} /> Volver a Grupos
                     </Link>
-                    <a
-                      className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50"
-                    >
+                    <a className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50">
                       <AlertCircle size={16} /> Ver Mis Solicitudes
                     </a>
                   </div>
@@ -313,8 +309,9 @@ export default function CreateGroupPage() {
             {[1, 2, 3].map((s) => (
               <div key={s} className="text-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                    }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
+                    step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                  }`}
                 >
                   {s}
                 </div>
@@ -354,10 +351,11 @@ export default function CreateGroupPage() {
                       placeholder="Una breve descripción que invite a los estudiantes a unirse."
                       value={formData.description}
                       onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.description
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                        validationErrors.description
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-slate-300 focus:border-blue-600'
-                        }`}
+                      }`}
                       required
                     />
                     {validationErrors.description && (
@@ -383,15 +381,14 @@ export default function CreateGroupPage() {
                       placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
                       value={formData.goal}
                       onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.goal
+                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                        validationErrors.goal
                           ? 'border-red-300 focus:border-red-500'
                           : 'border-slate-300 focus:border-blue-600'
-                        }`}
+                      }`}
                       required
                     />
-                    {validationErrors.goal && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
-                    )}
+                    {validationErrors.goal && <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>}
                   </div>
                 </div>
               </div>
@@ -466,8 +463,9 @@ export default function CreateGroupPage() {
                   type="button" // Cambiado de 'submit' a 'button'
                   onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
                   disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
-                    }`}
+                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
                   {submitting ? (
                     'Enviando…'

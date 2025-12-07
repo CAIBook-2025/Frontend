@@ -142,13 +142,11 @@ export default function BookRoomPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">
-                Límite de reservas activas alcanzado
-              </h3>
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">Límite de reservas activas alcanzado</h3>
               <p className="text-sm text-amber-700 mb-4">
-                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa{activeSchedules !== 1 ? 's' : ''}. 
-                El límite máximo es de 3 reservas simultáneas. Para realizar una nueva reserva, 
-                por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
+                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa
+                {activeSchedules !== 1 ? 's' : ''}. El límite máximo es de 3 reservas simultáneas. Para realizar una
+                nueva reserva, por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
               </p>
               <Link
                 href="/Reservations"
@@ -206,10 +204,10 @@ export default function BookRoomPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.isArray(rooms) && rooms.length > 0 ? (
               rooms.map((room) => (
-                <RoomCard 
-                  key={room.id} 
-                  room={room} 
-                  scheduleId={room.id} 
+                <RoomCard
+                  key={room.id}
+                  room={room}
+                  scheduleId={room.id}
                   userId={userProfile?.user?.id}
                   disabled={hasReachedLimit}
                 />

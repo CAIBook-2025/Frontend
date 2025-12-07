@@ -1,5 +1,5 @@
-import { Room } from "@/types/room";
-import { UserProfile } from "@/types/userProfile";
+import { Room } from '@/types/room';
+import { UserProfile } from '@/types/userProfile';
 
 export type ScheduleItem = {
   id: number;
