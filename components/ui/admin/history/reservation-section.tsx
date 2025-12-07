@@ -11,8 +11,7 @@ import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 export function ReservationSection() {
-  const [data, setData] = useState<ScheduleItem[]>([]);
-  const [total, setTotal] = useState(0);
+  const [allData, setAllData] = useState<ScheduleItem[]>([]); // Store ALL filtered items
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +19,12 @@ export function ReservationSection() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Pagination params for display (client-side slicing)
   const page = Number(searchParams.get('page')) || 1;
   const take = Number(searchParams.get('take')) || 20;
 
   useEffect(() => {
-    async function loadData() {
+    async function loadAllData() {
       try {
         setIsLoading(true);
         const tokenResponse = await getAccessToken();
@@ -34,15 +34,34 @@ export function ReservationSection() {
           throw new Error('Access token not available');
         }
 
-        const result = await fetchSchedule(accessToken, { page, take });
+        let fetchedItems: ScheduleItem[] = [];
+        let currentPage = 1;
+        let keepFetching = true;
+        const BATCH_SIZE = 100; // Max allowed by backend
+        const MAX_PAGES_SAFETY = 50; // Safety limit
 
-        if (result && result.items) {
-          setData(result.items);
-          setTotal(result.total);
-        } else {
-          setData([]);
-          setTotal(0);
+        while (keepFetching && currentPage <= MAX_PAGES_SAFETY) {
+          // Fetch batch
+          const result = await fetchSchedule(accessToken, { page: currentPage, take: BATCH_SIZE });
+
+          if (!result || !result.items || result.items.length === 0) {
+            keepFetching = false;
+          } else {
+            fetchedItems = [...fetchedItems, ...result.items];
+
+            // If we received fewer items than requested, we've reached the end
+            if (result.items.length < BATCH_SIZE) {
+              keepFetching = false;
+            } else {
+              currentPage++;
+            }
+          }
         }
+
+        // Client-side filtering: only keep schedules with a user
+        const filteredItems = fetchedItems.filter((item) => item.user);
+        setAllData(filteredItems);
+
       } catch (err) {
         console.error('Error fetching reservations:', err);
         setError('No se pudieron cargar las reservas.');
@@ -51,8 +70,8 @@ export function ReservationSection() {
       }
     }
 
-    loadData();
-  }, [page, take]);
+    loadAllData();
+  }, []); // Run once on mount
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -60,7 +79,13 @@ export function ReservationSection() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const totalPages = Math.ceil(total / take);
+  const total = allData.length;
+  const totalPages = Math.ceil(total / take) || 1;
+
+  // Client-side pagination slicing
+  const startIndex = (page - 1) * take;
+  const endIndex = startIndex + take;
+  const currentData = allData.slice(startIndex, endIndex);
 
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -79,16 +104,16 @@ export function ReservationSection() {
           />
           <StatCard
             icon={<CheckCircle2 className="h-4 w-4" />}
-            value={data.filter(i => i.attendanceStatus === 'PRESENT').length}
+            value={allData.filter(i => i.attendanceStatus === 'PRESENT').length}
             label="Completadas"
-            footer="En esta página"
+            footer="En total"
             variant="yellow"
           />
           <StatCard
             icon={<UserX className="h-4 w-4" />}
-            value={data.filter(i => i.attendanceStatus === 'ABSENT' || i.attendanceStatus === 'No Show').length}
+            value={allData.filter(i => i.attendanceStatus === 'ABSENT' || i.attendanceStatus === 'No Show').length}
             label="No Show"
-            footer="En esta página"
+            footer="En total"
             variant="red"
           />
           <StatCard
@@ -103,62 +128,66 @@ export function ReservationSection() {
 
       <div className="space-y-4">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-500">Cargando historial...</div>
+          <div className="p-8 text-center text-gray-500">
+            <p>Cargando historial completo...</p>
+            <p className="text-sm text-gray-400 mt-2">Esto puede tomar unos momentos...</p>
+          </div>
         ) : (
-          <ReservationHistoryTable reservations={data} />
+          <ReservationHistoryTable reservations={currentData} /> // Render the slice
         )}
 
-        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg">
-          <div className="flex flex-1 justify-between sm:hidden">
-            <button
-              onClick={() => handlePageChange(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              Anterior
-            </button>
-            <button
-              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
-              disabled={page >= totalPages}
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-            >
-              Siguiente
-            </button>
-          </div>
-          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Mostrando <span className="font-medium">{Math.min((page - 1) * take + 1, total)}</span> a <span className="font-medium">{Math.min(page * take, total)}</span> de <span className="font-medium">{total}</span> resultados
-              </p>
+        {!isLoading && total > 0 && (
+          <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button
+                onClick={() => handlePageChange(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                disabled={page >= totalPages}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                Siguiente
+              </button>
             </div>
-            <div>
-              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                <button
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1}
-                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                >
-                  <span className="sr-only">Anterior</span>
-                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-                </button>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  Mostrando <span className="font-medium">{Math.min(startIndex + 1, total)}</span> a <span className="font-medium">{Math.min(endIndex, total)}</span> de <span className="font-medium">{total}</span> resultados
+                </p>
+              </div>
+              <div>
+                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                  <button
+                    onClick={() => handlePageChange(page - 1)}
+                    disabled={page === 1}
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                  >
+                    <span className="sr-only">Anterior</span>
+                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  </button>
 
-                {/* Simple page info logic, can be improved to show page numbers */}
-                <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
-                  Página {page} de {totalPages || 1}
-                </span>
+                  <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                    Página {page} de {totalPages}
+                  </span>
 
-                <button
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page >= totalPages}
-                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                >
-                  <span className="sr-only">Siguiente</span>
-                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
-                </button>
-              </nav>
+                  <button
+                    onClick={() => handlePageChange(page + 1)}
+                    disabled={page >= totalPages}
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                  >
+                    <span className="sr-only">Siguiente</span>
+                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

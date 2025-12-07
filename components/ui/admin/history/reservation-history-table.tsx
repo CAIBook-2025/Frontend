@@ -44,8 +44,8 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="p-6 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Historial de Reservas</h2>
-        <p className="text-sm text-gray-600 mt-1">Registro completo de todas las reservas de salas</p>
+        <h2 className="text-lg font-semibold text-gray-900">Historial de Reservas Semanal</h2>
+        <p className="text-sm text-gray-600 mt-1">Registro semanal de las reservas de salas</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -76,7 +76,7 @@ export const ReservationHistoryTable = ({ reservations }: ReservationHistoryTabl
                 <td className="py-4 px-4 text-sm text-gray-700">{item.studyRoom?.name || 'Desconocida'}</td>
                 <td className="py-4 px-4">
                   <div>
-                    <p className="text-sm text-gray-900">{new Date(item.day).toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-900">{new Date(item.day).toLocaleDateString('es-CL')}</p>
                     <p className="text-xs text-gray-500 mt-1">{formatModule(item.module)}</p>
                   </div>
                 </td>
