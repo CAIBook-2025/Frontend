@@ -119,10 +119,10 @@ export const useScheduleMatrix = (
             if (roomItems.length > 0) {
               foundAny = true;
               roomItems.forEach((item) => {
-                const module = parseModule(item.module);
-                if (!module) return;
-                dayStatus[module] = {
-                  ...dayStatus[module],
+                const timeModule = parseModule(item.module);
+                if (!timeModule) return;
+                dayStatus[timeModule] = {
+                  ...dayStatus[timeModule],
                   status: getSlotStatus(item.available),
                   scheduleId: Number(item.id),
                   attendanceStatus: item.status ?? item.attendanceStatus ?? null,
@@ -239,7 +239,7 @@ export const useMaintenanceSelections = (
 };
 
 export const useVisibleWeekDays = (isOpen: boolean) => {
-  return useMemo(() => generateCurrentWeekDays(), [isOpen]);
+  return useMemo(() => generateCurrentWeekDays(), []);
 };
 
 export const useActionMode = (selectedStatus: Room['status']) => {

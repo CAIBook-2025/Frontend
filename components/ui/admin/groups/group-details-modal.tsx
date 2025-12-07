@@ -1,6 +1,7 @@
 'use client';
 
 import { X, Check, XIcon } from 'lucide-react';
+import Image from 'next/image';
 import { GroupRequest } from '@/types/groupRequest';
 
 interface GroupDetailsModalProps {
@@ -63,10 +64,13 @@ export const GroupDetailsModal = ({
           {/* Logo */}
           {request.logo && (
             <div className="flex justify-center">
-              <img
+              <Image
                 src={request.logo}
                 alt="Logo del grupo"
-                className="w-28 h-28 object-contain rounded-lg border"
+                className="object-contain rounded-lg border"
+                width={112}
+                height={112}
+                unoptimized
               />
             </div>
           )}

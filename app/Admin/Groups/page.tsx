@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TabNavigation } from '@/components/ui/tab-navigation';
 import { SearchBar } from '@/components/ui/search-bar';
@@ -63,6 +63,14 @@ export default function AdminGroupsPage() {
     }
   };
 
+  const handleView = useCallback((id: number) => {
+    const req = requests.find((r) => r.id === id);
+    if (req) {
+      setSelectedRequest(req);
+      setIsModalOpen(true);
+    }
+  }, [requests]);
+
 
   useEffect(() => {
     loadData();
@@ -72,7 +80,7 @@ export default function AdminGroupsPage() {
   useEffect(() => {
     const id = searchParams.get('groupId');
     if (id) handleView(Number(id));
-  }, [searchParams, requests]);
+  }, [searchParams, requests, handleView]);
 
 
   const updateStatus = async (id: number, status: "CONFIRMED" | "CANCELLED") => {
@@ -94,13 +102,7 @@ export default function AdminGroupsPage() {
   };
 
 
-  const handleView = (id: number) => {
-    const req = requests.find((r) => r.id === id);
-    if (req) {
-      setSelectedRequest(req);
-      setIsModalOpen(true);
-    }
-  };
+
 
   const handleApprove = (id: number) => updateStatus(id, "CONFIRMED");
   const handleReject = (id: number) => updateStatus(id, "CANCELLED");

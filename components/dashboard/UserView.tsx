@@ -12,6 +12,7 @@ import {
   Calendar,
   Target,
 } from 'lucide-react';
+import Image from 'next/image';
 
 // --- Tipos basados en la API ---
 interface GroupRequest {
@@ -154,10 +155,13 @@ export const UserView = ({ groupId }: UserViewProps) => {
           <div className="max-w-4xl">
             <div className="flex items-start gap-4 mb-4">
               {groupDetails.groupRequest.logo ? (
-                <img
+                <Image
                   src={groupDetails.groupRequest.logo}
                   alt={groupDetails.groupRequest.name}
-                  className="h-20 w-20 rounded-xl object-cover border-2 border-blue-200"
+                  className="rounded-xl object-cover border-2 border-blue-200"
+                  width={80}
+                  height={80}
+                  unoptimized
                 />
               ) : (
                 <div className="h-20 w-20 rounded-xl bg-blue-200 flex items-center justify-center">

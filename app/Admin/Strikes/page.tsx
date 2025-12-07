@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
 import { Users, Ban, AlertTriangle, Flag, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SearchBar } from '@/components/ui/search-bar';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UserStrikesTable } from '@/components/ui/admin/strikes/strikes-table';
 import { StrikeHistoryTable } from '@/components/ui/admin/strikes/strikes-history-table';
 import { UserStrikesHistoryModal } from '@/components/ui/admin/strikes/strikes-modal';
@@ -53,7 +53,7 @@ export default function StrikesPage() {
   const [isApplyStrikeModalOpen, setIsApplyStrikeModalOpen] = useState(false);
   const [userToLiftSuspension, setUserToLiftSuspension] = useState<UserStrike | null>(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const tokenResponse = await getAccessToken();
@@ -69,11 +69,11 @@ export default function StrikesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const processStrikesData = (data: ApiStrike[]) => {
     const usersMap = new Map<number, UserStrike>();
