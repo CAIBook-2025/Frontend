@@ -1,5 +1,3 @@
-import { StrikeType } from "@/types/strike";
-
 interface PostStrikeData {
     student_email: string;
     type: string;

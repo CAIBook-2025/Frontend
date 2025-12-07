@@ -64,19 +64,19 @@ export default function RoomPage() {
         prev.map((r) =>
           r.id === id
             ? {
-                ...r,
-                status,
-                statusNote: status === 'AVAILABLE' ? undefined : statusNote,
-                maintenanceBlocks:
-                  status === 'MAINTENANCE' && maintenanceBlocks?.length ? maintenanceBlocks : undefined,
-              }
+              ...r,
+              status,
+              statusNote: status === 'AVAILABLE' ? undefined : statusNote,
+              maintenanceBlocks:
+                status === 'MAINTENANCE' && maintenanceBlocks?.length ? maintenanceBlocks : undefined,
+            }
             : r
         )
       );
       setIsModalOpen(false);
       setSelectedRoom(null);
     },
-    []
+    [setRooms]
   );
 
   const handleCloseModal = useCallback(() => {

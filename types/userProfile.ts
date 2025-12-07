@@ -6,8 +6,10 @@ export type UserProfile = {
   role: string | null;
   is_representative: boolean;
   is_moderator: boolean;
+  is_deleted?: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
   auth0_id: string;
   career: string | null;
   phone: string | null;
