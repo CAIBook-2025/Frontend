@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
 import {
   Users,
@@ -11,7 +12,14 @@ import {
   Loader2,
   Calendar,
   Target,
+  Clock,
+  MapPin,
+  CalendarDays,
+  PartyPopper,
+  ArrowRight,
 } from 'lucide-react';
+import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
+import { EventRequest, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 // --- Tipos basados en la API ---
 interface GroupRequest {
@@ -75,6 +83,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [confirmedEvents, setConfirmedEvents] = useState<EventRequest[]>([]);
 
   // Obtener access token
   useEffect(() => {
@@ -93,7 +102,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
     fetchAccessToken();
   }, [user]);
 
-  // Cargar detalles del grupo
+  // Cargar detalles del grupo y eventos confirmados
   useEffect(() => {
     const loadGroupDetails = async () => {
       if (!accessToken) return;
@@ -114,6 +123,19 @@ export const UserView = ({ groupId }: UserViewProps) => {
 
         const data = await response.json();
         setGroupDetails(data);
+
+        // Cargar eventos CONFIRMADOS del grupo (eventos públicos)
+        const events = await fetchEventRequests(accessToken, { 
+          group_id: parseInt(groupId),
+          status: 'CONFIRMED'
+        });
+        if (events) {
+          // Ordenar por fecha más cercana primero
+          const sorted = [...events].sort((a, b) => {
+            return new Date(a.day).getTime() - new Date(b.day).getTime();
+          });
+          setConfirmedEvents(sorted);
+        }
       } catch (error) {
         console.error('Error loading group details:', error);
         setError('Error al cargar los detalles del grupo');
@@ -127,7 +149,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
 
   const getMemberCount = (): number => {
     if (!groupDetails) return 0;
-    return 1 + groupDetails.moderators.length; // 1 representante + N moderadores
+    return 1 + (groupDetails.moderators?.length ?? 0); // 1 representante + N moderadores
   };
 
   if (isLoading || isUserLoading) {
@@ -206,11 +228,84 @@ export const UserView = ({ groupId }: UserViewProps) => {
       {/* 2. Estadísticas del Grupo */}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard icon={<Users size={20} />} value={getMemberCount()} label="Miembros del Equipo" />
-        <StatCard icon={<Shield size={20} />} value={groupDetails.moderators.length} label="Moderadores" />
+        <StatCard icon={<Shield size={20} />} value={groupDetails.moderators?.length ?? 0} label="Moderadores" />
         <StatCard icon={<Star size={20} />} value={groupDetails.reputation} label="Reputación" />
       </section>
 
-      {/* 3. Información del Equipo de Gestión */}
+      {/* 3. Eventos del Grupo */}
+      <section className="mb-12">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <CalendarDays className="h-6 w-6 text-blue-600" />
+          Eventos del Grupo
+        </h2>
+
+        {confirmedEvents.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <PartyPopper className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-600 font-medium">Este grupo aún no tiene eventos confirmados</p>
+            <p className="text-sm text-slate-500 mt-1">¡Vuelve pronto para ver sus próximas actividades!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {confirmedEvents.map((event) => {
+              const statusConfig = EVENT_STATUS_CONFIG[event.status];
+              const eventDate = new Date(event.day);
+              const isUpcoming = eventDate >= new Date();
+
+              return (
+                <Link
+                  key={event.id}
+                  href={`/events/${event.id}`}
+                  className={`group block rounded-xl border bg-white p-5 shadow-sm transition-all hover:shadow-lg cursor-pointer ${
+                    isUpcoming ? 'border-green-200 bg-gradient-to-r from-green-50 to-white hover:border-green-300' : 'border-slate-200 hover:border-blue-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h3 className="font-bold text-gray-800 text-lg group-hover:text-blue-600 transition-colors">{event.name}</h3>
+                        {isUpcoming && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Próximamente
+                          </span>
+                        )}
+                      </div>
+                      
+                      {event.goal && (
+                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">{event.goal}</p>
+                      )}
+
+                      <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                          {eventDate.toLocaleDateString('es-CL', {
+                            weekday: 'long',
+                            day: 'numeric',
+                            month: 'long',
+                          })}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-4 w-4 text-blue-500" />
+                          {getModuleTimeLabel(event.module)}
+                        </span>
+                        {event.public_space && (
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-blue-500" />
+                            {event.public_space.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-blue-600 flex-shrink-0 mt-1" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* 4. Información del Equipo de Gestión */}
       <section>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Equipo de Gestión</h2>
 
@@ -242,16 +337,16 @@ export const UserView = ({ groupId }: UserViewProps) => {
           </div>
 
           {/* Moderadores */}
-          {groupDetails.moderators.length > 0 && (
+          {(groupDetails.moderators?.length ?? 0) > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="p-4 bg-gradient-to-r from-blue-50 to-white border-b border-slate-200">
                 <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
                   <Shield className="h-5 w-5 text-blue-500" />
-                  Moderadores ({groupDetails.moderators.length})
+                  Moderadores ({groupDetails.moderators?.length ?? 0})
                 </h3>
               </div>
               <ul className="divide-y divide-slate-200">
-                {groupDetails.moderators.map((moderator) => (
+                {groupDetails.moderators?.map((moderator) => (
                   <li key={moderator.id} className="p-4 hover:bg-slate-50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-2 border-blue-300">
@@ -275,7 +370,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
         </div>
       </section>
 
-      {/* 4. Información Adicional */}
+      {/* 5. Información Adicional */}
       {/* <section className="mt-8">
         <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Información del Grupo</h3>
@@ -295,7 +390,7 @@ export const UserView = ({ groupId }: UserViewProps) => {
         </div>
       </section> */}
 
-      {/* 5. Mensaje informativo */}
+      {/* 6. Mensaje informativo */}
       <section className="mt-8">
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center">
           <Users className="h-10 w-10 text-blue-600 mx-auto mb-3" />

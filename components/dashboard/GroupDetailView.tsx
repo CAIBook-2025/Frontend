@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 import {
   Users,
   Crown,
@@ -14,7 +15,20 @@ import {
   Loader2,
   Edit3,
   AlertTriangle,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Calendar,
+  MapPin,
+  Eye,
 } from 'lucide-react';
+
+import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
+import {
+  EventRequest,
+  EVENT_STATUS_CONFIG,
+  getModuleTimeLabel,
+} from '@/types/eventRequest';
 
 // --- Tipos basados en la API ---
 interface GroupRequest {
@@ -137,13 +151,15 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   const router = useRouter();
   const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [recentEvents, setRecentEvents] = useState<EventRequest[]>([]);
 
-  // Determinar el rol del usuario
-  const isRepresentative = groupDetails?.repre_id === user?.id;
+  // Determinar el rol del usuario (comparar ID del perfil con repre_id del grupo)
+  const isRepresentative = userProfile?.user && groupDetails ? groupDetails.repre_id === userProfile.user.id : false;
 
   // Obtener access token
   useEffect(() => {
@@ -162,7 +178,23 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
     fetchAccessToken();
   }, [user]);
 
-  // Cargar detalles del grupo
+  // Cargar perfil del usuario
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!accessToken) return;
+
+      try {
+        const profile = await fetchUserProfile(accessToken);
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+    };
+
+    if (accessToken) loadUserProfile();
+  }, [accessToken]);
+
+  // Cargar detalles del grupo y eventos recientes
   useEffect(() => {
     const loadGroupDetails = async () => {
       if (!accessToken) return;
@@ -181,6 +213,21 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
         const data = await response.json();
         setGroupDetails(data);
+
+        // Cargar eventos recientes del grupo
+        const events = await fetchEventRequests(accessToken, { group_id: parseInt(groupId) });
+        if (events) {
+          // Ordenar: pendientes primero, luego por fecha
+          const sorted = [...events].sort((a, b) => {
+            const statusOrder = { PENDING: 0, CONFIRMED: 1, CANCELLED: 2 };
+            const statusDiff =
+              statusOrder[a.status as keyof typeof statusOrder] -
+              statusOrder[b.status as keyof typeof statusOrder];
+            if (statusDiff !== 0) return statusDiff;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+          setRecentEvents(sorted.slice(0, 3)); // Solo los 3 más recientes
+        }
       } catch (error) {
         console.error('Error loading group details:', error);
         setError('Error al cargar los detalles del grupo');
@@ -275,16 +322,89 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
         />
       </section>
 
-      {/* 3. Acciones según el rol */}
+      {/* 3. Eventos Recientes */}
+      {isRepresentative && recentEvents.length > 0 && (
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Eventos Recientes</h2>
+            <a
+              href={`/Student/Groups/Representative/${groupId}/Events`}
+              className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
+            >
+              Ver todos <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+          <div className="space-y-3">
+            {recentEvents.map((event) => {
+              const statusConfig = EVENT_STATUS_CONFIG[event.status];
+              const StatusIcon =
+                event.status === 'PENDING'
+                  ? Clock
+                  : event.status === 'CONFIRMED'
+                  ? CheckCircle2
+                  : XCircle;
+
+              return (
+                <div
+                  key={event.id}
+                  className="rounded-lg border border-slate-200 bg-white p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-800 truncate">{event.name}</h3>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.color}`}
+                        >
+                          <StatusIcon className="h-3 w-3" />
+                          {statusConfig.label}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-sm text-slate-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {new Date(event.day).toLocaleDateString('es-CL', {
+                            day: 'numeric',
+                            month: 'short',
+                          })}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {getModuleTimeLabel(event.module)}
+                        </span>
+                        {event.public_space && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {event.public_space.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <a
+                      href={`/Student/Groups/Representative/${groupId}/Events/${event.id}`}
+                      className="flex-shrink-0 p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                      title="Ver detalles"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 4. Acciones según el rol */}
       {isRepresentative && (
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Acciones Disponibles</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <ActionCard
+              href={`/Student/Groups/Representative/${groupId}/Events`}
               icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
-              title="Crear Evento"
-              description="Organiza y reserva espacios para eventos del grupo."
-              disabled={true}
+              title="Gestionar Eventos"
+              description="Crea, visualiza y gestiona los eventos de tu grupo."
             />
 
             <ActionCard
@@ -305,7 +425,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
         </section>
       )}
 
-      {/* 4. Información del Representante */}
+      {/* 5. Información del Representante */}
       <section>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Representante del Grupo</h2>
 

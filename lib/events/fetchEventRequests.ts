@@ -1,16 +1,8 @@
-import { EventRequest } from "@/types/eventRequest";
-
-export type PublicSpace = {
-    id: number;
-    name: string;
-    capacity: number;
-    location: string;
-    available: boolean;
-};
+import { EventRequest, EventRequestStatus } from "@/types/eventRequest";
 
 export async function fetchEventRequests(
     accessToken: string | null,
-    filters?: { status?: string; group_id?: number }
+    filters?: { status?: EventRequestStatus; group_id?: number }
 ): Promise<EventRequest[] | null> {
     if (!accessToken) {
         console.warn('fetchEventRequests called without access token');
