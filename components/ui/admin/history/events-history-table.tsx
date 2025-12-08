@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { EventRequest } from '@/types/eventRequest';
-import { getAccessToken } from '@auth0/nextjs-auth0/client';
+import { getAccessToken } from '@auth0/nextjs-auth0';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { EventsFilterSearch } from './events-filter-search';
 import { updateEventRequest } from '@/lib/events/updateEventRequest';
