@@ -234,12 +234,11 @@ export default function CreateGroupPage() {
   if (hasPendingRequests) {
     return (
       <main className="flex min-h-screen bg-slate-50">
-        <div className="hidden lg:block w-3/5 relative">
+        <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
           <Image
             src="/PeopleForm.png"
             alt="Estudiantes colaborando en un grupo"
-            width={500}
-            height={500}
+            fill
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gray-900/40" />
@@ -293,12 +292,11 @@ export default function CreateGroupPage() {
   return (
     <>
     <main className="flex min-h-screen bg-slate-50">
-      <div className="hidden lg:block w-3/5 relative">
+      <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
         <Image
           src="/PeopleForm.png"
           alt="Estudiantes colaborando en un grupo"
-          width={500}
-          height={500}
+          fill
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gray-900/40" />
