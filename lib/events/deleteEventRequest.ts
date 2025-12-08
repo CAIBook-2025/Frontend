@@ -2,6 +2,12 @@
 
 export type DeleteEventResponse = {
   success: boolean;
+  data?: {
+    id: number;
+    name: string;
+    is_deleted: boolean;
+    deletedAt: string;
+  };
   error?: string;
 };
 
@@ -11,8 +17,8 @@ export async function deleteEventRequest(accessToken: string | null, eventId: nu
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${eventId}`, {
-      method: 'DELETE',
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/delete/${eventId}`, {
+      method: 'PATCH',
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -20,11 +26,27 @@ export async function deleteEventRequest(accessToken: string | null, eventId: nu
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
+
+      // Manejar errores específicos
+      if (response.status === 401) {
+        return { success: false, error: 'Token inválido' };
+      }
+      if (response.status === 403) {
+        return { success: false, error: 'No tienes permiso para eliminar este evento' };
+      }
+      if (response.status === 404) {
+        return { success: false, error: 'Evento no encontrado' };
+      }
+
       const errorMessage = data.error || 'Error al eliminar el evento';
       return { success: false, error: errorMessage };
     }
 
-    return { success: true };
+    const data = await response.json();
+    return {
+      success: true,
+      data: data.eventRequest,
+    };
   } catch (error) {
     console.error('Error deleting event request:', error);
     return { success: false, error: 'Error de conexión al eliminar el evento' };

@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAccessToken, useUser } from '@auth0/nextjs-auth0';
+import Image from 'next/image';
 import {
   Users,
   Crown,

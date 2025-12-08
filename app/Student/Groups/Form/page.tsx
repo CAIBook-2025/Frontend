@@ -1,485 +1,469 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowLeft, ArrowRight, UploadCloud, Send, AlertCircle, Clock } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
-import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
-import { fetchUserProfile } from '@/lib/user/fetchUserProfile';
-import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
+import { useUser } from '@auth0/nextjs-auth0';
+import { use, useEffect, useState } from 'react';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import { fetchUserProfile, UserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
+import { useRouter } from 'next/navigation';
+import { AlertTriangle, X } from 'lucide-react';
 
-// --- TIPOS Y DATOS DEL FORMULARIO ---
-interface GroupFormData {
-  name: string;
-  description: string;
-  goal: string;
-  logo: File | null;
-}
-
-export default function CreateGroupPage() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const userIdParam = params.get('userId');
-  const [userId, setUserId] = useState<number | null>(userIdParam !== null ? Number(userIdParam) : null);
-  const { user } = useUser();
-
-  const [step, setStep] = useState(1);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+export default function ProfilePage() {
+  const { user, isLoading } = useUser();
+  const [userData, setUserData] = useState<UserProfile | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
-  const [isLoadingPendingRequests, setIsLoadingPendingRequests] = useState(true);
-  const [formData, setFormData] = useState<GroupFormData>({
-    name: '',
-    description: '',
-    goal: '',
-    logo: null,
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const router = useRouter();
+
+  // ✅ NUEVO: Estados para cambio de contraseña
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [isSendingPasswordEmail, setIsSendingPasswordEmail] = useState(false);
+
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    career: '',
+    student_number: '',
   });
 
-  // Obtener access token y perfil de usuario
+  // ✅ Detectar si puede cambiar contraseña (si su login es Auth0 Database)
+  const canChangePassword = user?.sub?.startsWith('auth0|');
+
   useEffect(() => {
-    async function fetchData() {
+    async function fetchAccessToken() {
       if (user) {
         try {
-          const tokenResponse = await getAccessToken();
-          const resolvedToken = resolveAccessToken(tokenResponse);
-          setAccessToken(resolvedToken);
-
-          const profile = await fetchUserProfile(resolvedToken);
-          if (profile?.user?.id) {
-            setUserId(profile.user.id);
-          }
+          const accessToken = await getAccessToken();
+          setAccessToken(accessToken);
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error('Error fetching access token:', error);
         }
       }
     }
 
-    fetchData();
+    fetchAccessToken();
   }, [user]);
 
-  // Obtener solicitudes pendientes del usuario
   useEffect(() => {
-    async function loadPendingRequests() {
-      if (!accessToken || userId === null) {
-        setIsLoadingPendingRequests(false);
-        return;
-      }
-
-      setIsLoadingPendingRequests(true);
-      try {
-        const requests = await fetchGroupRequests(accessToken, {
-          status: 'PENDING',
-          user_id: userId,
-        });
-        setPendingRequestsCount(requests?.length ?? 0);
-      } catch (error) {
-        console.error('Error loading pending requests:', error);
-      } finally {
-        setIsLoadingPendingRequests(false);
-      }
-    }
-
-    if (accessToken && userId !== null) loadPendingRequests();
-  }, [accessToken, userId]);
-
-  // Verificar si el usuario tiene 3 o más solicitudes pendientes
-  const hasPendingRequests = pendingRequestsCount >= 3;
-
-  // Función para validar cada etapa
-  const validateStep = (currentStep: number): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (currentStep === 1) {
-      // Validar Etapa 1: Información General
-      if (!formData.name.trim()) {
-        errors.name = 'El nombre del grupo es requerido';
-      }
-      if (!formData.description.trim()) {
-        errors.description = 'La descripción es requerida';
-      }
-    } else if (currentStep === 2) {
-      // Validar Etapa 2: Detalles y Objetivos
-      if (!formData.goal.trim()) {
-        errors.goal = 'El objetivo principal es requerido';
+    async function fetchUserData() {
+      if (accessToken) {
+        try {
+          const profileResponse = await fetchUserProfile(accessToken);
+          if (profileResponse?.user) {
+            setUserData(profileResponse.user);
+            setFormData({
+              first_name: profileResponse.user.first_name || '',
+              last_name: profileResponse.user.last_name || '',
+              phone: profileResponse.user.phone || '',
+              career: profileResponse.user.career || '',
+              student_number: profileResponse.user.student_number || '',
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
       }
     }
-    // Etapa 3 no requiere validación (logo es opcional)
 
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+    fetchUserData();
+  }, [accessToken]);
 
-  const handleNext = () => {
-    // Validar la etapa actual antes de avanzar
-    if (!validateStep(step)) {
-      setErrorMsg('Por favor completa todos los campos requeridos antes de continuar.');
-      return;
-    }
-
-    // Limpiar errores si la validación es exitosa
-    setErrorMsg(null);
-    setValidationErrors({});
-
-    if (step < 3) {
-      setStep(step + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    // Limpiar el error del campo cuando el usuario empiece a escribir
-    if (validationErrors[name]) {
-      setValidationErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
+  const handleSave = async () => {
+    if (!accessToken || !userData) return;
+
+    setIsSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar el perfil');
+      }
+
+      const updatedProfile = await response.json();
+      setUserData(updatedProfile);
+      setIsEditing(false);
+      setSuccess('Perfil actualizado exitosamente');
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Error al actualizar el perfil');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!accessToken || !userData) return;
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete/me`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar la cuenta');
+      }
+
+      router.push('/auth/logout');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setError('Error al eliminar la cuenta');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (userData) {
+      setFormData({
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        phone: userData.phone || '',
+        career: userData.career || '',
+        student_number: userData.student_number || '',
       });
     }
-
-    // Limpiar el mensaje de error general si todos los campos están completos
-    if (errorMsg) {
-      setErrorMsg(null);
-    }
+    setIsEditing(false);
+    setError(null);
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      setFormData((prev) => ({ ...prev, logo: file }));
-    } else {
-      setFormData((prev) => ({ ...prev, logo: null }));
-    }
-  };
+  // ✅ NUEVO: Enviar email de cambio de contraseña
+  const handlePasswordReset = async () => {
+    setIsSendingPasswordEmail(true);
+    setPasswordMessage(null);
+    console.log('Iniciando proceso de cambio de contraseña para:', user?.email, user?.id);
 
-  // La función de envío ya no necesita el evento 'e'
-  const handleSubmit = async () => {
     try {
-      setSubmitting(true);
-      setErrorMsg(null);
-
-      const { name, description, goal, logo } = formData;
-
-      if (!name.trim() || !description.trim() || !goal.trim()) {
-        setErrorMsg('Por favor completa todos los campos obligatorios.');
-        setSubmitting(false);
-        return;
-      }
-
-      if (userId === null) {
-        setErrorMsg('No se detectó el usuario. Reintenta desde el Dashboard.');
-        return;
-      }
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/group-requests`, {
+      console.log('Enviando solicitud de cambio de contraseña para:', user?.email, user?.id);
+      await fetch(`${process.env.AUTH0_DOMAIN}/dbconnections/change_password`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // TODO: Add token authorization
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          user_id: userId,
-          name: name.trim(),
-          goal: goal.trim(),
-          description: description.trim(),
+          client_id: user?.id,
+          email: user?.email,
+          connection: 'Username-Password-Authentication',
         }),
       });
 
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(errText || 'No se pudo crear la solicitud de grupo.');
-      }
-
-      const data = await res.json();
-
-      // Redirigir al dashboard con parámetro de éxito
-      router.push(`/Student?view=groups&success=true`);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
-      setSubmitting(false);
+      setPasswordMessage('Te hemos enviado un correo para cambiar tu contraseña.');
+    } catch (err) {
+      console.error(err);
+      setPasswordMessage('Hubo un problema al solicitar el cambio de contraseña.');
+    } finally {
+      setIsSendingPasswordEmail(false);
     }
   };
 
-  // Si está cargando las solicitudes pendientes, mostrar loading
-  if (isLoadingPendingRequests) {
+  if (!userData)
     return (
-      <main className="flex min-h-screen bg-slate-50 items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-          <p className="mt-4 text-slate-600">Verificando tu estado...</p>
-        </div>
-      </main>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Cargando...</div>
+      </div>
     );
-  }
-
-  // Si tiene solicitudes pendientes, mostrar mensaje y bloquear formulario
-  if (hasPendingRequests) {
-    return (
-      <main className="flex min-h-screen bg-slate-50">
-        <div className="hidden lg:block w-3/5 relative">
-          <Image
-            src="/PeopleForm.png"
-            alt="Estudiantes colaborando en un grupo"
-            width={500}
-            height={500}
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gray-900/40" />
-          <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
-            <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
-            <p className="mt-2 text-lg max-w-md text-white/90">
-              Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
-            </p>
-          </div>
-        </div>
-
-        <div className="w-full lg:w-3/5 flex flex-col items-center justify-center h-full p-8">
-          <div className="max-w-2xl w-full">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
-                  <div className="rounded-full bg-amber-100 p-3">
-                    <Clock className="h-8 w-8 text-amber-600" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-amber-800 mb-3">Límite de solicitudes alcanzado</h2>
-                  <p className="text-amber-700 mb-6">
-                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes. El límite máximo es de 3
-                    solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
-                  </p>
-                  <div className="flex gap-3 flex-wrap">
-                    <Link
-                      href="/Student?view=groups"
-                      className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
-                    >
-                      <ArrowLeft size={16} /> Volver a Grupos
-                    </Link>
-                    <a className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50">
-                      <AlertCircle size={16} /> Ver Mis Solicitudes
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   return (
-    <main className="flex min-h-screen bg-slate-50">
-      <div className="hidden lg:block w-3/5 relative">
-        <Image
-          src="/PeopleForm.png"
-          alt="Estudiantes colaborando en un grupo"
-          width={500}
-          height={500}
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gray-900/40" />
-        <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
-          <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
-          <p className="mt-2 text-lg max-w-md text-white/90">
-            Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
-          </p>
-        </div>
-      </div>
-
-      <div className="w-full lg:w-3/5  flex flex-col items-center h-full p-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">
-          ¡Felicidades! Estás dando el primer paso hacia tu comunidad
-        </h1>
-
-        <div className="max-w-3xl w-full">
-          <div className="mb-8 flex items-center justify-center gap-4">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="text-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
-                    step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
-                >
-                  {s}
+    <>
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
+              <div className="flex items-center space-x-4">
+                <div className="h-20 w-20 rounded-full bg-white flex items-center justify-center text-3xl font-bold text-blue-600">
+                  {userData.first_name?.[0]}
+                  {userData.last_name?.[0]}
                 </div>
-                <p className={`mt-2 text-xs font-semibold ${step >= s ? 'text-blue-600' : 'text-slate-500'}`}>
-                  {s === 1 && 'Info General'}
-                  {s === 2 && 'Detalles'}
-                  {s === 3 && 'Finalizar'}
-                </p>
+                <div className="text-white">
+                  <h1 className="text-2xl font-bold">
+                    {userData.first_name} {userData.last_name}
+                  </h1>
+                  <p className="text-blue-100">{userData.email}</p>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* El contenedor principal ahora es un <div> en lugar de <form> */}
-          <div className="bg-white px-8 py-12 rounded-2xl shadow-lg">
-            {step === 1 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Información General</h2>
-                <div className="space-y-8">
-                  <Input
-                    id="name"
-                    name="name"
-                    label="Nombre del Grupo"
-                    placeholder="Ej: Club de Programación"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    error={validationErrors.name}
-                  />
+            {/* Content */}
+            <div className="px-6 py-6">
+              {error && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>
+              )}
+
+              {success && (
+                <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                  {success}
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
-                      Descripción Corta
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={6}
-                      placeholder="Una breve descripción que invite a los estudiantes a unirse."
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
-                        validationErrors.description
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-slate-300 focus:border-blue-600'
-                      }`}
-                      required
-                    />
-                    {validationErrors.description && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="first_name"
+                        value={formData.first_name}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{userData.first_name || 'No especificado'}</p>
                     )}
                   </div>
-                </div>
-              </div>
-            )}
 
-            {step === 2 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
-                <div className="space-y-8">
                   <div>
-                    <label htmlFor="goal" className="block text-sm font-medium text-slate-700 mb-1">
-                      Objetivo Principal
-                    </label>
-                    <textarea
-                      id="goal"
-                      name="goal"
-                      rows={10}
-                      placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
-                      value={formData.goal}
-                      onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
-                        validationErrors.goal
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-slate-300 focus:border-blue-600'
-                      }`}
-                      required
-                    />
-                    {validationErrors.goal && <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>}
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{userData.last_name || 'No especificado'}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Carrera</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="career"
+                        value={formData.career}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{userData.career || 'No especificado'}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Número de estudiante</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="student_number"
+                        value={formData.student_number}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{userData.student_number || 'No especificado'}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{userData.phone || 'No especificado'}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                    <p className="text-gray-900">{userData.role || 'No especificado'}</p>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {step === 3 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Finalizar y Enviar</h2>
-                <div>
-                  <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1">
-                    Logo del Grupo (Opcional)
-                  </label>
-                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-slate-900/25 px-6 py-10">
-                    <div className="text-center">
-                      <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
-                      <div className="mt-4 flex text-sm leading-6 text-slate-600">
-                        <label
-                          htmlFor="logo-upload"
-                          className="relative cursor-pointer rounded-md bg-white font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
+                {/* Actions */}
+                <div className="pt-6 border-t border-gray-200">
+                  {isEditing ? (
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                      </button>
+
+                      <button
+                        onClick={handleCancel}
+                        disabled={isSaving}
+                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 disabled:opacity-50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                      >
+                        Editar perfil
+                      </button>
+
+                      <a
+                        href="/auth/logout"
+                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-center"
+                      >
+                        Cerrar sesión
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* ✅ CAMBIAR CONTRASEÑA (solo si es Auth0 Database) */}
+                {canChangePassword && (
+                  <div className="pt-6 border-t border-gray-200">
+                    {!showPasswordForm ? (
+                      <button
+                        onClick={() => setShowPasswordForm(true)}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        Cambiar contraseña
+                      </button>
+                    ) : (
+                      <div className="bg-blue-50 p-4 rounded">
+                        <p className="text-blue-800 mb-3">Te enviaremos un correo para cambiar tu contraseña.</p>
+
+                        <button
+                          onClick={handlePasswordReset}
+                          disabled={isSendingPasswordEmail}
+                          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                         >
-                          <span>Sube un archivo</span>
-                          <input
-                            id="logo-upload"
-                            name="logo"
-                            type="file"
-                            className="sr-only"
-                            onChange={handleFileChange}
-                            accept="image/png, image/jpeg"
-                          />
-                        </label>
-                        <p className="pl-1">o arrástralo aquí</p>
+                          {isSendingPasswordEmail ? 'Enviando...' : 'Enviar correo'}
+                        </button>
+
+                        {passwordMessage && <p className="text-blue-700 mt-3">{passwordMessage}</p>}
                       </div>
-                      <p className="text-xs leading-5 text-slate-500">PNG, JPG hasta 2MB</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Danger Zone */}
+                <div className="mt-8 rounded-lg border-2 border-red-300 bg-red-50/50">
+                  <div className="border-b border-red-200 bg-red-100/50 px-4 py-3">
+                    <h3 className="text-sm font-semibold text-red-800">Zona de Peligro</h3>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">Eliminar esta cuenta</p>
+                        <p className="text-sm text-gray-600">
+                          Una vez eliminada, no podrás recuperar tu cuenta ni tus datos.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="rounded-md border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white hover:border-red-600 cursor-pointer"
+                      >
+                        Eliminar cuenta
+                      </button>
                     </div>
                   </div>
-                  {formData.logo && (
-                    <p className="mt-2 text-sm text-green-600 text-center">
-                      Archivo seleccionado: {formData.logo.name}
-                    </p>
-                  )}
                 </div>
               </div>
-            )}
-
-            {errorMsg && (
-              <div className="mt-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {errorMsg}
-              </div>
-            )}
-
-            {/* Navegación del Carrusel */}
-            <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
-              <button
-                type="button"
-                onClick={handleBack}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity duration-300 ${step === 1 ? 'opacity-0 cursor-default' : 'text-slate-600 hover:bg-slate-100'}`}
-                disabled={step === 1}
-              >
-                <ArrowLeft size={16} /> Volver
-              </button>
-
-              {step < 3 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-                >
-                  Siguiente <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  type="button" // Cambiado de 'submit' a 'button'
-                  onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
-                  disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${
-                    submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  {submitting ? (
-                    'Enviando…'
-                  ) : (
-                    <>
-                      Enviar Solicitud <Send size={16} />
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
         </div>
       </div>
-    </main>
+
+      {/* Modal de Confirmación para Eliminar Cuenta */}
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div
+            className="relative w-full max-w-md m-4 rounded-xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <h3 className="text-xl font-bold text-gray-800">⚠️ Eliminar Cuenta Permanentemente</h3>
+              <button onClick={() => setShowDeleteConfirm(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="mt-4 space-y-4">
+              <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-red-800">Esta acción es irreversible</p>
+                  <p className="text-sm text-red-700 mt-1">
+                    Una vez eliminada, no podrás recuperar tu cuenta ni ningún dato asociado.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-slate-600">
+                <p className="mb-2">Al eliminar tu cuenta perderás:</p>
+                <ul className="list-disc list-inside text-sm space-y-1 text-slate-500">
+                  <li>Todas tus reservas activas e históricas</li>
+                  <li>Tu membresía en grupos estudiantiles</li>
+                  <li>Todo tu historial de actividad en CAIBook</li>
+                </ul>
+              </div>
+
+              <p className="text-sm font-medium text-slate-700">
+                ¿Estás completamente seguro de que deseas eliminar tu cuenta?
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="rounded-lg bg-slate-100 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer"
+              >
+                Volver
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300 cursor-pointer"
+              >
+                {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Mi Cuenta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

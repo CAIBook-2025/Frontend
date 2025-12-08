@@ -29,26 +29,47 @@ const ActionCard = ({
   icon,
   title,
   description,
+  disabled = false,
+  disabledMessage,
 }: {
   href: LinkProps['href'];
   icon: React.ReactNode;
   title: string;
   description: string;
-}) => (
-  <Link
-    href={href}
-    className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg"
-  >
-    <div className="flex items-start justify-between">
-      <div>
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">{icon}</div>
-        <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-        <p className="mt-1 text-slate-600">{description}</p>
+  disabled?: boolean;
+  disabledMessage?: string;
+}) => {
+  if (disabled) {
+    return (
+      <div className="block rounded-xl border border-red-200 bg-red-50 p-6 shadow-md cursor-not-allowed opacity-80">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">{icon}</div>
+            <h3 className="text-xl font-bold text-red-800">{title}</h3>
+            <p className="mt-1 text-red-600">{disabledMessage || description}</p>
+          </div>
+          <ShieldAlert className="mt-1 h-5 w-5 text-red-400" />
+        </div>
       </div>
-      <ArrowRight className="mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-blue-500" />
-    </div>
-  </Link>
-);
+    );
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-all duration-300 hover:border-blue-500 hover:shadow-lg"
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">{icon}</div>
+          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+          <p className="mt-1 text-slate-600">{description}</p>
+        </div>
+        <ArrowRight className="mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-blue-500" />
+      </div>
+    </Link>
+  );
+};
 
 // --- Componente para Estadísticas Rápidas ---
 const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string | number; label: string }) => (
@@ -73,20 +94,17 @@ const formatDateTime = (day: string, module: number) => {
   const dateOnly = new Date(date);
   dateOnly.setHours(0, 0, 0, 0);
 
-  // Mapeo de módulos a horas (ajusta según tu sistema)
+  // Mapeo de módulos a horas
   const moduleTimes: Record<number, string> = {
-    1: '08:00 - 09:00',
-    2: '09:00 - 10:00',
-    3: '10:00 - 11:00',
-    4: '11:00 - 12:00',
-    5: '12:00 - 13:00',
-    6: '13:00 - 14:00',
-    7: '14:00 - 15:00',
-    8: '15:00 - 16:00',
-    9: '16:00 - 17:00',
-    10: '17:00 - 18:00',
-    11: '18:00 - 19:00',
-    12: '19:00 - 20:00',
+    1: '08:20 - 09:30',
+    2: '09:40 - 10:50',
+    3: '11:00 - 12:10',
+    4: '12:20 - 13:30',
+    5: '14:50 - 16:00',
+    6: '16:10 - 17:20',
+    7: '17:30 - 18:40',
+    8: '18:50 - 20:00',
+    9: '20:10 - 21:20',
   };
 
   const timeRange = moduleTimes[module] || `${module}:00`;
@@ -179,13 +197,37 @@ export const PersonalView = ({ stats }: { stats: Stats }) => {
         <StatCard icon={<ShieldAlert size={20} />} value={stats.strikes} label="Strikes" />
       </section>
 
+      {/* Alerta de cuenta bloqueada por strikes */}
+      {stats.strikes >= 3 && (
+        <section className="mb-8">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="rounded-full bg-red-100 p-2">
+                  <ShieldAlert className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-800 mb-2">Tu cuenta está restringida</h3>
+                <p className="text-sm text-red-700">
+                  Has acumulado {stats.strikes} strikes, por lo que no puedes realizar nuevas reservas de salas. Por
+                  favor, acércate a un administrador para revisar tu caso y resolver esta situación.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 3. Acciones Principales */}
       <section className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-3">
         <ActionCard
           href={{ pathname: '/Student/StudyRoomBooker', query: { userId: stats.userId } }}
-          icon={<BookMarked className="h-6 w-6 text-blue-500" />}
+          icon={<BookMarked className={`h-6 w-6 ${stats.strikes >= 3 ? 'text-red-500' : 'text-blue-500'}`} />}
           title="Reservar una Sala"
           description="Busca y asegura un espacio de estudio para ti o tu grupo."
+          disabled={stats.strikes >= 3}
+          disabledMessage="No puedes reservar salas. Acércate a un administrador para revisar tu caso."
         />
         <ActionCard
           href="Reservations"

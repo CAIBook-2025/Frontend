@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 
 import { X, Check, XIcon } from 'lucide-react';
 import Image from 'next/image';

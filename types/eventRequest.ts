@@ -83,14 +83,15 @@ export type EventRequestDetail = EventRequest & {
 
 // Mapeo de módulos a horarios
 export const MODULE_TIMES: Record<number, { start: string; end: string; label: string }> = {
-  1: { start: '08:00', end: '09:30', label: '08:00 - 09:30' },
-  2: { start: '09:30', end: '11:00', label: '09:30 - 11:00' },
-  3: { start: '11:00', end: '12:30', label: '11:00 - 12:30' },
-  4: { start: '12:30', end: '14:00', label: '12:30 - 14:00' },
-  5: { start: '14:00', end: '15:30', label: '14:00 - 15:30' },
-  6: { start: '15:30', end: '17:00', label: '15:30 - 17:00' },
-  7: { start: '17:00', end: '18:30', label: '17:00 - 18:30' },
-  8: { start: '18:30', end: '20:00', label: '18:30 - 20:00' },
+  1: { start: '08:20', end: '09:30', label: '08:20 - 09:30' },
+  2: { start: '09:40', end: '10:50', label: '09:40 - 10:50' },
+  3: { start: '11:00', end: '12:10', label: '11:00 - 12:10' },
+  4: { start: '12:20', end: '13:30', label: '12:20 - 13:30' },
+  5: { start: '14:50', end: '16:00', label: '14:50 - 16:00' },
+  6: { start: '16:10', end: '17:20', label: '16:10 - 17:20' },
+  7: { start: '17:30', end: '18:40', label: '17:30 - 18:40' },
+  8: { start: '18:50', end: '20:00', label: '18:50 - 20:00' },
+  9: { start: '20:10', end: '21:20', label: '20:10 - 21:20' },
 };
 
 // Helper para obtener el label del horario

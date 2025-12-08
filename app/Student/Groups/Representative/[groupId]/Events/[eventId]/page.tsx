@@ -178,7 +178,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
   const statusConfig = EVENT_STATUS_CONFIG[event.status];
   const canEdit = event.status === 'PENDING';
-  const canDelete = event.status !== 'CONFIRMED';
+  const canDelete = event.status === 'PENDING' || event.status === 'CONFIRMED';
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
@@ -362,20 +362,20 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                     className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-white font-medium hover:bg-red-700 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Eliminar Solicitud
+                    {event.status === 'CONFIRMED' ? 'Cancelar Evento' : 'Eliminar Solicitud'}
                   </button>
                 )}
               </div>
             )}
 
-            {/* Mensaje si no se puede editar/eliminar */}
+            {/* Mensaje informativo para eventos confirmados */}
             {event.status === 'CONFIRMED' && (
-              <div className="mt-6 p-4 rounded-lg bg-amber-50 border border-amber-200">
+              <div className="mt-6 p-4 rounded-lg bg-blue-50 border border-blue-200">
                 <div className="flex gap-3">
-                  <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                  <p className="text-sm text-amber-800">
-                    Los eventos confirmados no pueden ser editados ni eliminados. Si necesitas hacer cambios, contacta a
-                    un administrador.
+                  <Info className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <p className="text-sm text-blue-800">
+                    Los eventos confirmados no pueden ser editados. Si necesitas cancelar el evento, recuerda
+                    comunicarlo a los posibles asistentes.
                   </p>
                 </div>
               </div>
@@ -386,18 +386,72 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
       {/* Modal de confirmación de eliminación */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-red-100 rounded-full">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => !isDeleting && setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${event.status === 'CONFIRMED' ? 'bg-amber-100' : 'bg-red-100'}`}>
+                  <AlertTriangle
+                    className={`h-6 w-6 ${event.status === 'CONFIRMED' ? 'text-amber-600' : 'text-red-600'}`}
+                  />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800">
+                  {event.status === 'CONFIRMED' ? 'Cancelar Evento' : 'Eliminar Solicitud'}
+                </h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Eliminar Solicitud</h3>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="p-1 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
+              >
+                <XCircle className="h-5 w-5 text-slate-400" />
+              </button>
             </div>
-            <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar la solicitud del evento <strong>&quot;{event.name}&quot;</strong>?
-              Esta acción no se puede deshacer.
-            </p>
+
+            {/* Mensaje según estado */}
+            <div className="mb-6">
+              <p className="text-slate-600 mb-4">
+                ¿Estás seguro de que deseas {event.status === 'CONFIRMED' ? 'cancelar' : 'eliminar'} el evento{' '}
+                <strong>&quot;{event.name}&quot;</strong>?
+              </p>
+
+              {event.status === 'PENDING' ? (
+                <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                  <div className="flex gap-3">
+                    <Info className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-amber-800 font-medium mb-1">Solicitud en revisión</p>
+                      <p className="text-sm text-amber-700">
+                        Al eliminar esta solicitud, los estudiantes no tendrán la oportunidad de asistir a este evento.
+                        Esta acción no se puede deshacer.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+                  <div className="flex gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-red-800 font-medium mb-1">¡Evento ya confirmado!</p>
+                      <p className="text-sm text-red-700 mb-2">
+                        Este evento ya fue aprobado y puede que estudiantes estén esperando asistir.
+                      </p>
+                      <p className="text-sm text-red-700 font-medium">
+                        📢 Recuerda avisar a tus asistentes o comunicar públicamente el motivo de la cancelación.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {deleteError && (
               <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
@@ -409,22 +463,24 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium disabled:opacity-50"
+                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium disabled:opacity-50 transition-colors"
               >
-                Cancelar
+                Volver
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
                 {isDeleting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Eliminando...
+                    {event.status === 'CONFIRMED' ? 'Cancelando...' : 'Eliminando...'}
                   </>
+                ) : event.status === 'CONFIRMED' ? (
+                  'Confirmar Cancelación'
                 ) : (
-                  'Eliminar'
+                  'Eliminar Solicitud'
                 )}
               </button>
             </div>
