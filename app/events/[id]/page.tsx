@@ -413,7 +413,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Event Feedback Section */}
-            {profileData && (
+            {profileData &&  event.status !== 'CANCELLED' && (
               <EventFeedback
                 eventId={event.id}
                 isAdmin={isAdmin}

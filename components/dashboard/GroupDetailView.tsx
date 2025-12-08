@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Star,
   Loader2,
-  Edit3,
   AlertTriangle,
   Clock,
   CheckCircle2,
@@ -96,9 +95,8 @@ const ActionCard = ({
     <div className="flex items-start justify-between">
       <div>
         <div
-          className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${
-            variant === 'danger' ? 'bg-red-100' : 'bg-blue-100'
-          }`}
+          className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full ${variant === 'danger' ? 'bg-red-100' : 'bg-blue-100'
+            }`}
         >
           {icon}
         </div>
@@ -107,9 +105,8 @@ const ActionCard = ({
         {disabled && <p className="mt-2 text-xs text-orange-600 font-medium">Próximamente disponible</p>}
       </div>
       <ArrowRight
-        className={`mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 ${
-          variant === 'danger' ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'
-        }`}
+        className={`mt-1 h-5 w-5 text-slate-400 transition-transform duration-300 group-hover:translate-x-1 ${variant === 'danger' ? 'group-hover:text-red-500' : 'group-hover:text-blue-500'
+          }`}
       />
     </div>
   );
@@ -246,7 +243,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
     if (!accessToken || !groupDetails) return;
 
     setIsDeleting(true);
-    
+
     const result = await deleteGroupRequest(accessToken, groupDetails.group_request_id);
 
     if (result.success) {
@@ -309,10 +306,10 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
       {/* 2. Estadísticas del Grupo */}
       <section className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard icon={<Star size={20} />} value={groupDetails.reputation} label="Reputación" />
-        <StatCard 
-          icon={<CalendarPlus size={20} />} 
-          value={groupDetails.eventRequests?.length || 0} 
-          label="Eventos Creados" 
+        <StatCard
+          icon={<CalendarPlus size={20} />}
+          value={groupDetails.eventRequests?.length || 0}
+          label="Eventos Creados"
         />
       </section>
 
@@ -335,8 +332,8 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                 event.status === 'PENDING'
                   ? Clock
                   : event.status === 'CONFIRMED'
-                  ? CheckCircle2
-                  : XCircle;
+                    ? CheckCircle2
+                    : XCircle;
 
               return (
                 <div
@@ -393,7 +390,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
       {isRepresentative && (
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Acciones Disponibles</h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <ActionCard
               href={`/Student/Groups/Representative/${groupId}/Events`}
               icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
@@ -401,12 +398,12 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
               description="Crea, visualiza y gestiona los eventos de tu grupo."
             />
 
-            <ActionCard
+            {/* <ActionCard
               icon={<Edit3 className="h-6 w-6 text-blue-500" />}
               title="Editar Grupo"
               description="Modifica la descripción, logo y configuración del grupo."
               disabled={true}
-            />
+            /> */}
 
             <ActionCard
               variant="danger"
@@ -451,11 +448,11 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
       {/* Modal de Confirmación para Eliminar Grupo */}
       {showDeleteConfirm && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => !isDeleting && setShowDeleteConfirm(false)}
         >
-          <div 
+          <div
             className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -465,12 +462,12 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
               </div>
               <h3 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h3>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-slate-600 mb-4">
                 ¿Estás seguro de que deseas eliminar el grupo <span className="font-semibold text-gray-800">&quot;{groupDetails.groupRequest.name}&quot;</span>?
               </p>
-              
+
               {/* Advertencia de eliminación en cascada */}
               <div className="rounded-lg bg-red-50 border border-red-200 p-4">
                 <p className="text-sm font-semibold text-red-800 mb-2">
@@ -496,7 +493,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                 </ul>
               </div>
             </div>
-            
+
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
