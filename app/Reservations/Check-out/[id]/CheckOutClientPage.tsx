@@ -178,4 +178,3 @@ export default function CheckOutClientPage({ reservationId }: { reservationId: n
     </div>
   );
 }
-

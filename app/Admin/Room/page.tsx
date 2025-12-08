@@ -76,7 +76,7 @@ export default function RoomPage() {
       setIsModalOpen(false);
       setSelectedRoom(null);
     },
-    []
+    [setRooms]
   );
 
   const handleCloseModal = useCallback(() => {
@@ -114,9 +114,7 @@ export default function RoomPage() {
                 <StatCard
                   icon={<Percent className="h-4 w-4" />}
                   value={
-                    rooms.length
-                      ? Math.round(rooms.reduce((acc, room) => acc + room.utilization, 0) / rooms.length)
-                      : 0
+                    rooms.length ? Math.round(rooms.reduce((acc, room) => acc + room.utilization, 0) / rooms.length) : 0
                   }
                   label="Utilización promedio"
                   footer="Porcentaje de ocupación"
@@ -152,5 +150,3 @@ export default function RoomPage() {
     </div>
   );
 }
-
-

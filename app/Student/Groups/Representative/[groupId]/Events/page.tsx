@@ -20,12 +20,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
-import {
-  EventRequest,
-  EventRequestStatus,
-  EVENT_STATUS_CONFIG,
-  getModuleTimeLabel,
-} from '@/types/eventRequest';
+import { EventRequest, EventRequestStatus, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 interface EventsPageProps {
   params: Promise<{ groupId: string }>;
@@ -70,12 +65,9 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
 
       try {
         // Cargar info del grupo
-        const groupResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
+        const groupResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
         if (groupResponse.ok) {
           const groupData = await groupResponse.json();
@@ -92,8 +84,7 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
           const sorted = [...eventsData].sort((a, b) => {
             const statusOrder = { PENDING: 0, CONFIRMED: 1, CANCELLED: 2 };
             const statusDiff =
-              statusOrder[a.status as keyof typeof statusOrder] -
-              statusOrder[b.status as keyof typeof statusOrder];
+              statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
             if (statusDiff !== 0) return statusDiff;
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
           });
@@ -237,9 +228,7 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                statusFilter === status
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                statusFilter === status ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               {status === 'ALL' ? 'Todos' : EVENT_STATUS_CONFIG[status].label}
@@ -303,7 +292,9 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Clock className="h-4 w-4 text-blue-500" />
-                            <span>Módulo {event.module} ({getModuleTimeLabel(event.module)})</span>
+                            <span>
+                              Módulo {event.module} ({getModuleTimeLabel(event.module)})
+                            </span>
                           </div>
                           {event.public_space && (
                             <>
@@ -339,8 +330,8 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
                       event.status === 'PENDING'
                         ? 'bg-amber-400'
                         : event.status === 'CONFIRMED'
-                        ? 'bg-green-500'
-                        : 'bg-red-400'
+                          ? 'bg-green-500'
+                          : 'bg-red-400'
                     }`}
                   />
                 </div>
@@ -352,4 +343,3 @@ export default function GroupEventsPage({ params }: EventsPageProps) {
     </main>
   );
 }
-

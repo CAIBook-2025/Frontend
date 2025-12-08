@@ -1,6 +1,6 @@
 // types/eventRequest.ts
 
-import { Group } from "./group";
+import { Group } from './group';
 
 // Tipo para espacios públicos
 export type PublicSpace = {
@@ -8,11 +8,11 @@ export type PublicSpace = {
   name: string;
   capacity: number;
   location: string;
-  available: "AVAILABLE" | "MAINTENANCE" | "UNAVAILABLE";
+  available: 'AVAILABLE' | 'MAINTENANCE' | 'UNAVAILABLE';
 };
 
 // Estados posibles de una solicitud de evento
-export type EventRequestStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
+export type EventRequestStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
 // Tipo principal para solicitud de evento
 export type EventRequest = {
@@ -83,20 +83,20 @@ export type EventRequestDetail = EventRequest & {
 
 // Mapeo de módulos a horarios
 export const MODULE_TIMES: Record<number, { start: string; end: string; label: string }> = {
-  1: { start: "08:20", end: "09:30", label: "08:20 - 09:30" },
-  2: { start: "09:40", end: "10:50", label: "09:40 - 10:50" },
-  3: { start: "11:00", end: "12:10", label: "11:00 - 12:10" },
-  4: { start: "12:20", end: "13:30", label: "12:20 - 13:30" },
-  5: { start: "14:50", end: "16:00", label: "14:50 - 16:00" },
-  6: { start: "16:10", end: "17:20", label: "16:10 - 17:20" },
-  7: { start: "17:30", end: "18:40", label: "17:30 - 18:40" },
-  8: { start: "18:50", end: "20:00", label: "18:50 - 20:00" },
-  9: { start: "20:10", end: "21:20", label: "20:10 - 21:20" },
+  1: { start: '08:20', end: '09:30', label: '08:20 - 09:30' },
+  2: { start: '09:40', end: '10:50', label: '09:40 - 10:50' },
+  3: { start: '11:00', end: '12:10', label: '11:00 - 12:10' },
+  4: { start: '12:20', end: '13:30', label: '12:20 - 13:30' },
+  5: { start: '14:50', end: '16:00', label: '14:50 - 16:00' },
+  6: { start: '16:10', end: '17:20', label: '16:10 - 17:20' },
+  7: { start: '17:30', end: '18:40', label: '17:30 - 18:40' },
+  8: { start: '18:50', end: '20:00', label: '18:50 - 20:00' },
+  9: { start: '20:10', end: '21:20', label: '20:10 - 21:20' },
 };
 
 // Helper para obtener el label del horario
 export const getModuleTimeLabel = (module: number): string => {
-  return MODULE_TIMES[module]?.label || "Horario no especificado";
+  return MODULE_TIMES[module]?.label || 'Horario no especificado';
 };
 
 // Colores y labels para estados
@@ -105,21 +105,21 @@ export const EVENT_STATUS_CONFIG: Record<
   { label: string; color: string; bgColor: string; borderColor: string }
 > = {
   PENDING: {
-    label: "Pendiente",
-    color: "text-amber-800",
-    bgColor: "bg-amber-100",
-    borderColor: "border-amber-200",
+    label: 'Pendiente',
+    color: 'text-amber-800',
+    bgColor: 'bg-amber-100',
+    borderColor: 'border-amber-200',
   },
   CONFIRMED: {
-    label: "Confirmado",
-    color: "text-green-800",
-    bgColor: "bg-green-100",
-    borderColor: "border-green-200",
+    label: 'Confirmado',
+    color: 'text-green-800',
+    bgColor: 'bg-green-100',
+    borderColor: 'border-green-200',
   },
   CANCELLED: {
-    label: "Cancelado",
-    color: "text-red-800",
-    bgColor: "bg-red-100",
-    borderColor: "border-red-200",
+    label: 'Cancelado',
+    color: 'text-red-800',
+    bgColor: 'bg-red-100',
+    borderColor: 'border-red-200',
   },
 };

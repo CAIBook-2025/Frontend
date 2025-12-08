@@ -34,11 +34,7 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
     const style = statusStyles[status] || 'bg-gray-500 text-white';
     const label = statusLabels[status] || status;
 
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>
-        {label}
-      </span>
-    );
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${style}`}>{label}</span>;
   };
 
   const formatDate = (dateString: string) => {
@@ -88,10 +84,7 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
         endOfWeek.setDate(startOfWeek.getDate() + 6);
         if (eventDate < startOfWeek || eventDate > endOfWeek) return false;
       } else if (dateFilter === 'month') {
-        if (
-          eventDate.getMonth() !== today.getMonth() ||
-          eventDate.getFullYear() !== today.getFullYear()
-        ) {
+        if (eventDate.getMonth() !== today.getMonth() || eventDate.getFullYear() !== today.getFullYear()) {
           return false;
         }
       }
@@ -152,9 +145,7 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
                       </div>
                     </td>
 
-                    <td className="py-4 px-4 text-sm text-gray-700">
-                      {event.public_space?.name || 'N/A'}
-                    </td>
+                    <td className="py-4 px-4 text-sm text-gray-700">{event.public_space?.name || 'N/A'}</td>
 
                     <td className="py-4 px-4">
                       <div>

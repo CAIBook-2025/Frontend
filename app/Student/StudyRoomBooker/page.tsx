@@ -43,7 +43,7 @@ export default function BookRoomPage() {
   const { user } = useUser();
   // --- ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  
+
   // --- ESTADOS PARA LOS FILTROS ---
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [minCapacity, setMinCapacity] = useState<number>(0);
@@ -145,17 +145,18 @@ export default function BookRoomPage() {
   // --- FILTRADO DE SALAS ---
   const filteredRooms = rooms.filter((room) => {
     // Filtro por nombre/ubicación
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch =
+      searchTerm === '' ||
       room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       room.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Filtro por capacidad mínima
     const matchesCapacity = minCapacity === 0 || room.capacity >= minCapacity;
-    
+
     // Filtro por horario: si es hoy, no mostrar módulos que ya pasaron
     const today = new Date().toISOString().split('T')[0];
     const isToday = selectedDate === today;
-    
+
     let isModuleStillAvailable = true;
     if (isToday && room.module) {
       const moduleInfo = MODULE_TIMES[room.module as keyof typeof MODULE_TIMES];
@@ -164,12 +165,12 @@ export default function BookRoomPage() {
         const [startHour, startMinute] = moduleInfo.start.split(':').map(Number);
         const moduleStartTime = new Date();
         moduleStartTime.setHours(startHour, startMinute, 0, 0);
-        
+
         // Si la hora actual ya pasó el inicio del módulo, no mostrar
         isModuleStillAvailable = now < moduleStartTime;
       }
     }
-    
+
     return matchesSearch && matchesCapacity && isModuleStillAvailable;
   });
 
@@ -185,13 +186,11 @@ export default function BookRoomPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">
-                Tu cuenta está restringida
-              </h3>
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Tu cuenta está restringida</h3>
               <p className="text-sm text-red-700">
-                Has acumulado {strikesCount} strike{strikesCount !== 1 ? 's' : ''}, por lo que no puedes realizar nuevas reservas de salas. 
-                Deberás esperar hasta que un administrador revise tu caso. Por favor, acércate a ellos para más información 
-                sobre cómo resolver esta situación.
+                Has acumulado {strikesCount} strike{strikesCount !== 1 ? 's' : ''}, por lo que no puedes realizar nuevas
+                reservas de salas. Deberás esperar hasta que un administrador revise tu caso. Por favor, acércate a
+                ellos para más información sobre cómo resolver esta situación.
               </p>
             </div>
           </div>
@@ -208,13 +207,11 @@ export default function BookRoomPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-amber-800 mb-2">
-                Límite de reservas activas alcanzado
-              </h3>
+              <h3 className="text-lg font-semibold text-amber-800 mb-2">Límite de reservas activas alcanzado</h3>
               <p className="text-sm text-amber-700 mb-4">
-                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa{activeSchedules !== 1 ? 's' : ''}. 
-                El límite máximo es de 3 reservas simultáneas. Para realizar una nueva reserva, 
-                por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
+                Ya tienes {activeSchedules} reserva{activeSchedules !== 1 ? 's' : ''} activa
+                {activeSchedules !== 1 ? 's' : ''}. El límite máximo es de 3 reservas simultáneas. Para realizar una
+                nueva reserva, por favor cancela alguna de tus reservas activas o espera a que se complete alguna.
               </p>
               <Link
                 href="/Reservations"
@@ -231,9 +228,9 @@ export default function BookRoomPage() {
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <SearchInput 
-            id="search" 
-            label="Buscar por nombre o edificio" 
+          <SearchInput
+            id="search"
+            label="Buscar por nombre o edificio"
             placeholder="Ej: Biblioteca, Sala A1..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -277,18 +274,18 @@ export default function BookRoomPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredRooms.length > 0 ? (
               filteredRooms.map((room) => (
-                <RoomCard 
-                  key={room.id} 
-                  room={room} 
-                  scheduleId={room.id} 
+                <RoomCard
+                  key={room.id}
+                  room={room}
+                  scheduleId={room.id}
                   userId={userProfile?.user?.id}
                   disabled={cannotBook}
                 />
               ))
             ) : (
               <p className="col-span-full text-center text-slate-500">
-                {rooms.length > 0 
-                  ? 'No se encontraron salas con los filtros seleccionados.' 
+                {rooms.length > 0
+                  ? 'No se encontraron salas con los filtros seleccionados.'
                   : 'No hay salas disponibles.'}
               </p>
             )}

@@ -94,12 +94,9 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
         setPublicSpaces(spaces);
 
         // Cargar info del grupo
-        const groupResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
+        const groupResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
         if (groupResponse.ok) {
           const groupData = await groupResponse.json();
@@ -275,13 +272,10 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                 <Clock className="h-8 w-8 text-amber-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-amber-800 mb-3">
-                  Límite de solicitudes alcanzado
-                </h2>
+                <h2 className="text-2xl font-bold text-amber-800 mb-3">Límite de solicitudes alcanzado</h2>
                 <p className="text-amber-700 mb-6">
-                  Ya tienes {pendingEventsCount} solicitudes de evento pendientes. El límite máximo
-                  es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes
-                  de crear una nueva.
+                  Ya tienes {pendingEventsCount} solicitudes de evento pendientes. El límite máximo es de 3 solicitudes
+                  simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
                 </p>
                 <Link
                   href={`/Student/Groups/Representative/${groupId}/Events`}
@@ -313,12 +307,8 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
 
         {/* Header */}
         <section className="mb-8 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            Solicitar Nuevo Evento
-          </h1>
-          <p className="text-slate-600">
-            {groupName} • Completa el formulario para solicitar un espacio
-          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Solicitar Nuevo Evento</h1>
+          <p className="text-slate-600">{groupName} • Completa el formulario para solicitar un espacio</p>
         </section>
 
         {/* Progress Steps */}
@@ -388,15 +378,10 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                           : 'border-slate-300 focus:border-blue-600'
                       }`}
                     />
-                    {validationErrors.goal && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
-                    )}
+                    {validationErrors.goal && <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>}
                   </div>
                   <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-slate-700 mb-1"
-                    >
+                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
                       Descripción <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -498,9 +483,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                           : 'border-slate-300 focus:border-blue-600'
                       } focus:ring-2 focus:ring-blue-600`}
                     />
-                    {validationErrors.day && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.day}</p>
-                    )}
+                    {validationErrors.day && <p className="mt-1 text-sm text-red-600">{validationErrors.day}</p>}
                   </div>
 
                   {/* Selector de módulo */}
@@ -509,9 +492,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                       Módulo Horario <span className="text-red-500">*</span>
                     </label>
 
-                    {validationErrors.module && (
-                      <p className="mb-2 text-sm text-red-600">{validationErrors.module}</p>
-                    )}
+                    {validationErrors.module && <p className="mb-2 text-sm text-red-600">{validationErrors.module}</p>}
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {Object.entries(MODULE_TIMES).map(([moduleNum, times]) => {
@@ -530,9 +511,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                           >
                             <div className="font-semibold text-gray-800">Módulo {num}</div>
                             <div className="text-xs text-slate-600 mt-1">{times.label}</div>
-                            {isSelected && (
-                              <CheckCircle2 className="h-4 w-4 text-blue-600 mx-auto mt-2" />
-                            )}
+                            {isSelected && <CheckCircle2 className="h-4 w-4 text-blue-600 mx-auto mt-2" />}
                           </button>
                         );
                       })}
@@ -546,8 +525,8 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                       <div className="text-sm text-blue-800">
                         <p className="font-medium mb-1">Importante</p>
                         <p>
-                          No puede haber dos eventos en el mismo espacio, día y módulo. Si hay
-                          conflicto, el sistema te notificará.
+                          No puede haber dos eventos en el mismo espacio, día y módulo. Si hay conflicto, el sistema te
+                          notificará.
                         </p>
                       </div>
                     </div>
@@ -592,9 +571,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                         </div>
                         <div>
                           <span className="text-sm text-slate-500">Capacidad</span>
-                          <p className="font-medium text-gray-800">
-                            {selectedSpace?.capacity} personas
-                          </p>
+                          <p className="font-medium text-gray-800">{selectedSpace?.capacity} personas</p>
                         </div>
                       </div>
                       <hr />
@@ -627,9 +604,8 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                       <div className="text-sm text-amber-800">
                         <p className="font-medium mb-1">Antes de enviar</p>
                         <p>
-                          Tu solicitud quedará en estado <strong>Pendiente</strong> hasta que un
-                          administrador la revise y confirme. Recibirás una notificación cuando
-                          cambie el estado.
+                          Tu solicitud quedará en estado <strong>Pendiente</strong> hasta que un administrador la revise
+                          y confirme. Recibirás una notificación cuando cambie el estado.
                         </p>
                       </div>
                     </div>
@@ -652,9 +628,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                 type="button"
                 onClick={handleBack}
                 className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity ${
-                  step === 1
-                    ? 'opacity-0 cursor-default'
-                    : 'text-slate-600 hover:bg-slate-100'
+                  step === 1 ? 'opacity-0 cursor-default' : 'text-slate-600 hover:bg-slate-100'
                 }`}
                 disabled={step === 1}
               >
@@ -675,9 +649,7 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
                   onClick={handleSubmit}
                   disabled={isSubmitting}
                   className={`flex items-center gap-2 rounded-full px-6 py-2 text-sm font-semibold text-white transition-colors ${
-                    isSubmitting
-                      ? 'bg-green-400 cursor-wait'
-                      : 'bg-green-600 hover:bg-green-700'
+                    isSubmitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
                   }`}
                 >
                   {isSubmitting ? (
@@ -700,4 +672,3 @@ export default function CreateEventPage({ params }: CreateEventPageProps) {
     </main>
   );
 }
-

@@ -185,4 +185,3 @@ export default function CheckInClientPage({ reservationId }: { reservationId: nu
     </div>
   );
 }
-

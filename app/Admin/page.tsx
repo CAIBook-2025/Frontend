@@ -52,13 +52,13 @@ export default function CAIAdminDashboard() {
 
         if (data) {
           // Sort by createdAt descending and take top 3
-          const sorted = data.sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          ).slice(0, 3);
+          const sorted = data
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 3);
           setRecentRequests(sorted);
         }
       } catch (error) {
-        console.error("Error loading group requests:", error);
+        console.error('Error loading group requests:', error);
       } finally {
         setLoadingRequests(false);
       }

@@ -57,9 +57,7 @@ export const HistoricalReservationCard = ({ reservation }: HistoricalReservation
             <MapPin size={14} /> {location}
           </p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-medium ${currentStatusStyle}`}>
-          {currentStatusText}
-        </span>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ${currentStatusStyle}`}>{currentStatusText}</span>
       </div>
       <div className="mt-4 border-t border-slate-100 pt-4 space-y-2 text-sm text-slate-600">
         <div className="flex items-center gap-2">
@@ -74,4 +72,3 @@ export const HistoricalReservationCard = ({ reservation }: HistoricalReservation
     </div>
   );
 };
-

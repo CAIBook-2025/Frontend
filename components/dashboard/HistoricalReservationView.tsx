@@ -47,4 +47,3 @@ export const HistoricalReservationsView = ({ reservations }: HistoricalReservati
     </div>
   );
 };
-

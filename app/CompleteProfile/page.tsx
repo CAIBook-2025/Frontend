@@ -120,107 +120,107 @@ export default function RegisterPage() {
 
   return (
     <>
-    <main className="flex min-h-screen items-center justify-center bg-brand-light p-4 py-12">
-      <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-2xl">
-        <div className="text-center">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <School className="h-10 w-10 text-brand-primary" />
-            <span className="text-3xl font-bold text-brand-dark">CAIBook</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-brand-dark">Completa tu perfil</h1>
-          <p className="mt-2 text-slate-600">Proporciona la información necesaria para tu cuenta.</p>
+      <main className="flex min-h-screen items-center justify-center bg-brand-light p-4 py-12">
+        <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-2xl">
+          <div className="text-center">
+            <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              <School className="h-10 w-10 text-brand-primary" />
+              <span className="text-3xl font-bold text-brand-dark">CAIBook</span>
+            </Link>
+            <h1 className="text-2xl font-bold text-brand-dark">Completa tu perfil</h1>
+            <p className="mt-2 text-slate-600">Proporciona la información necesaria para tu cuenta.</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+            <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+              <div>
+                <Input
+                  id="firstName"
+                  label="Nombre(s)"
+                  type="text"
+                  {...register('firstName')}
+                  onKeyDown={handleKeyDownLettersOnly}
+                />
+                {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
+              </div>
+              <div>
+                <Input
+                  id="lastName"
+                  label="Apellido(s)"
+                  type="text"
+                  {...register('lastName')}
+                  onKeyDown={handleKeyDownLettersOnly}
+                />
+                {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
+              </div>
+            </div>
+            <div>
+              <Input
+                id="career"
+                label="Carrera"
+                type="text"
+                placeholder="Ej: Ingeniería de Software"
+                {...register('career')}
+                onKeyDown={handleKeyDownLettersOnly}
+              />
+              {errors.career && <p className="mt-1 text-sm text-red-600">{errors.career.message}</p>}
+            </div>
+            <div>
+              <Input
+                id="phone"
+                label="Número de Teléfono"
+                type="tel"
+                placeholder="+56 9 1234 5678"
+                {...register('phone')}
+                onKeyDown={handleKeyDownNumbersOnly}
+              />
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
+            </div>
+            <div>
+              <Input
+                id="studentNumber"
+                label="Número de Alumno"
+                type="text"
+                placeholder="Ej: 12345678"
+                {...register('studentNumber')}
+                onKeyDown={handleKeyDownNumbersOnly}
+              />
+              {errors.studentNumber && <p className="mt-1 text-sm text-red-600">{errors.studentNumber.message}</p>}
+            </div>
+
+            <div className="!mt-8">
+              <button
+                type="submit"
+                className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary cursor-pointer"
+              >
+                Registrarse
+              </button>
+            </div>
+          </form>
         </div>
+      </main>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
-          <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
-            <div>
-              <Input
-                id="firstName"
-                label="Nombre(s)"
-                type="text"
-                {...register('firstName')}
-                onKeyDown={handleKeyDownLettersOnly}
-              />
-              {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
+      {/* Modal de Éxito */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <div>
-              <Input
-                id="lastName"
-                label="Apellido(s)"
-                type="text"
-                {...register('lastName')}
-                onKeyDown={handleKeyDownLettersOnly}
-              />
-              {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
-            </div>
-          </div>
-          <div>
-            <Input
-              id="career"
-              label="Carrera"
-              type="text"
-              placeholder="Ej: Ingeniería de Software"
-              {...register('career')}
-              onKeyDown={handleKeyDownLettersOnly}
-            />
-            {errors.career && <p className="mt-1 text-sm text-red-600">{errors.career.message}</p>}
-          </div>
-          <div>
-            <Input
-              id="phone"
-              label="Número de Teléfono"
-              type="tel"
-              placeholder="+56 9 1234 5678"
-              {...register('phone')}
-              onKeyDown={handleKeyDownNumbersOnly}
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
-          </div>
-          <div>
-            <Input
-              id="studentNumber"
-              label="Número de Alumno"
-              type="text"
-              placeholder="Ej: 12345678"
-              {...register('studentNumber')}
-              onKeyDown={handleKeyDownNumbersOnly}
-            />
-            {errors.studentNumber && <p className="mt-1 text-sm text-red-600">{errors.studentNumber.message}</p>}
-          </div>
-
-          <div className="!mt-8">
+            <h3 className="mt-4 text-xl font-bold text-gray-900">¡Registro Exitoso!</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Tu perfil ha sido completado correctamente. Ahora podrás acceder a todas las funcionalidades de{' '}
+              <span className="font-semibold text-brand-primary">CAIBook</span>.
+            </p>
             <button
-              type="submit"
-              className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary cursor-pointer"
+              onClick={handleCloseSuccessModal}
+              className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700"
             >
-              Registrarse
+              Ir a mi Perfil
             </button>
           </div>
-        </form>
-      </div>
-    </main>
-
-    {/* Modal de Éxito */}
-    {showSuccessModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-8 w-8 text-green-600" />
-          </div>
-          <h3 className="mt-4 text-xl font-bold text-gray-900">¡Registro Exitoso!</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Tu perfil ha sido completado correctamente. Ahora podrás acceder a todas las funcionalidades de{' '}
-            <span className="font-semibold text-brand-primary">CAIBook</span>.
-          </p>
-          <button
-            onClick={handleCloseSuccessModal}
-            className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700"
-          >
-            Ir a mi Perfil
-          </button>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
