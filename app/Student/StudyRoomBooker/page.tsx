@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Loader2, AlertCircle, Calendar } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, ShieldAlert } from 'lucide-react';
 
 // Importamos los componentes, incluyendo el nuevo DaySelector
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -12,6 +12,7 @@ import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
+import { MODULE_TIMES } from '@/types/eventRequest';
 
 function normalizeEquipment(equ: any): string[] {
   try {
@@ -134,6 +135,13 @@ export default function BookRoomPage() {
   const activeSchedules = userProfile?.activeSchedules ?? 0;
   const hasReachedLimit = activeSchedules >= 3;
 
+  // Verificar si el usuario tiene 3 o más strikes (cuenta restringida)
+  const strikesCount = userProfile?.strikesCount ?? 0;
+  const isAccountRestricted = strikesCount >= 3;
+
+  // Deshabilitar reservas si tiene límite de reservas O si tiene cuenta restringida
+  const cannotBook = hasReachedLimit || isAccountRestricted;
+
   // --- FILTRADO DE SALAS ---
   const filteredRooms = rooms.filter((room) => {
     // Filtro por nombre/ubicación
@@ -144,13 +152,54 @@ export default function BookRoomPage() {
     // Filtro por capacidad mínima
     const matchesCapacity = minCapacity === 0 || room.capacity >= minCapacity;
     
-    return matchesSearch && matchesCapacity;
+    // Filtro por horario: si es hoy, no mostrar módulos que ya pasaron
+    const today = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === today;
+    
+    let isModuleStillAvailable = true;
+    if (isToday && room.module) {
+      const moduleInfo = MODULE_TIMES[room.module as keyof typeof MODULE_TIMES];
+      if (moduleInfo) {
+        const now = new Date();
+        const [startHour, startMinute] = moduleInfo.start.split(':').map(Number);
+        const moduleStartTime = new Date();
+        moduleStartTime.setHours(startHour, startMinute, 0, 0);
+        
+        // Si la hora actual ya pasó el inicio del módulo, no mostrar
+        isModuleStillAvailable = now < moduleStartTime;
+      }
+    }
+    
+    return matchesSearch && matchesCapacity && isModuleStillAvailable;
   });
 
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
+      {/* Banner de cuenta restringida por strikes */}
+      {isAccountRestricted && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="rounded-full bg-red-100 p-2">
+                <ShieldAlert className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">
+                Tu cuenta está restringida
+              </h3>
+              <p className="text-sm text-red-700">
+                Has acumulado {strikesCount} strike{strikesCount !== 1 ? 's' : ''}, por lo que no puedes realizar nuevas reservas de salas. 
+                Deberás esperar hasta que un administrador revise tu caso. Por favor, acércate a ellos para más información 
+                sobre cómo resolver esta situación.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Banner de límite alcanzado */}
-      {hasReachedLimit && (
+      {hasReachedLimit && !isAccountRestricted && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0">
@@ -233,7 +282,7 @@ export default function BookRoomPage() {
                   room={room} 
                   scheduleId={room.id} 
                   userId={userProfile?.user?.id}
-                  disabled={hasReachedLimit}
+                  disabled={cannotBook}
                 />
               ))
             ) : (
