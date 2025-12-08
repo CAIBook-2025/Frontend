@@ -145,8 +145,13 @@ export default function EventFeedback({ eventId, isAdmin, isGroupRep, userId, ac
 
     try {
       const isMyFeedback = feedbacks.find((f) => f.id === feedbackId)?.student_id === userId;
-      const endpoint =
-        isAdmin && !isMyFeedback ? `/api/event-feedback/admin/${feedbackId}` : `/api/event-feedback/${feedbackId}`;
+
+      // Use admin endpoint ONLY if user is admin AND the feedback belongs to someone else
+      const useAdminEndpoint = isAdmin && !isMyFeedback;
+
+      const endpoint = useAdminEndpoint
+        ? `/api/event-feedback/admin/${feedbackId}`
+        : `/api/event-feedback/${feedbackId}`;
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
         method: 'PATCH',
@@ -176,8 +181,13 @@ export default function EventFeedback({ eventId, isAdmin, isGroupRep, userId, ac
 
     try {
       const isMyFeedback = feedbacks.find((f) => f.id === feedbackId)?.student_id === userId;
-      const endpoint =
-        isAdmin && !isMyFeedback ? `/api/event-feedback/admin/${feedbackId}` : `/api/event-feedback/${feedbackId}`;
+
+      // Use admin endpoint ONLY if user is admin AND the feedback belongs to someone else
+      const useAdminEndpoint = isAdmin && !isMyFeedback;
+
+      const endpoint = useAdminEndpoint
+        ? `/api/event-feedback/admin/${feedbackId}`
+        : `/api/event-feedback/${feedbackId}`;
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
         method: 'DELETE',
