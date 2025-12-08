@@ -80,7 +80,7 @@ export default function EventDetailPage() {
   const { user, isLoading: authLoading } = useUser();
 
   const [event, setEvent] = useState<Event | null>(null);
-  const [profileData, setProfileData] = useState<UserProfileResponse["user"] | null>(null);
+  const [profileData, setProfileData] = useState<UserProfileResponse['user'] | null>(null);
   const [groupData, setGroupData] = useState<GroupData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,14 +111,11 @@ export default function EventDetailPage() {
         setProfileData(profile?.user ?? null);
 
         // Cargar evento específico
-        const eventResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const eventResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${params.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!eventResponse.ok) {
           throw new Error('Evento no encontrado');
@@ -129,14 +126,11 @@ export default function EventDetailPage() {
 
         // Cargar información del grupo para verificar representante
         if (eventData?.group?.id) {
-          const groupResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/groups/${eventData.group.id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const groupResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${eventData.group.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           if (groupResponse.ok) {
             const groupInfo = await groupResponse.json();
@@ -198,9 +192,7 @@ export default function EventDetailPage() {
     };
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.ACTIVE;
     return (
-      <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${config.color}`}>
-        {config.label}
-      </span>
+      <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${config.color}`}>{config.label}</span>
     );
   };
 
@@ -211,15 +203,12 @@ export default function EventDetailPage() {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/events/${event.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events/${event.id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       if (!response.ok) {
         throw new Error('Error al eliminar el evento');
@@ -236,8 +225,7 @@ export default function EventDetailPage() {
 
   const isRepresentative = profileData?.role === 'REPRESENTATIVE';
   const isAdmin = profileData?.role === 'ADMIN';
-  const canManageEvent = isRepresentative &&
-    groupData?.representative?.id === profileData?.id;
+  const canManageEvent = isRepresentative && groupData?.representative?.id === profileData?.id;
 
   if (isLoading) {
     return (
@@ -301,8 +289,24 @@ export default function EventDetailPage() {
                 <div className="flex items-center gap-3">
                   <Users size={20} />
                   <span className="text-lg">Organizado por {event.group.name}</span>
-                  <div className="flex items-center bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/30" title="Reputación del grupo">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#FCD34D" stroke="#FCD34D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                  <div
+                    className="flex items-center bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/30"
+                    title="Reputación del grupo"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="#FCD34D"
+                      stroke="#FCD34D"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-1.5"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
                     <span className="font-bold">{event.group.reputation}</span>
                   </div>
                 </div>
@@ -367,9 +371,7 @@ export default function EventDetailPage() {
                     <Users size={20} className="mr-3 text-blue-600 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm text-gray-500">Capacidad</p>
-                      <p className="font-medium text-gray-900">
-                        {event.public_space.capacity} personas
-                      </p>
+                      <p className="font-medium text-gray-900">{event.public_space.capacity} personas</p>
                     </div>
                   </div>
                 </div>
@@ -388,7 +390,6 @@ export default function EventDetailPage() {
                   <span className="text-gray-500">Última actualización:</span>
                   <span className="ml-2 text-gray-900">{formatDateTime(event.updatedAt)}</span>
                 </div>
-
               </div>
             </div>
 
@@ -413,7 +414,7 @@ export default function EventDetailPage() {
             )}
 
             {/* Event Feedback Section */}
-            {profileData &&  event.status !== 'CANCELLED' && (
+            {profileData && event.status !== 'CANCELLED' && (
               <EventFeedback
                 eventId={event.id}
                 isAdmin={isAdmin}
@@ -432,9 +433,8 @@ export default function EventDetailPage() {
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Confirmar Eliminación</h3>
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que deseas eliminar el evento{' '}
-              <strong className="text-gray-900">{event.name}</strong>? Esta acción no se puede
-              deshacer.
+              ¿Estás seguro de que deseas eliminar el evento <strong className="text-gray-900">{event.name}</strong>?
+              Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-3 justify-end">
               <button

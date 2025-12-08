@@ -43,7 +43,7 @@ export default function MyReservationsPage() {
   // Obtener access token
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       setError('Debes iniciar sesión para ver tus reservas.');
       setIsLoading(false);
@@ -73,7 +73,7 @@ export default function MyReservationsPage() {
         const profile = await fetchUserProfile(accessToken);
         if (profile) {
           setProfileData(profile);
-          
+
           // Transformar schedule a reservations
           const transformedReservations: Reservation[] = (profile.schedule || []).map((item: UserScheduleItem) => ({
             id: item.id,
@@ -110,11 +110,9 @@ export default function MyReservationsPage() {
       const result = await cancelReservation(reservationToCancel.id, profileData.user.id);
       if (result.success) {
         // Actualizar la reserva localmente
-        setReservations(current =>
-          current.map(res =>
-            res.id === reservationToCancel.id
-              ? { ...res, status: 'CANCELED', isFinished: true }
-              : res
+        setReservations((current) =>
+          current.map((res) =>
+            res.id === reservationToCancel.id ? { ...res, status: 'CANCELED', isFinished: true } : res
           )
         );
         handleCloseCancelModal();
@@ -173,10 +171,7 @@ export default function MyReservationsPage() {
 
       {/* Contenido según la vista */}
       {currentView === 'active' ? (
-        <MyReservationsView
-          reservations={reservations}
-          onCancelClick={handleOpenCancelModal}
-        />
+        <MyReservationsView reservations={reservations} onCancelClick={handleOpenCancelModal} />
       ) : (
         <HistoricalReservationsView reservations={reservations} />
       )}
@@ -191,25 +186,21 @@ export default function MyReservationsPage() {
       >
         <p>
           ¿Estás seguro de que deseas cancelar tu reserva para la sala{' '}
-          <strong className="font-bold text-gray-800">{reservationToCancel?.roomName}</strong>?
-          Esta acción no se puede deshacer.
+          <strong className="font-bold text-gray-800">{reservationToCancel?.roomName}</strong>? Esta acción no se puede
+          deshacer.
         </p>
       </ConfirmationModal>
 
       {/* Modal Informativo de Check-In */}
-      <InfoModal
-        isOpen={isInfoModalOpen}
-        onClose={() => setIsInfoModalOpen(false)}
-        title="Pasos para hacer Check-In"
-      >
+      <InfoModal isOpen={isInfoModalOpen} onClose={() => setIsInfoModalOpen(false)} title="Pasos para hacer Check-In">
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">
               1
             </div>
             <p>
-              Dirígete a la sala que tienes reservada y busca el <strong>código QR</strong> que se
-              encuentra en la entrada.
+              Dirígete a la sala que tienes reservada y busca el <strong>código QR</strong> que se encuentra en la
+              entrada.
             </p>
           </div>
           <div className="flex items-start gap-3">
@@ -217,8 +208,8 @@ export default function MyReservationsPage() {
               2
             </div>
             <p>
-              Escanea el código con tu celular. Serás redirigido a la página de check-in de la sala,
-              donde se validará tu reserva activa.
+              Escanea el código con tu celular. Serás redirigido a la página de check-in de la sala, donde se validará
+              tu reserva activa.
             </p>
           </div>
           <div className="flex items-start gap-3">
@@ -226,8 +217,8 @@ export default function MyReservationsPage() {
               3
             </div>
             <p>
-              Haz clic en el botón <strong>Confirmar Asistencia</strong> y ¡listo! Tu reserva quedará
-              confirmada y podrás usar la sala.
+              Haz clic en el botón <strong>Confirmar Asistencia</strong> y ¡listo! Tu reserva quedará confirmada y
+              podrás usar la sala.
             </p>
           </div>
         </div>

@@ -94,7 +94,8 @@ export default async function RootLayout({
             <div className="container mx-auto px-6 py-8 text-center text-slate-400">
               <p>&copy; {new Date().getFullYear()} Mapocho Web Services. Un proyecto para IIC3143.</p>
               <p className="text-sm mt-2">
-                Desarrollado para la comunidad de la Escuela de Ingeniería de la Pontificia Universidad Católica de Chile.
+                Desarrollado para la comunidad de la Escuela de Ingeniería de la Pontificia Universidad Católica de
+                Chile.
               </p>
             </div>
           </footer>

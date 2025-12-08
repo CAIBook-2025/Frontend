@@ -20,27 +20,22 @@ export const GroupRequestsTable = ({
   onReject,
   onManage,
 }: GroupRequestsTableProps) => {
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('es-CL');
+  const formatDate = (date: string) => new Date(date).toLocaleDateString('es-CL');
 
-  const getStatusBadge = (status: GroupRequest["status"]) => {
-    const styles: Record<GroupRequest["status"], string> = {
-      PENDING: "bg-orange-100 text-orange-800",
-      CONFIRMED: "bg-green-100 text-green-800",
-      CANCELLED: "bg-red-100 text-red-800",
+  const getStatusBadge = (status: GroupRequest['status']) => {
+    const styles: Record<GroupRequest['status'], string> = {
+      PENDING: 'bg-orange-100 text-orange-800',
+      CONFIRMED: 'bg-green-100 text-green-800',
+      CANCELLED: 'bg-red-100 text-red-800',
     };
 
-    const labels: Record<GroupRequest["status"], string> = {
-      PENDING: "Pendiente",
-      CONFIRMED: "Confirmado",
-      CANCELLED: "Cancelado",
+    const labels: Record<GroupRequest['status'], string> = {
+      PENDING: 'Pendiente',
+      CONFIRMED: 'Confirmado',
+      CANCELLED: 'Cancelado',
     };
 
-    return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
+    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status]}`}>{labels[status]}</span>;
   };
 
   const getTableHeaders = () => {
@@ -72,13 +67,9 @@ export const GroupRequestsTable = ({
             <p className="text-blue-600 text-xs mt-1">{req.user.email}</p>
           </td>
 
-          <td className="py-4 px-4 text-sm text-gray-700">
-            {formatDate(req.createdAt)}
-          </td>
+          <td className="py-4 px-4 text-sm text-gray-700">{formatDate(req.createdAt)}</td>
 
-          <td className="py-4 px-4">
-            {getStatusBadge(req.status)}
-          </td>
+          <td className="py-4 px-4">{getStatusBadge(req.status)}</td>
 
           <td className="py-4 px-4">
             <div className="flex items-center gap-2">
@@ -122,13 +113,9 @@ export const GroupRequestsTable = ({
             <p className="text-blue-600 text-xs mt-1">{req.user.email}</p>
           </td>
 
-          <td className="py-4 px-4 text-sm text-gray-700">
-            {formatDate(req.createdAt)}
-          </td>
+          <td className="py-4 px-4 text-sm text-gray-700">{formatDate(req.createdAt)}</td>
 
-          <td className="py-4 px-4 text-sm text-gray-700">
-            {req.group_id ?? '—'}
-          </td>
+          <td className="py-4 px-4 text-sm text-gray-700">{req.group_id ?? '—'}</td>
 
           <td className="py-4 px-4">
             {req.group_id && (
@@ -157,9 +144,7 @@ export const GroupRequestsTable = ({
           <p className="text-blue-600 text-xs mt-1">{req.user.email}</p>
         </td>
 
-        <td className="py-4 px-4 text-sm text-gray-700">
-          {formatDate(req.createdAt)}
-        </td>
+        <td className="py-4 px-4 text-sm text-gray-700">{formatDate(req.createdAt)}</td>
       </tr>
     );
   };
@@ -171,10 +156,7 @@ export const GroupRequestsTable = ({
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {getTableHeaders().map((header) => (
-                <th
-                  key={header}
-                  className="text-left py-3 px-4 font-medium text-gray-700 text-sm"
-                >
+                <th key={header} className="text-left py-3 px-4 font-medium text-gray-700 text-sm">
                   {header}
                 </th>
               ))}

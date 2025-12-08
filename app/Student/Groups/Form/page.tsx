@@ -75,7 +75,7 @@ export default function CreateGroupPage() {
       try {
         const requests = await fetchGroupRequests(accessToken, {
           status: 'PENDING',
-          user_id: userId
+          user_id: userId,
         });
         setPendingRequestsCount(requests?.length ?? 0);
       } catch (error) {
@@ -235,12 +235,7 @@ export default function CreateGroupPage() {
     return (
       <main className="flex min-h-screen bg-slate-50">
         <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
-          <Image
-            src="/PeopleForm.png"
-            alt="Estudiantes colaborando en un grupo"
-            fill
-            className="object-cover"
-          />
+          <Image src="/PeopleForm.png" alt="Estudiantes colaborando en un grupo" fill className="object-cover" />
           <div className="absolute inset-0 bg-gray-900/40" />
           <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
             <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
@@ -260,12 +255,10 @@ export default function CreateGroupPage() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-amber-800 mb-3">
-                    Límite de solicitudes alcanzado
-                  </h2>
+                  <h2 className="text-2xl font-bold text-amber-800 mb-3">Límite de solicitudes alcanzado</h2>
                   <p className="text-amber-700 mb-6">
-                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes.
-                    El límite máximo es de 3 solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
+                    Ya tienes {pendingRequestsCount} solicitudes de grupo pendientes. El límite máximo es de 3
+                    solicitudes simultáneas. Por favor espera a que se resuelvan algunas antes de crear una nueva.
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     <Link
@@ -274,9 +267,7 @@ export default function CreateGroupPage() {
                     >
                       <ArrowLeft size={16} /> Volver a Grupos
                     </Link>
-                    <a
-                      className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50"
-                    >
+                    <a className="inline-flex items-center gap-2 rounded-full bg-white border-2 border-amber-600 px-6 py-3 text-sm font-semibold text-amber-600 transition-colors hover:bg-amber-50">
                       <AlertCircle size={16} /> Ver Mis Solicitudes
                     </a>
                   </div>
@@ -291,225 +282,222 @@ export default function CreateGroupPage() {
 
   return (
     <>
-    <main className="flex min-h-screen bg-slate-50">
-      <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
-        <Image
-          src="/PeopleForm.png"
-          alt="Estudiantes colaborando en un grupo"
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gray-900/40" />
-        <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
-          <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
-          <p className="mt-2 text-lg max-w-md text-white/90">
-            Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
-          </p>
-        </div>
-      </div>
-
-      <div className="w-full lg:w-3/5  flex flex-col items-center h-full p-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">
-          ¡Felicidades! Estás dando el primer paso hacia tu comunidad
-        </h1>
-
-        <div className="max-w-3xl w-full">
-          <div className="mb-8 flex items-center justify-center gap-4">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="text-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
-                    }`}
-                >
-                  {s}
-                </div>
-                <p className={`mt-2 text-xs font-semibold ${step >= s ? 'text-blue-600' : 'text-slate-500'}`}>
-                  {s === 1 && 'Info General'}
-                  {s === 2 && 'Detalles'}
-                  {s === 3 && 'Finalizar'}
-                </p>
-              </div>
-            ))}
+      <main className="flex min-h-screen bg-slate-50">
+        <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
+          <Image src="/PeopleForm.png" alt="Estudiantes colaborando en un grupo" fill className="object-cover" />
+          <div className="absolute inset-0 bg-gray-900/40" />
+          <div className="absolute bottom-10 left-10 text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">
+            <h1 className="text-4xl font-bold">Crea tu Comunidad</h1>
+            <p className="mt-2 text-lg max-w-md text-white/90">
+              Reúne a personas con tus mismos intereses y empieza a organizar eventos increíbles.
+            </p>
           </div>
+        </div>
 
-          {/* El contenedor principal ahora es un <div> en lugar de <form> */}
-          <div className="bg-white px-8 py-12 rounded-2xl shadow-lg">
-            {step === 1 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Información General</h2>
-                <div className="space-y-8">
-                  <Input
-                    id="name"
-                    name="name"
-                    label="Nombre del Grupo"
-                    placeholder="Ej: Club de Programación"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    error={validationErrors.name}
-                  />
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
-                      Descripción Corta
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={6}
-                      placeholder="Una breve descripción que invite a los estudiantes a unirse."
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.description
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-slate-300 focus:border-blue-600'
-                        }`}
-                      required
-                    />
-                    {validationErrors.description && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
-                    )}
+        <div className="w-full lg:w-3/5  flex flex-col items-center h-full p-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-5 text-center">
+            ¡Felicidades! Estás dando el primer paso hacia tu comunidad
+          </h1>
+
+          <div className="max-w-3xl w-full">
+            <div className="mb-8 flex items-center justify-center gap-4">
+              {[1, 2, 3].map((s) => (
+                <div key={s} className="text-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-300 ${
+                      step >= s ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}
+                  >
+                    {s}
                   </div>
+                  <p className={`mt-2 text-xs font-semibold ${step >= s ? 'text-blue-600' : 'text-slate-500'}`}>
+                    {s === 1 && 'Info General'}
+                    {s === 2 && 'Detalles'}
+                    {s === 3 && 'Finalizar'}
+                  </p>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
 
-            {step === 2 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
-                <div className="space-y-8">
-                  <div>
-                    <label htmlFor="goal" className="block text-sm font-medium text-slate-700 mb-1">
-                      Objetivo Principal
-                    </label>
-                    <textarea
-                      id="goal"
-                      name="goal"
-                      rows={10}
-                      placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
-                      value={formData.goal}
+            {/* El contenedor principal ahora es un <div> en lugar de <form> */}
+            <div className="bg-white px-8 py-12 rounded-2xl shadow-lg">
+              {step === 1 && (
+                <div className="animate-fade-in">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-8">Información General</h2>
+                  <div className="space-y-8">
+                    <Input
+                      id="name"
+                      name="name"
+                      label="Nombre del Grupo"
+                      placeholder="Ej: Club de Programación"
+                      value={formData.name}
                       onChange={handleInputChange}
-                      className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${validationErrors.goal
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-slate-300 focus:border-blue-600'
-                        }`}
                       required
+                      error={validationErrors.name}
                     />
-                    {validationErrors.goal && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-800 mb-8">Finalizar y Enviar</h2>
-                <div>
-                  <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1">
-                    Logo del Grupo (Opcional)
-                  </label>
-                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-slate-900/25 px-6 py-10">
-                    <div className="text-center">
-                      <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
-                      <div className="mt-4 flex text-sm leading-6 text-slate-600">
-                        <label
-                          htmlFor="logo-upload"
-                          className="relative cursor-pointer rounded-md bg-white font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
-                        >
-                          <span>Sube un archivo</span>
-                          <input
-                            id="logo-upload"
-                            name="logo"
-                            type="file"
-                            className="sr-only"
-                            onChange={handleFileChange}
-                            accept="image/png, image/jpeg"
-                          />
-                        </label>
-                        <p className="pl-1">o arrástralo aquí</p>
-                      </div>
-                      <p className="text-xs leading-5 text-slate-500">PNG, JPG hasta 2MB</p>
+                    <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
+                        Descripción Corta
+                      </label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        rows={6}
+                        placeholder="Una breve descripción que invite a los estudiantes a unirse."
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                          validationErrors.description
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-slate-300 focus:border-blue-600'
+                        }`}
+                        required
+                      />
+                      {validationErrors.description && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+                      )}
                     </div>
                   </div>
-                  {formData.logo && (
-                    <p className="mt-2 text-sm text-green-600 text-center">
-                      Archivo seleccionado: {formData.logo.name}
-                    </p>
-                  )}
                 </div>
-              </div>
-            )}
-
-            {errorMsg && (
-              <div className="mt-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {errorMsg}
-              </div>
-            )}
-
-            {/* Navegación del Carrusel */}
-            <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
-              <button
-                type="button"
-                onClick={handleBack}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity duration-300 ${step === 1 ? 'opacity-0 cursor-default' : 'text-slate-600 hover:bg-slate-100'}`}
-                disabled={step === 1}
-              >
-                <ArrowLeft size={16} /> Volver
-              </button>
-
-              {step < 3 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 cursor-pointer"
-                >
-                  Siguiente <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700 cursor-pointer'
-                    }`}
-                >
-                  {submitting ? (
-                    'Enviando…'
-                  ) : (
-                    <>
-                      Enviar Solicitud <Send size={16} />
-                    </>
-                  )}
-                </button>
               )}
+
+              {step === 2 && (
+                <div className="animate-fade-in">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-8">Detalles y Objetivos</h2>
+                  <div className="space-y-8">
+                    <div>
+                      <label htmlFor="goal" className="block text-sm font-medium text-slate-700 mb-1">
+                        Objetivo Principal
+                      </label>
+                      <textarea
+                        id="goal"
+                        name="goal"
+                        rows={10}
+                        placeholder="¿Cuál es el propósito principal de este grupo? ¿Qué buscan lograr?"
+                        value={formData.goal}
+                        onChange={handleInputChange}
+                        className={`resize-none block w-full rounded-md border shadow-sm placeholder:text-slate-400 focus:ring-blue-600 ${
+                          validationErrors.goal
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-slate-300 focus:border-blue-600'
+                        }`}
+                        required
+                      />
+                      {validationErrors.goal && <p className="mt-1 text-sm text-red-600">{validationErrors.goal}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="animate-fade-in">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-8">Finalizar y Enviar</h2>
+                  <div>
+                    <label htmlFor="logo" className="block text-sm font-medium text-slate-700 mb-1">
+                      Logo del Grupo (Opcional)
+                    </label>
+                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-slate-900/25 px-6 py-10">
+                      <div className="text-center">
+                        <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
+                        <div className="mt-4 flex text-sm leading-6 text-slate-600">
+                          <label
+                            htmlFor="logo-upload"
+                            className="relative cursor-pointer rounded-md bg-white font-semibold text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-2 hover:text-blue-500"
+                          >
+                            <span>Sube un archivo</span>
+                            <input
+                              id="logo-upload"
+                              name="logo"
+                              type="file"
+                              className="sr-only"
+                              onChange={handleFileChange}
+                              accept="image/png, image/jpeg"
+                            />
+                          </label>
+                          <p className="pl-1">o arrástralo aquí</p>
+                        </div>
+                        <p className="text-xs leading-5 text-slate-500">PNG, JPG hasta 2MB</p>
+                      </div>
+                    </div>
+                    {formData.logo && (
+                      <p className="mt-2 text-sm text-green-600 text-center">
+                        Archivo seleccionado: {formData.logo.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {errorMsg && (
+                <div className="mt-4 rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  {errorMsg}
+                </div>
+              )}
+
+              {/* Navegación del Carrusel */}
+              <div className="mt-10 pt-8 border-t border-slate-200 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-opacity duration-300 ${step === 1 ? 'opacity-0 cursor-default' : 'text-slate-600 hover:bg-slate-100'}`}
+                  disabled={step === 1}
+                >
+                  <ArrowLeft size={16} /> Volver
+                </button>
+
+                {step < 3 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 cursor-pointer"
+                  >
+                    Siguiente <ArrowRight size={16} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={submitting}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-colors ${
+                      submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700 cursor-pointer'
+                    }`}
+                  >
+                    {submitting ? (
+                      'Enviando…'
+                    ) : (
+                      <>
+                        Enviar Solicitud <Send size={16} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
 
-    {/* Modal de Éxito */}
-    {showSuccessModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+      {/* Modal de Éxito */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <h3 className="mt-4 text-xl font-bold text-gray-900">¡Solicitud Enviada!</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Tu solicitud para crear el grupo <span className="font-semibold text-blue-600">{formData.name}</span> ha
+              sido enviada correctamente. Recibirás una notificación cuando sea revisada.
+            </p>
+            <button
+              onClick={handleCloseSuccessModal}
+              className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700 cursor-pointer"
+            >
+              Ver Mis Grupos
+            </button>
           </div>
-          <h3 className="mt-4 text-xl font-bold text-gray-900">¡Solicitud Enviada!</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Tu solicitud para crear el grupo <span className="font-semibold text-blue-600">{formData.name}</span> ha sido
-            enviada correctamente. Recibirás una notificación cuando sea revisada.
-          </p>
-          <button
-            onClick={handleCloseSuccessModal}
-            className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700 cursor-pointer"
-          >
-            Ver Mis Grupos
-          </button>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }

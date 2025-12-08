@@ -20,4 +20,3 @@ export default function CheckOutPage({ params }: { params: { id: string } }) {
     </Suspense>
   );
 }
-
