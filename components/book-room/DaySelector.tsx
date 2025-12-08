@@ -14,9 +14,22 @@ interface DaySelectorProps {
   onDateChange: (date: string) => void;
 }
 
+// Función auxiliar para comparar si dos fechas son el mismo día
+const isSameDay = (date1: Date, date2: Date): boolean => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+};
+
 // Función para generar los próximos días hábiles
 const getNextWeekdays = (): DayOption[] => {
   const weekdays: DayOption[] = [];
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
   const currentDate = new Date();
 
   while (weekdays.length < 7) {
@@ -24,8 +37,9 @@ const getNextWeekdays = (): DayOption[] => {
 
     // Si no es Sábado ni Domingo
     if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-      const isToday = weekdays.length === 0;
-      const isTomorrow = weekdays.length === 1 && new Date().getDate() + 1 === currentDate.getDate();
+      // Comparamos fechas reales, no posición en el array
+      const isToday = isSameDay(currentDate, today);
+      const isTomorrow = isSameDay(currentDate, tomorrow);
 
       const label = isToday
         ? 'Hoy'

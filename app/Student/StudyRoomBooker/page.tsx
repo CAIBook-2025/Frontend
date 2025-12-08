@@ -42,6 +42,10 @@ export default function BookRoomPage() {
   const { user } = useUser();
   // --- ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  
+  // --- ESTADOS PARA LOS FILTROS ---
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [minCapacity, setMinCapacity] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
@@ -130,6 +134,19 @@ export default function BookRoomPage() {
   const activeSchedules = userProfile?.activeSchedules ?? 0;
   const hasReachedLimit = activeSchedules >= 3;
 
+  // --- FILTRADO DE SALAS ---
+  const filteredRooms = rooms.filter((room) => {
+    // Filtro por nombre/ubicación
+    const matchesSearch = searchTerm === '' || 
+      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room.location.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por capacidad mínima
+    const matchesCapacity = minCapacity === 0 || room.capacity >= minCapacity;
+    
+    return matchesSearch && matchesCapacity;
+  });
+
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
       {/* Banner de límite alcanzado */}
@@ -164,26 +181,31 @@ export default function BookRoomPage() {
       {/* 1. Filtros de Búsqueda */}
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SearchInput id="search" label="Buscar por nombre o edificio" placeholder="Ej: Biblioteca, Sala A1..." />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <SearchInput 
+            id="search" 
+            label="Buscar por nombre o edificio" 
+            placeholder="Ej: Biblioteca, Sala A1..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <div>
             <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">
               Capacidad mínima
             </label>
             <select
               id="capacity"
+              value={minCapacity}
+              onChange={(e) => setMinCapacity(Number(e.target.value))}
               className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
             >
-              <option>Cualquier capacidad</option>
-              <option>2+ personas</option>
-              <option>4+ personas</option>
-              <option>6+ personas</option>
-              <option>8+ personas</option>
+              <option value={0}>Cualquier capacidad</option>
+              <option value={2}>2+ personas</option>
+              <option value={4}>4+ personas</option>
+              <option value={6}>6+ personas</option>
+              <option value={8}>8+ personas</option>
             </select>
           </div>
-          {/* --- REEMPLAZAMOS EL INPUT DE FECHA POR NUESTRO COMPONENTE --- */}
-          {/* Ocupará una columna completa en pantallas pequeñas y una columna en medianas */}
-          <div className="md:col-span-1">{/* No es necesario un div extra, el componente ya tiene su label */}</div>
         </div>
         <div className="mt-4">
           <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
@@ -204,8 +226,8 @@ export default function BookRoomPage() {
           </div>
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.isArray(rooms) && rooms.length > 0 ? (
-              rooms.map((room) => (
+            {filteredRooms.length > 0 ? (
+              filteredRooms.map((room) => (
                 <RoomCard 
                   key={room.id} 
                   room={room} 
@@ -215,7 +237,11 @@ export default function BookRoomPage() {
                 />
               ))
             ) : (
-              <p>No hay salas disponibles.</p>
+              <p className="col-span-full text-center text-slate-500">
+                {rooms.length > 0 
+                  ? 'No se encontraron salas con los filtros seleccionados.' 
+                  : 'No hay salas disponibles.'}
+              </p>
             )}
           </div>
         ) : (

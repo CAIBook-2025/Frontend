@@ -121,8 +121,8 @@ export default function ProfilePage() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userData.id}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete/me`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
