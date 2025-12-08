@@ -146,11 +146,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
   // Obtener todas las solicitudes del usuario
   useEffect(() => {
     async function loadMyRequests() {
-      console.log('[GroupsView] Cargando solicitudes para userId:', userId);
       setIsLoadingRequests(true);
       try {
         const requests = await fetchGroupRequests(accessToken, { user_id: userId });
-        console.log('[GroupsView] Solicitudes recibidas:', requests);
         setMyRequests(requests ?? []);
       } catch (error) {
         console.error('[GroupsView] Error loading my requests:', error);
@@ -159,13 +157,9 @@ export const GroupsView: React.FC<GroupsViewProps> = ({ userId }) => {
       }
     }
 
-    console.log('[GroupsView] Estado actual - accessToken:', !!accessToken, 'userId:', userId, 'isLoading:', isLoading);
-
     if (accessToken && userId !== undefined && userId !== null && userId > 0) {
       loadMyRequests();
     } else if (!isLoading && (!accessToken || userId === 0)) {
-      // Si Auth0 terminó de cargar pero no hay token o userId válido
-      console.log('[GroupsView] No hay token o userId válido, deteniendo loading');
       setIsLoadingRequests(false);
     }
   }, [accessToken, userId, isLoading]);

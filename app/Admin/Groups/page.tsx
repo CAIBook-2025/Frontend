@@ -106,7 +106,6 @@ export default function AdminGroupsPage() {
 
   const handleManage = (group_id: number | null) => {
     if (!group_id) return;
-    console.log('Manage group:', group_id);
   };
 
   const handleCloseModal = () => {
