@@ -1,6 +1,6 @@
-// lib/events/deleteEventRequest.ts
+// lib/groups/deleteGroupRequest.ts
 
-export type DeleteEventResponse = {
+export type DeleteGroupRequestResponse = {
   success: boolean;
   data?: {
     id: number;
@@ -12,26 +12,26 @@ export type DeleteEventResponse = {
 };
 
 /**
- * Elimina (soft delete) una solicitud de evento.
+ * Elimina (soft delete) una solicitud de grupo.
  * 
- * Elimina el EventRequest y sus Feedbacks asociados.
- * Si el evento estaba CONFIRMED, también recalcula la reputación del grupo.
+ * Si la solicitud está PENDING: Solo elimina la GroupRequest
+ * Si la solicitud está CONFIRMED: Elimina en cascada GroupRequest + Group + EventRequests + Feedbacks
  * 
  * @param accessToken - Token JWT de autenticación
- * @param eventId - ID de la solicitud de evento
+ * @param groupRequestId - ID de la solicitud de grupo (NO el ID del grupo)
  * @returns Resultado de la operación
  */
-export async function deleteEventRequest(
+export async function deleteGroupRequest(
   accessToken: string | null,
-  eventId: number
-): Promise<DeleteEventResponse> {
+  groupRequestId: number
+): Promise<DeleteGroupRequestResponse> {
   if (!accessToken) {
     return { success: false, error: "No hay token de autenticación" };
   }
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/events/delete/${eventId}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/group-requests/delete/${groupRequestId}`,
       {
         method: "PATCH",
         headers: {
@@ -48,24 +48,25 @@ export async function deleteEventRequest(
         return { success: false, error: "Token inválido" };
       }
       if (response.status === 403) {
-        return { success: false, error: "No tienes permiso para eliminar este evento" };
+        return { success: false, error: "No tienes permiso para eliminar esta solicitud" };
       }
       if (response.status === 404) {
-        return { success: false, error: "Evento no encontrado" };
+        return { success: false, error: "Solicitud no encontrada" };
       }
       
-      const errorMessage = data.error || "Error al eliminar el evento";
+      const errorMessage = data.error || "Error al eliminar la solicitud de grupo";
       return { success: false, error: errorMessage };
     }
 
     const data = await response.json();
+    console.log('📋 Delete Group Request Response:', data);
     return { 
       success: true, 
-      data: data.eventRequest 
+      data: data.groupRequest 
     };
   } catch (error) {
-    console.error("Error deleting event request:", error);
-    return { success: false, error: "Error de conexión al eliminar el evento" };
+    console.error("Error deleting group request:", error);
+    return { success: false, error: "Error de conexión al eliminar la solicitud" };
   }
 }
 

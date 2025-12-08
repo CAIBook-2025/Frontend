@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, UploadCloud, Send, AlertCircle, Clock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, UploadCloud, Send, AlertCircle, Clock, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
@@ -29,6 +29,7 @@ export default function CreateGroupPage() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [pendingRequestsCount, setPendingRequestsCount] = useState<number>(0);
@@ -204,12 +205,17 @@ export default function CreateGroupPage() {
 
       const data = await res.json();
 
-      // Redirigir al dashboard con parámetro de éxito
-      router.push(`/Student?view=groups&success=true`);
+      // Mostrar modal de éxito
+      setShowSuccessModal(true);
     } catch (err: any) {
       setErrorMsg(err.message || 'Ocurrió un error al enviar la solicitud.');
       setSubmitting(false);
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    router.push('/Student?view=groups');
   };
 
   // Si está cargando las solicitudes pendientes, mostrar loading
@@ -228,12 +234,11 @@ export default function CreateGroupPage() {
   if (hasPendingRequests) {
     return (
       <main className="flex min-h-screen bg-slate-50">
-        <div className="hidden lg:block w-3/5 relative">
+        <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
           <Image
             src="/PeopleForm.png"
             alt="Estudiantes colaborando en un grupo"
-            width={500}
-            height={500}
+            fill
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gray-900/40" />
@@ -285,13 +290,13 @@ export default function CreateGroupPage() {
   }
 
   return (
+    <>
     <main className="flex min-h-screen bg-slate-50">
-      <div className="hidden lg:block w-3/5 relative">
+      <div className="hidden lg:block w-3/5 h-screen sticky top-0 relative">
         <Image
           src="/PeopleForm.png"
           alt="Estudiantes colaborando en un grupo"
-          width={500}
-          height={500}
+          fill
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gray-900/40" />
@@ -457,16 +462,16 @@ export default function CreateGroupPage() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                  className="flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 cursor-pointer"
                 >
                   Siguiente <ArrowRight size={16} />
                 </button>
               ) : (
                 <button
-                  type="button" // Cambiado de 'submit' a 'button'
-                  onClick={handleSubmit} // El onClick ahora llama directamente a handleSubmit
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={submitting}
-                  className={`flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700'
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-colors ${submitting ? 'bg-green-400 cursor-wait' : 'bg-green-600 hover:bg-green-700 cursor-pointer'
                     }`}
                 >
                   {submitting ? (
@@ -483,5 +488,28 @@ export default function CreateGroupPage() {
         </div>
       </div>
     </main>
+
+    {/* Modal de Éxito */}
+    {showSuccessModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
+          <h3 className="mt-4 text-xl font-bold text-gray-900">¡Solicitud Enviada!</h3>
+          <p className="mt-2 text-sm text-gray-600">
+            Tu solicitud para crear el grupo <span className="font-semibold text-blue-600">{formData.name}</span> ha sido
+            enviada correctamente. Recibirás una notificación cuando sea revisada.
+          </p>
+          <button
+            onClick={handleCloseSuccessModal}
+            className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700 cursor-pointer"
+          >
+            Ver Mis Grupos
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

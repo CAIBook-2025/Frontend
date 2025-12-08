@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
+import { deleteGroupRequest } from '@/lib/groups/deleteGroupRequest';
 import {
   EventRequest,
   EVENT_STATUS_CONFIG,
@@ -212,6 +213,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
         }
 
         const data = await response.json();
+        console.log('📋 Group Details:', data);
         setGroupDetails(data);
 
         // Cargar eventos recientes del grupo
@@ -241,26 +243,18 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
   // Eliminar grupo (solo representante)
   const handleDeleteGroup = async () => {
-    if (!accessToken) return;
+    if (!accessToken || !groupDetails) return;
 
     setIsDeleting(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+    
+    const result = await deleteGroupRequest(accessToken, groupDetails.group_request_id);
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar el grupo');
-      }
-
+    if (result.success) {
       // Redirigir al dashboard después de eliminar
-      router.push('/Student/Dashboard');
-    } catch (error) {
-      console.error('Error deleting group:', error);
-      setError('Error al eliminar el grupo');
+      router.push('/Student?view=groups');
+    } else {
+      console.error('Error deleting group:', result.error);
+      setError(result.error || 'Error al eliminar el grupo');
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
@@ -457,28 +451,64 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
 
       {/* Modal de Confirmación para Eliminar Grupo */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => !isDeleting && setShowDeleteConfirm(false)}
+        >
+          <div 
+            className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-              <h3 className="text-lg font-bold text-gray-800">Confirmar Eliminación</h3>
+              <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h3>
             </div>
-            <p className="text-slate-600 mb-6">
-              ¿Estás seguro de que deseas eliminar el grupo &quot;{groupDetails.groupRequest.name}&quot;? Esta acción no
-              se puede deshacer y se perderán todos los datos del grupo.
-            </p>
+            
+            <div className="mb-6">
+              <p className="text-slate-600 mb-4">
+                ¿Estás seguro de que deseas eliminar el grupo <span className="font-semibold text-gray-800">&quot;{groupDetails.groupRequest.name}&quot;</span>?
+              </p>
+              
+              {/* Advertencia de eliminación en cascada */}
+              <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                <p className="text-sm font-semibold text-red-800 mb-2">
+                  Esta acción eliminará permanentemente:
+                </p>
+                <ul className="text-sm text-red-700 space-y-1">
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    La solicitud del grupo
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    El grupo y toda su información
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    Todos los eventos del grupo ({recentEvents.length > 0 ? `${groupDetails.eventRequests?.length || 0} eventos` : 'sin eventos'})
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    Todos los feedbacks asociados
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDeleteGroup}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
                 {isDeleting ? (
                   <>

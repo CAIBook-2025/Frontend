@@ -6,10 +6,11 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/Input';
-import { School } from 'lucide-react';
+import { School, CheckCircle } from 'lucide-react';
 import { useUser } from '@auth0/nextjs-auth0';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 // 1. ESQUEMA DE VALIDACIÓN CON ZOD
 const registerSchema = z.object({
@@ -48,6 +49,8 @@ export default function RegisterPage() {
   });
   const { user, error, isLoading } = useUser();
   const [token, setToken] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     try {
@@ -70,8 +73,7 @@ export default function RegisterPage() {
         body: JSON.stringify(userData),
       });
       if (response.ok) {
-        alert('¡Registro exitoso!');
-        window.location.href = '/Profile';
+        setShowSuccessModal(true);
       } else {
         console.error('Error en la respuesta del servidor:', response.statusText);
       }
@@ -111,7 +113,13 @@ export default function RegisterPage() {
     fetchToken();
   }, []);
 
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    router.push('/Profile');
+  };
+
   return (
+    <>
     <main className="flex min-h-screen items-center justify-center bg-brand-light p-4 py-12">
       <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-2xl">
         <div className="text-center">
@@ -183,7 +191,7 @@ export default function RegisterPage() {
           <div className="!mt-8">
             <button
               type="submit"
-              className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"
+              className="w-full flex justify-center rounded-md bg-slate-600 px-4 py-3 font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary cursor-pointer"
             >
               Registrarse
             </button>
@@ -191,5 +199,28 @@ export default function RegisterPage() {
         </form>
       </div>
     </main>
+
+    {/* Modal de Éxito */}
+    {showSuccessModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="m-4 max-w-sm rounded-xl bg-white p-6 text-center shadow-2xl">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle className="h-8 w-8 text-green-600" />
+          </div>
+          <h3 className="mt-4 text-xl font-bold text-gray-900">¡Registro Exitoso!</h3>
+          <p className="mt-2 text-sm text-gray-600">
+            Tu perfil ha sido completado correctamente. Ahora podrás acceder a todas las funcionalidades de{' '}
+            <span className="font-semibold text-brand-primary">CAIBook</span>.
+          </p>
+          <button
+            onClick={handleCloseSuccessModal}
+            className="mt-6 w-full rounded-lg bg-green-600 px-4 py-2.5 font-semibold text-white transition-colors duration-300 hover:bg-green-700"
+          >
+            Ir a mi Perfil
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

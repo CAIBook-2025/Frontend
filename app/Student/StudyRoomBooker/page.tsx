@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Loader2, AlertCircle, Calendar } from 'lucide-react';
+import { Loader2, AlertCircle, Calendar, ShieldAlert } from 'lucide-react';
 
 // Importamos los componentes, incluyendo el nuevo DaySelector
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -12,6 +12,7 @@ import { ViewToggler } from '@/components/book-room/ViewToggler';
 import { DaySelector } from '@/components/book-room/DaySelector';
 import { useUser, getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
+import { MODULE_TIMES } from '@/types/eventRequest';
 
 function normalizeEquipment(equ: any): string[] {
   try {
@@ -42,6 +43,10 @@ export default function BookRoomPage() {
   const { user } = useUser();
   // --- ESTADO PARA LA FECHA SELECCIONADA ---
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  
+  // --- ESTADOS PARA LOS FILTROS ---
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [minCapacity, setMinCapacity] = useState<number>(0);
 
   useEffect(() => {
     if (!user) return;
@@ -130,10 +135,71 @@ export default function BookRoomPage() {
   const activeSchedules = userProfile?.activeSchedules ?? 0;
   const hasReachedLimit = activeSchedules >= 3;
 
+  // Verificar si el usuario tiene 3 o más strikes (cuenta restringida)
+  const strikesCount = userProfile?.strikesCount ?? 0;
+  const isAccountRestricted = strikesCount >= 3;
+
+  // Deshabilitar reservas si tiene límite de reservas O si tiene cuenta restringida
+  const cannotBook = hasReachedLimit || isAccountRestricted;
+
+  // --- FILTRADO DE SALAS ---
+  const filteredRooms = rooms.filter((room) => {
+    // Filtro por nombre/ubicación
+    const matchesSearch = searchTerm === '' || 
+      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room.location.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por capacidad mínima
+    const matchesCapacity = minCapacity === 0 || room.capacity >= minCapacity;
+    
+    // Filtro por horario: si es hoy, no mostrar módulos que ya pasaron
+    const today = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === today;
+    
+    let isModuleStillAvailable = true;
+    if (isToday && room.module) {
+      const moduleInfo = MODULE_TIMES[room.module as keyof typeof MODULE_TIMES];
+      if (moduleInfo) {
+        const now = new Date();
+        const [startHour, startMinute] = moduleInfo.start.split(':').map(Number);
+        const moduleStartTime = new Date();
+        moduleStartTime.setHours(startHour, startMinute, 0, 0);
+        
+        // Si la hora actual ya pasó el inicio del módulo, no mostrar
+        isModuleStillAvailable = now < moduleStartTime;
+      }
+    }
+    
+    return matchesSearch && matchesCapacity && isModuleStillAvailable;
+  });
+
   return (
     <main className="container mx-auto px-4 py-8 md:py-12">
+      {/* Banner de cuenta restringida por strikes */}
+      {isAccountRestricted && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="rounded-full bg-red-100 p-2">
+                <ShieldAlert className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">
+                Tu cuenta está restringida
+              </h3>
+              <p className="text-sm text-red-700">
+                Has acumulado {strikesCount} strike{strikesCount !== 1 ? 's' : ''}, por lo que no puedes realizar nuevas reservas de salas. 
+                Deberás esperar hasta que un administrador revise tu caso. Por favor, acércate a ellos para más información 
+                sobre cómo resolver esta situación.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Banner de límite alcanzado */}
-      {hasReachedLimit && (
+      {hasReachedLimit && !isAccountRestricted && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0">
@@ -164,26 +230,31 @@ export default function BookRoomPage() {
       {/* 1. Filtros de Búsqueda */}
       <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="text-2xl font-bold text-brand-dark mb-4">Buscar Salas</h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <SearchInput id="search" label="Buscar por nombre o edificio" placeholder="Ej: Biblioteca, Sala A1..." />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <SearchInput 
+            id="search" 
+            label="Buscar por nombre o edificio" 
+            placeholder="Ej: Biblioteca, Sala A1..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
           <div>
             <label htmlFor="capacity" className="block text-sm font-medium text-slate-700 mb-1">
               Capacidad mínima
             </label>
             <select
               id="capacity"
+              value={minCapacity}
+              onChange={(e) => setMinCapacity(Number(e.target.value))}
               className="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-primary focus:ring-brand-primary"
             >
-              <option>Cualquier capacidad</option>
-              <option>2+ personas</option>
-              <option>4+ personas</option>
-              <option>6+ personas</option>
-              <option>8+ personas</option>
+              <option value={0}>Cualquier capacidad</option>
+              <option value={2}>2+ personas</option>
+              <option value={4}>4+ personas</option>
+              <option value={6}>6+ personas</option>
+              <option value={8}>8+ personas</option>
             </select>
           </div>
-          {/* --- REEMPLAZAMOS EL INPUT DE FECHA POR NUESTRO COMPONENTE --- */}
-          {/* Ocupará una columna completa en pantallas pequeñas y una columna en medianas */}
-          <div className="md:col-span-1">{/* No es necesario un div extra, el componente ya tiene su label */}</div>
         </div>
         <div className="mt-4">
           <DaySelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
@@ -204,18 +275,22 @@ export default function BookRoomPage() {
           </div>
         ) : viewMode === 'list' ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.isArray(rooms) && rooms.length > 0 ? (
-              rooms.map((room) => (
+            {filteredRooms.length > 0 ? (
+              filteredRooms.map((room) => (
                 <RoomCard 
                   key={room.id} 
                   room={room} 
                   scheduleId={room.id} 
                   userId={userProfile?.user?.id}
-                  disabled={hasReachedLimit}
+                  disabled={cannotBook}
                 />
               ))
             ) : (
-              <p>No hay salas disponibles.</p>
+              <p className="col-span-full text-center text-slate-500">
+                {rooms.length > 0 
+                  ? 'No se encontraron salas con los filtros seleccionados.' 
+                  : 'No hay salas disponibles.'}
+              </p>
             )}
           </div>
         ) : (

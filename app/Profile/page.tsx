@@ -5,6 +5,7 @@ import { use, useEffect, useState } from 'react';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import { fetchUserProfile, UserProfile, UserProfileResponse } from '@/lib/user/fetchUserProfile';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle, X } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, isLoading } = useUser();
@@ -120,8 +121,8 @@ export default function ProfilePage() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userData.id}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/delete/me`, {
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -188,6 +189,7 @@ export default function ProfilePage() {
   );
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -388,38 +390,27 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Delete Account */}
-              <div className="pt-6 border-t border-gray-200">
-                {showDeleteConfirm ? (
-                  <div className="bg-red-50 p-4 rounded-md">
-                    <p className="text-red-800 font-medium mb-3">
-                      ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.
-                    </p>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                      >
-                        {isDeleting ? 'Eliminando...' : 'Sí, eliminar cuenta'}
-                      </button>
-                      <button
-                        onClick={() => setShowDeleteConfirm(false)}
-                        disabled={isDeleting}
-                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300"
-                      >
-                        Cancelar
-                      </button>
+              {/* Danger Zone */}
+              <div className="mt-8 rounded-lg border-2 border-red-300 bg-red-50/50">
+                <div className="border-b border-red-200 bg-red-100/50 px-4 py-3">
+                  <h3 className="text-sm font-semibold text-red-800">Zona de Peligro</h3>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">Eliminar esta cuenta</p>
+                      <p className="text-sm text-gray-600">
+                        Una vez eliminada, no podrás recuperar tu cuenta ni tus datos.
+                      </p>
                     </div>
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="rounded-md border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white hover:border-red-600 cursor-pointer"
+                    >
+                      Eliminar cuenta
+                    </button>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium"
-                  >
-                    Eliminar cuenta
-                  </button>
-                )}
+                </div>
               </div>
 
             </div>
@@ -428,5 +419,74 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+
+    {/* Modal de Confirmación para Eliminar Cuenta */}
+    {showDeleteConfirm && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+        onClick={() => setShowDeleteConfirm(false)}
+      >
+        <div
+          className="relative w-full max-w-md m-4 rounded-xl bg-white p-6 shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <h3 className="text-xl font-bold text-gray-800">⚠️ Eliminar Cuenta Permanentemente</h3>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="mt-4 space-y-4">
+            <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-red-800">Esta acción es irreversible</p>
+                <p className="text-sm text-red-700 mt-1">
+                  Una vez eliminada, no podrás recuperar tu cuenta ni ningún dato asociado.
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-slate-600">
+              <p className="mb-2">Al eliminar tu cuenta perderás:</p>
+              <ul className="list-disc list-inside text-sm space-y-1 text-slate-500">
+                <li>Todas tus reservas activas e históricas</li>
+                <li>Tu membresía en grupos estudiantiles</li>
+                <li>Todo tu historial de actividad en CAIBook</li>
+              </ul>
+            </div>
+
+            <p className="text-sm font-medium text-slate-700">
+              ¿Estás completamente seguro de que deseas eliminar tu cuenta?
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+              className="rounded-lg bg-slate-100 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer"
+            >
+              Volver
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300 cursor-pointer"
+            >
+              {isDeleting ? 'Eliminando...' : 'Sí, Eliminar Mi Cuenta'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
