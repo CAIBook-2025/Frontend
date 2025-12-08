@@ -63,10 +63,6 @@ export default function AdminGroupsPage() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const handleView = useCallback(
     (id: number) => {
       const req = requests.find((r) => r.id === id);
@@ -79,9 +75,13 @@ export default function AdminGroupsPage() {
   );
 
   useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
     const id = searchParams.get('groupId');
     if (id) handleView(Number(id));
-  }, [searchParams, handleView]);
+  }, [searchParams, requests, handleView]);
 
   const updateStatus = async (id: number, status: 'CONFIRMED' | 'CANCELLED') => {
     try {
@@ -106,7 +106,6 @@ export default function AdminGroupsPage() {
 
   const handleManage = (group_id: number | null) => {
     if (!group_id) return;
-    console.log('Manage group:', group_id);
   };
 
   const handleCloseModal = () => {

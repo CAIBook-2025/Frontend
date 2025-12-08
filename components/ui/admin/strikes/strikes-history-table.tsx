@@ -1,15 +1,6 @@
 'use client';
 
-interface Strike {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  type: 'No-show' | 'Misuse' | 'Late-cancellation';
-  reason: string;
-  appliedBy: string;
-  date: string;
-}
+import { Strike } from '@/types/strike';
 
 interface StrikeHistoryTableProps {
   strikes: Strike[];
@@ -17,23 +8,31 @@ interface StrikeHistoryTableProps {
 
 const getTypeLabel = (type: Strike['type']) => {
   switch (type) {
-    case 'No-show':
+    case 'NO_SHOW':
       return 'No Show';
-    case 'Misuse':
+    case 'DAMAGE':
+      return 'Daños';
+    case 'MISUSE':
       return 'Mal Uso';
-    case 'Late-cancellation':
-      return 'Cancelación Tardía';
+    case 'OTHER':
+      return 'Otro';
+    default:
+      return type;
   }
 };
 
 const getTypeBadgeColor = (type: Strike['type']) => {
   switch (type) {
-    case 'No-show':
+    case 'NO_SHOW':
       return 'bg-red-500 text-white';
-    case 'Misuse':
+    case 'DAMAGE':
       return 'bg-yellow-500 text-white';
-    case 'Late-cancellation':
+    case 'MISUSE':
       return 'bg-yellow-600 text-white';
+    case 'OTHER':
+      return 'bg-gray-500 text-white';
+    default:
+      return 'bg-gray-500 text-white';
   }
 };
 
@@ -56,8 +55,10 @@ export function StrikeHistoryTable({ strikes }: StrikeHistoryTableProps) {
               <tr key={strike.id} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="py-4 px-4">
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">{strike.userName}</p>
-                    <p className="text-xs text-gray-500 mt-1">{strike.userEmail}</p>
+                    <p className="font-medium text-gray-900 text-sm">
+                      {strike.student?.first_name} {strike.student?.last_name}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{strike.student?.email}</p>
                   </div>
                 </td>
                 <td className="py-4 px-4">
@@ -68,13 +69,15 @@ export function StrikeHistoryTable({ strikes }: StrikeHistoryTableProps) {
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-sm">{strike.reason}</div>
+                  <div className="text-sm">{strike.description || 'Sin descripción'}</div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-sm">{strike.appliedBy}</div>
+                  <div className="text-sm">
+                    {strike.admin?.first_name} {strike.admin?.last_name}
+                  </div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-sm">{strike.date}</div>
+                  <div className="text-sm">{new Date(strike.date).toLocaleDateString()}</div>
                 </td>
               </tr>
             ))}

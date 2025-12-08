@@ -19,6 +19,7 @@ import {
   PartyPopper,
   ArrowRight,
 } from 'lucide-react';
+import Image from 'next/image';
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
 import { EventRequest, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
@@ -110,7 +111,6 @@ export const UserView = ({ groupId }: UserViewProps) => {
 
       setIsLoading(true);
       try {
-        console.log('Fetching group details for groupId:', groupId);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/groups/${groupId}`, {
           method: 'GET',
           headers: {
@@ -180,9 +180,10 @@ export const UserView = ({ groupId }: UserViewProps) => {
                 <Image
                   src={groupDetails.groupRequest.logo}
                   alt={groupDetails.groupRequest.name}
+                  className="rounded-xl object-cover border-2 border-blue-200"
                   width={80}
                   height={80}
-                  className="rounded-xl object-cover border-2 border-blue-200"
+                  unoptimized
                 />
               ) : (
                 <div className="h-20 w-20 rounded-xl bg-blue-200 flex items-center justify-center">

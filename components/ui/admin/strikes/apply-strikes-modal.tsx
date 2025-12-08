@@ -1,30 +1,67 @@
 'use client';
 
 import type React from 'react';
-
 import { useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { postStrike } from '@/lib/strikes/postStrike';
 
 interface ApplyStrikeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApply: (email: string, type: string, description: string) => void;
+  accessToken: string | null;
+  onSuccess: () => void;
 }
 
-export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalProps) {
+export function ApplyStrikeModal({ isOpen, onClose, accessToken, onSuccess }: ApplyStrikeModalProps) {
+  const { user } = useUser();
   const [email, setEmail] = useState('');
   const [infractionType, setInfractionType] = useState('');
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && infractionType && description) {
-      onApply(email, infractionType, description);
-      // Reset form
+    setError(null);
+
+    if (!email || !infractionType || !description || !date) {
+      setError('Todos los campos son requeridos');
+      return;
+    }
+
+    if (!accessToken) {
+      setError('No se pudo autenticar la sesión (falta token)');
+      return;
+    }
+
+    if (!user?.email) {
+      setError('No se pudo identificar al administrador');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await postStrike(accessToken, {
+        student_email: email,
+        type: infractionType,
+        description,
+        date,
+        admin_email: user.email,
+      });
+
+      // Reset form and close
       setEmail('');
       setInfractionType('');
       setDescription('');
+      setDate(new Date().toISOString().split('T')[0]);
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || 'Error al crear el strike');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,6 +69,8 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
     setEmail('');
     setInfractionType('');
     setDescription('');
+    setDate(new Date().toISOString().split('T')[0]);
+    setError(null);
     onClose();
   };
 
@@ -65,6 +104,10 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
           <p className="mt-1 text-sm text-gray-600">Aplica una sanción a un usuario por incumplimiento de reglas</p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-200 text-red-700 rounded-md text-sm">{error}</div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email field */}
@@ -96,10 +139,26 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
               required
             >
               <option value="">Selecciona el tipo</option>
-              <option value="No Show">No Show</option>
-              <option value="Mal Uso">Mal Uso</option>
-              <option value="Cancelación Tardía">Cancelación Tardía</option>
+              <option value="NO_SHOW">No Show</option>
+              <option value="MISUSE">Mal Uso</option>
+              <option value="DAMAGE">Daño</option>
+              <option value="OTHER">Otro</option>
             </select>
+          </div>
+
+          {/* Date field */}
+          <div>
+            <label htmlFor="date" className="block text-sm font-medium text-gray-900 mb-2">
+              Fecha de Infracción
+            </label>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            />
           </div>
 
           {/* Description textarea */}
@@ -118,28 +177,22 @@ export function ApplyStrikeModal({ isOpen, onClose, onApply }: ApplyStrikeModalP
             />
           </div>
 
-          {/* Warning box */}
-          <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
-            <p className="text-sm text-amber-900">
-              <span className="font-semibold">Importante:</span> Al llegar a 3 strikes, el usuario será suspendido por 1
-              semana automáticamente.
-            </p>
-          </div>
-
           {/* Action buttons */}
           <div className="flex gap-3 pt-2">
             <button
               type="button"
               onClick={handleClose}
               className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+              disabled={loading}
             >
-              Aplicar
+              {loading ? 'Aplicando...' : 'Aplicar'}
             </button>
           </div>
         </form>

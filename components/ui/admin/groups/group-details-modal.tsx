@@ -2,6 +2,7 @@
 import Image from 'next/image';
 
 import { X, Check, XIcon } from 'lucide-react';
+import Image from 'next/image';
 import { GroupRequest } from '@/types/groupRequest';
 
 interface GroupDetailsModalProps {
@@ -56,9 +57,10 @@ export const GroupDetailsModal = ({ request, isOpen, onClose, onApprove, onRejec
               <Image
                 src={request.logo}
                 alt="Logo del grupo"
+                className="object-contain rounded-lg border"
                 width={112}
                 height={112}
-                className="object-contain rounded-lg border"
+                unoptimized
               />
             </div>
           )}

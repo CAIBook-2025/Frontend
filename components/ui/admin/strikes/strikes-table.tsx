@@ -11,14 +11,16 @@ interface UserStrike {
   lastStrike: string;
   status: 'Activo' | 'Advertencia' | 'Suspendido';
   suspendedUntil?: string;
+  strikesHistory: any[];
 }
 
 interface UserStrikesTableProps {
   users: UserStrike[];
   onViewHistory: (user: UserStrike) => void;
+  onLiftSuspension?: (user: UserStrike) => void;
 }
 
-export function UserStrikesTable({ users, onViewHistory }: UserStrikesTableProps) {
+export function UserStrikesTable({ users, onViewHistory, onLiftSuspension }: UserStrikesTableProps) {
   const getStatusBadge = (status: UserStrike['status']) => {
     const statusStyles = {
       Activo: 'bg-blue-500 text-white',
@@ -38,7 +40,6 @@ export function UserStrikesTable({ users, onViewHistory }: UserStrikesTableProps
               <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Strikes</th>
               <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Último Strike</th>
               <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Estado</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Suspendido Hasta</th>
               <th className="text-left py-3 px-4 font-medium text-gray-700 text-sm">Acciones</th>
             </tr>
           </thead>
@@ -59,7 +60,6 @@ export function UserStrikesTable({ users, onViewHistory }: UserStrikesTableProps
                 </td>
                 <td className="py-4 px-4 text-sm text-gray-700">{user.lastStrike}</td>
                 <td className="py-4 px-4">{getStatusBadge(user.status)}</td>
-                <td className="py-4 px-4 text-sm text-gray-700">{user.suspendedUntil || '-'}</td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     <button
@@ -70,7 +70,10 @@ export function UserStrikesTable({ users, onViewHistory }: UserStrikesTableProps
                       Historial
                     </button>
                     {user.status === 'Suspendido' && (
-                      <button className="px-3 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                      <button
+                        className="px-3 py-1.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                        onClick={() => onLiftSuspension?.(user)}
+                      >
                         Levantar Suspensión
                       </button>
                     )}

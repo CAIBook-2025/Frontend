@@ -11,16 +11,6 @@ export type DeleteEventResponse = {
   error?: string;
 };
 
-/**
- * Elimina (soft delete) una solicitud de evento.
- *
- * Elimina el EventRequest y sus Feedbacks asociados.
- * Si el evento estaba CONFIRMED, también recalcula la reputación del grupo.
- *
- * @param accessToken - Token JWT de autenticación
- * @param eventId - ID de la solicitud de evento
- * @returns Resultado de la operación
- */
 export async function deleteEventRequest(accessToken: string | null, eventId: number): Promise<DeleteEventResponse> {
   if (!accessToken) {
     return { success: false, error: 'No hay token de autenticación' };

@@ -28,11 +28,16 @@ export async function fetchSchedule(
     return null;
   }
 
-  const params = new URLSearchParams({
-    day: query.day ?? DEFAULT_QUERY.day,
+  const queryParams: Record<string, string> = {
     page: String(query.page ?? DEFAULT_QUERY.page),
     take: String(query.take ?? DEFAULT_QUERY.take),
-  });
+  };
+
+  if (query.day) {
+    queryParams.day = query.day;
+  }
+
+  const params = new URLSearchParams(queryParams);
 
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/srSchedule?${params.toString()}`, {
