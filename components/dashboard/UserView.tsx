@@ -19,7 +19,6 @@ import {
   PartyPopper,
   ArrowRight,
 } from 'lucide-react';
-import Image from 'next/image';
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
 import { EventRequest, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
