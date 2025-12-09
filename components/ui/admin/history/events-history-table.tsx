@@ -6,6 +6,8 @@ import { getAccessToken } from '@auth0/nextjs-auth0';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { EventsFilterSearch } from './events-filter-search';
 import { updateEventRequest } from '@/lib/events/updateEventRequest';
+import { Eye } from 'lucide-react';
+import { EventDetailsModal } from './event-details-modal';
 
 interface EventHistoryTableProps {
   events: EventRequest[];
@@ -16,7 +18,10 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
   const [dateFilter, setDateFilter] = useState('all');
+  const [selectedEvent, setSelectedEvent] = useState<EventRequest | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const getStatusBadge = (status: string) => {
     const statusStyles: Record<string, string> = {
@@ -185,6 +190,17 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
                           {loadingId === event.id ? '...' : 'Cancelar'}
                         </button>
                       )}
+
+                      <button
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setIsDetailsOpen(true);
+                        }}
+                        className="ml-2 px-2 py-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Ver detalles"
+                      >
+                        <Eye size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -199,6 +215,8 @@ export const EventHistoryTable = ({ events, onUpdate }: EventHistoryTableProps) 
           </table>
         </div>
       </div>
+
+      <EventDetailsModal isOpen={isDetailsOpen} onClose={() => setIsDetailsOpen(false)} event={selectedEvent} />
     </div>
   );
 };

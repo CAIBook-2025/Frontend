@@ -24,6 +24,7 @@ import {
 
 import { fetchEventRequests } from '@/lib/events/fetchEventRequests';
 import { deleteGroupRequest } from '@/lib/groups/deleteGroupRequest';
+import { softDeleteGroupAsAdmin } from '@/lib/groups/deleteGroupAsAdmin';
 import { EventRequest, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 // --- Tipos basados en la API ---
@@ -59,6 +60,8 @@ interface GroupDetails {
 
 interface GroupDetailViewProps {
   groupId: string;
+  viewMode?: 'representative' | 'admin';
+  onAdminDeleteSuccess?: () => void;
 }
 
 // --- Componente para Tarjetas de Acción ---
@@ -142,7 +145,11 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
 );
 
 // --- Componente Principal ---
-export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
+export const GroupDetailView = ({
+  groupId,
+  viewMode = 'representative',
+  onAdminDeleteSuccess,
+}: GroupDetailViewProps) => {
   const { user, isLoading: isUserLoading } = useUser();
   const router = useRouter();
   const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
@@ -155,7 +162,13 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
   const [recentEvents, setRecentEvents] = useState<EventRequest[]>([]);
 
   // Determinar el rol del usuario (comparar ID del perfil con repre_id del grupo)
-  const isRepresentative = userProfile?.user && groupDetails ? groupDetails.repre_id === userProfile.user.id : false;
+  // En modo admin, siempre permitimos ver, pero las acciones dependen del viewMode
+  const isRepresentative =
+    viewMode === 'representative' && userProfile?.user && groupDetails
+      ? groupDetails.repre_id === userProfile.user.id
+      : false;
+
+  const isAdmin = viewMode === 'admin';
 
   // Obtener access token
   useEffect(() => {
@@ -235,17 +248,26 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
     if (accessToken) loadGroupDetails();
   }, [accessToken, groupId]);
 
-  // Eliminar grupo (solo representante)
+  // Eliminar grupo (representante o admin)
   const handleDeleteGroup = async () => {
     if (!accessToken || !groupDetails) return;
 
     setIsDeleting(true);
 
-    const result = await deleteGroupRequest(accessToken, groupDetails.group_request_id);
+    let result;
+    if (isAdmin) {
+      result = await softDeleteGroupAsAdmin(accessToken, groupDetails.id); // Ensure using correct ID for admin delete
+    } else {
+      result = await deleteGroupRequest(accessToken, groupDetails.group_request_id);
+    }
 
     if (result.success) {
-      // Redirigir al dashboard después de eliminar
-      router.push('/Student?view=groups');
+      if (isAdmin && onAdminDeleteSuccess) {
+        onAdminDeleteSuccess();
+      } else {
+        // Redirigir al dashboard después de eliminar si es estudiante
+        router.push('/Student?view=groups');
+      }
     } else {
       console.error('Error deleting group:', result.error);
       setError(result.error || 'Error al eliminar el grupo');
@@ -296,6 +318,11 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                 </span>
               </div>
             )}
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                <div className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">Vista Admin</div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -311,16 +338,18 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
       </section>
 
       {/* 3. Eventos Recientes */}
-      {isRepresentative && recentEvents.length > 0 && (
+      {(isRepresentative || isAdmin) && recentEvents.length > 0 && (
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Eventos Recientes</h2>
-            <a
-              href={`/Student/Groups/Representative/${groupId}/Events`}
-              className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
-            >
-              Ver todos <ArrowRight className="h-4 w-4" />
-            </a>
+            {!isAdmin && (
+              <a
+                href={`/Student/Groups/Representative/${groupId}/Events`}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
+              >
+                Ver todos <ArrowRight className="h-4 w-4" />
+              </a>
+            )}
           </div>
           <div className="space-y-3">
             {recentEvents.map((event) => {
@@ -364,13 +393,15 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
                         )}
                       </div>
                     </div>
-                    <a
-                      href={`/Student/Groups/Representative/${groupId}/Events/${event.id}`}
-                      className="flex-shrink-0 p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                      title="Ver detalles"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </a>
+                    {!isAdmin && (
+                      <a
+                        href={`/Student/Groups/Representative/${groupId}/Events/${event.id}`}
+                        className="flex-shrink-0 p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        title="Ver detalles"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </a>
+                    )}
                   </div>
                 </div>
               );
@@ -380,16 +411,18 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
       )}
 
       {/* 4. Acciones según el rol */}
-      {isRepresentative && (
+      {(isRepresentative || isAdmin) && (
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Acciones Disponibles</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <ActionCard
-              href={`/Student/Groups/Representative/${groupId}/Events`}
-              icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
-              title="Gestionar Eventos"
-              description="Crea, visualiza y gestiona los eventos de tu grupo."
-            />
+            {!isAdmin && (
+              <ActionCard
+                href={`/Student/Groups/Representative/${groupId}/Events`}
+                icon={<CalendarPlus className="h-6 w-6 text-blue-500" />}
+                title="Gestionar Eventos"
+                description="Crea, visualiza y gestiona los eventos de tu grupo."
+              />
+            )}
 
             {/* <ActionCard
               icon={<Edit3 className="h-6 w-6 text-blue-500" />}
@@ -450,7 +483,7 @@ export const GroupDetailView = ({ groupId }: GroupDetailViewProps) => {
               <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Confirmar Eliminación</h3>
+              <h3 className="text-xl font-bold text-gray-800">Confirmar Eliminación {isAdmin ? '(Admin)' : ''}</h3>
             </div>
 
             <div className="mb-6">
