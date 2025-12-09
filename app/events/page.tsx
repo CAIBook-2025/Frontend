@@ -129,8 +129,6 @@ export default function EventsPage() {
     return event.status.toLowerCase() === filterStatus;
   });
 
-  const isRepresentative = profileData?.role === 'REPRESENTATIVE';
-
   if (isLoading) {
     return (
       <main className="container mx-auto px-6 py-8">
@@ -169,14 +167,12 @@ export default function EventsPage() {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Eventos</h1>
             <p className="text-slate-600">Descubre y participa en los eventos de tu universidad</p>
           </div>
-          {isRepresentative && (
-            <button
-              onClick={() => router.push('/events/create')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-              Crear Evento
-            </button>
-          )}
+          <button
+            onClick={() => router.push('/events/create')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            Crear Evento
+          </button>
         </div>
       </div>
 
