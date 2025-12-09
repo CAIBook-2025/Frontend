@@ -10,6 +10,10 @@ type ConfirmationModalProps = {
   title: string;
   isLoading?: boolean;
   children: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  loadingText?: string;
+  variant?: 'danger' | 'primary';
 };
 
 export const ConfirmationModal = ({
@@ -19,8 +23,16 @@ export const ConfirmationModal = ({
   title,
   isLoading = false,
   children,
+  confirmText = 'Confirmar Cancelación',
+  cancelText = 'Volver',
+  loadingText = 'Cancelando...',
+  variant = 'danger',
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
+
+  const buttonColor = variant === 'danger'
+    ? 'bg-red-500 hover:bg-red-600 disabled:bg-red-300'
+    : 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400';
 
   return (
     // Overlay de fondo
@@ -49,14 +61,14 @@ export const ConfirmationModal = ({
             className="rounded-lg bg-slate-100 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-200"
             disabled={isLoading}
           >
-            Volver
+            {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className="flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 font-semibold text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
+            className={`flex items-center justify-center rounded-lg px-4 py-2 font-semibold text-white disabled:cursor-not-allowed ${buttonColor}`}
             disabled={isLoading}
           >
-            {isLoading ? 'Cancelando...' : 'Confirmar Cancelación'}
+            {isLoading ? loadingText : confirmText}
           </button>
         </div>
       </div>
