@@ -84,7 +84,7 @@ export default function CAIAdminDashboard() {
           weekDates.push(d.toISOString().split('T')[0]);
         }
 
-        const schedulePromises = weekDates.map(date => fetchSchedule(accessToken, { day: date }));
+        const schedulePromises = weekDates.map((date) => fetchSchedule(accessToken, { day: date }));
         const weeklySchedules = await Promise.all(schedulePromises);
         const totalReservations = weeklySchedules.reduce((acc, curr) => acc + (curr?.total || 0), 0);
 
@@ -109,7 +109,7 @@ export default function CAIAdminDashboard() {
         const activities: { date: Date; type: string; item: any }[] = [];
 
         if (recentSchedulesRaw?.items) {
-          recentSchedulesRaw.items.forEach(s => {
+          recentSchedulesRaw.items.forEach((s) => {
             if (s.createdAt && s.user) {
               activities.push({ date: new Date(s.createdAt), type: 'RESERVATION', item: s });
             }
@@ -117,7 +117,7 @@ export default function CAIAdminDashboard() {
         }
 
         if (allEventsRaw) {
-          allEventsRaw.forEach(e => {
+          allEventsRaw.forEach((e) => {
             activities.push({ date: new Date(e.createdAt), type: 'EVENT', item: e });
           });
         }
@@ -126,7 +126,7 @@ export default function CAIAdminDashboard() {
         activities.sort((a, b) => b.date.getTime() - a.date.getTime());
 
         // Take top 3
-        const top3 = activities.slice(0, 3).map(act => {
+        const top3 = activities.slice(0, 3).map((act) => {
           if (act.type === 'RESERVATION') {
             const s = act.item; // ScheduleItem
             const userName = s.user ? `${s.user.first_name} ${s.user.last_name}` : 'Usuario desconocido';
@@ -135,28 +135,34 @@ export default function CAIAdminDashboard() {
               id: `sched-${s.id}`,
               status: 'Reserva creada',
               details: `${roomName} - ${userName}`,
-              variant: 'green'
+              variant: 'green',
             };
           } else {
             const e = act.item; // EventRequest
             let statusText = 'Evento solicitado';
             let variant = 'blue';
-            if (e.status === 'CONFIRMED') { statusText = 'Evento confirmado'; variant = 'green'; }
-            else if (e.status === 'CANCELLED') { statusText = 'Evento cancelado'; variant = 'red'; }
-            else if (e.status === 'PENDING') { statusText = 'Evento pendiente'; variant = 'yellow'; }
+            if (e.status === 'CONFIRMED') {
+              statusText = 'Evento confirmado';
+              variant = 'green';
+            } else if (e.status === 'CANCELLED') {
+              statusText = 'Evento cancelado';
+              variant = 'red';
+            } else if (e.status === 'PENDING') {
+              statusText = 'Evento pendiente';
+              variant = 'yellow';
+            }
 
             return {
               id: `event-${e.id}`,
               status: statusText,
               details: `${e.name} - ${e.group?.name || 'Sin grupo'}`,
-              variant: variant
+              variant: variant,
             };
           }
         });
 
         setRecentActivity(top3);
         setLoadingActivity(false);
-
       } catch (error) {
         console.error('Error loading dashboard data:', error);
       } finally {
@@ -237,12 +243,7 @@ export default function CAIAdminDashboard() {
                 <ListSkeleton />
               ) : recentActivity.length > 0 ? (
                 recentActivity.map((act) => (
-                  <ActivityCard
-                    key={act.id}
-                    status={act.status}
-                    details={act.details}
-                    variant={act.variant as any}
-                  />
+                  <ActivityCard key={act.id} status={act.status} details={act.details} variant={act.variant as any} />
                 ))
               ) : (
                 <p className="text-sm text-gray-500">No hay actividad reciente.</p>
