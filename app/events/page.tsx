@@ -13,7 +13,7 @@ interface Event {
   name: string;
   goal: string;
   description: string;
-  status: 'confirmed' | 'CANCELLED' | 'FINISHED';
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'FINISHED';
   day: string;
   module: number;
   group: {
@@ -41,7 +41,7 @@ export default function EventsPage() {
   const [profileData, setProfileData] = useState<UserProfileResponse['user'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'confirmed' | 'cancelled' | 'finished'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'finished'>('all');
 
   useEffect(() => {
     if (authLoading) return;
@@ -115,11 +115,12 @@ export default function EventsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      CONFIRMED: { label: 'Activo', color: 'bg-green-100 text-green-800' },
+      PENDING: { label: 'Pendiente', color: 'bg-amber-100 text-amber-800' },
+      CONFIRMED: { label: 'Confirmado', color: 'bg-green-100 text-green-800' },
       CANCELLED: { label: 'Cancelado', color: 'bg-red-100 text-red-800' },
       FINISHED: { label: 'Finalizado', color: 'bg-gray-100 text-gray-800' },
     };
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.CONFIRMED;
+    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.PENDING;
     return <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>{config.label}</span>;
   };
 
@@ -190,12 +191,20 @@ export default function EventsPage() {
           Todos
         </button>
         <button
+          onClick={() => setFilterStatus('pending')}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            filterStatus === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          Pendientes
+        </button>
+        <button
           onClick={() => setFilterStatus('confirmed')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filterStatus === 'confirmed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          Activos
+          Confirmados
         </button>
         <button
           onClick={() => setFilterStatus('finished')}
