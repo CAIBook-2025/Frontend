@@ -46,4 +46,3 @@ export async function cancelEventRequest(accessToken: string | null, eventId: nu
     return { success: false, error: 'Error de conexión al cancelar el evento' };
   }
 }
-

@@ -1,10 +1,11 @@
+export type UserRole = 'STUDENT' | 'ADMIN';
+
 export type UserProfile = {
   id: number;
   email: string;
   first_name: string;
   last_name: string;
-  role: string | null;
-  is_representative: boolean;
+  role: UserRole;
   is_moderator: boolean;
   is_deleted?: boolean;
   createdAt: string;

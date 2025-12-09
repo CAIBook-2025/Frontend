@@ -93,9 +93,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     setDeleteError(null);
 
     // PENDING → eliminar solicitud, CONFIRMED → cancelar evento
-    const result = event.status === 'PENDING'
-      ? await deleteEventRequest(accessToken, event.id)
-      : await cancelEventRequest(accessToken, event.id);
+    const result =
+      event.status === 'PENDING'
+        ? await deleteEventRequest(accessToken, event.id)
+        : await cancelEventRequest(accessToken, event.id);
 
     if (result.success) {
       const queryParam = event.status === 'PENDING' ? 'deleted=true' : 'cancelled=true';

@@ -70,7 +70,6 @@ interface GroupData {
     last_name: string;
     email: string;
     role: string;
-    is_representative: boolean;
   };
 }
 
@@ -223,9 +222,8 @@ export default function EventDetailPage() {
     }
   };
 
-  const isRepresentative = profileData?.role === 'REPRESENTATIVE';
   const isAdmin = profileData?.role === 'ADMIN';
-  const canManageEvent = isRepresentative && groupData?.representative?.id === profileData?.id;
+  const canManageEvent = groupData?.representative?.id === profileData?.id;
 
   if (isLoading) {
     return (
