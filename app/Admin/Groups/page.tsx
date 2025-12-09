@@ -1,3 +1,4 @@
+// app/Admin/Groups/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -7,11 +8,13 @@ import { SearchBar } from '@/components/ui/search-bar';
 import { GroupRequestsTable } from '@/components/ui/admin/groups/group-requests-table';
 import { PageHeader } from '@/components/ui/page-header';
 import { GroupDetailsModal } from '@/components/ui/admin/groups/group-details-modal';
+import { GroupDetailView } from '@/components/dashboard/GroupDetailView'; // Importar el componente
 import { fetchGroupRequests } from '@/lib/groups/fetchGroupRequests';
 import { GroupRequest } from '@/types/groupRequest';
 import { getAccessToken } from '@auth0/nextjs-auth0';
 import { resolveAccessToken } from '@/app/Admin/Room/room-utils';
 import { updateGroupRequest } from '@/lib/groups/updateGroupRequest';
+import { X } from 'lucide-react'; // Importar icono para cerrar
 
 export default function AdminGroupsPage() {
   const searchParams = useSearchParams();
@@ -24,6 +27,9 @@ export default function AdminGroupsPage() {
 
   const [selectedRequest, setSelectedRequest] = useState<GroupRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Estado para gestionar grupo (eliminar)
+  const [managingGroupId, setManagingGroupId] = useState<number | null>(null);
 
   const loadData = async () => {
     try {
@@ -106,11 +112,21 @@ export default function AdminGroupsPage() {
 
   const handleManage = (group_id: number | null) => {
     if (!group_id) return;
+    setManagingGroupId(group_id);
   };
 
   const handleCloseModal = () => {
     setSelectedRequest(null);
     setIsModalOpen(false);
+  };
+
+  const handleCloseManageModal = () => {
+    setManagingGroupId(null);
+  };
+
+  const handleAdminDeleteSuccess = () => {
+    setManagingGroupId(null);
+    loadData(); // Recargar datos para actualizar la lista
   };
 
   const requestsByStatus = {
@@ -178,6 +194,32 @@ export default function AdminGroupsPage() {
           onApprove={handleApprove}
           onReject={handleReject}
         />
+
+        {/* Modal de Gestión de Grupo (Admin) */}
+        {managingGroupId && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            {/* Wrapper para el contenido del modal */}
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col relative my-8">
+              {/* Botón de cierre sticky o absoluto */}
+              <button
+                onClick={handleCloseManageModal}
+                className="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-gray-100 transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
+
+              {/* Contenedor escrolleable para el contenido */}
+              <div className="overflow-y-auto p-6 md:p-8">
+                <GroupDetailView
+                  groupId={managingGroupId.toString()}
+                  viewMode="admin"
+                  onAdminDeleteSuccess={handleAdminDeleteSuccess}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
