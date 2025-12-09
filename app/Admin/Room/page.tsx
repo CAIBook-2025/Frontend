@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
@@ -71,12 +70,12 @@ export default function RoomPage() {
         prev.map((r) =>
           r.id === id
             ? {
-              ...r,
-              status,
-              statusNote: status === 'AVAILABLE' ? undefined : statusNote,
-              maintenanceBlocks:
-                status === 'MAINTENANCE' && maintenanceBlocks?.length ? maintenanceBlocks : undefined,
-            }
+                ...r,
+                status,
+                statusNote: status === 'AVAILABLE' ? undefined : statusNote,
+                maintenanceBlocks:
+                  status === 'MAINTENANCE' && maintenanceBlocks?.length ? maintenanceBlocks : undefined,
+              }
             : r
         )
       );
@@ -196,7 +195,10 @@ export default function RoomPage() {
               variant="primary"
               isLoading={isRefreshing}
             >
-              <p>¿Estás seguro de que deseas mover todas las reservas 7 días hacia adelante? Esta acción no se puede deshacer.</p>
+              <p>
+                ¿Estás seguro de que deseas mover todas las reservas 7 días hacia adelante? Esta acción no se puede
+                deshacer.
+              </p>
             </ConfirmationModal>
           </>
         )}

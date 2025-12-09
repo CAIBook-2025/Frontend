@@ -30,9 +30,10 @@ export const ConfirmationModal = ({
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
-  const buttonColor = variant === 'danger'
-    ? 'bg-red-500 hover:bg-red-600 disabled:bg-red-300'
-    : 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400';
+  const buttonColor =
+    variant === 'danger'
+      ? 'bg-red-500 hover:bg-red-600 disabled:bg-red-300'
+      : 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400';
 
   return (
     // Overlay de fondo
