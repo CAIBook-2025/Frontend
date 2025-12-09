@@ -56,9 +56,20 @@ export default function StrikesPage() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const tokenResponse = await getAccessToken();
-      const accessToken = resolveAccessToken(tokenResponse);
-      if (!accessToken) return;
+
+      // In Cypress test mode, use mock token directly
+      let accessToken: string | null = null;
+      if (typeof window !== 'undefined' && (window as any).Cypress) {
+        accessToken = 'mock-access-token';
+      } else {
+        const tokenResponse = await getAccessToken();
+        accessToken = resolveAccessToken(tokenResponse);
+      }
+
+      if (!accessToken) {
+        console.error('No access token available');
+        return;
+      }
       setAccessToken(accessToken);
 
       const data = await getStrikes(accessToken);

@@ -1,0 +1,58 @@
+[
+  {
+    "reservation_id": 1,
+    "room_name": "Sala 101",
+    "date": "2024-12-09",
+    "start_time": "09:00:00",
+    "end_time": "11:00:00",
+    "group_id": 4,
+    "group_name": "Grupo de Estudio Matemáticas",
+    "status": "CONFIRMED",
+    "created_at": "2024-12-01T10:00:00Z"
+  },
+  {
+    "reservation_id": 2,
+    "room_name": "Sala 202",
+    "date": "2024-12-09",
+    "start_time": "14:00:00",
+    "end_time": "16:00:00",
+    "group_id": 5,
+    "group_name": "Club de Robótica",
+    "status": "CONFIRMED",
+    "created_at": "2024-12-02T11:30:00Z"
+  },
+  {
+    "reservation_id": 3,
+    "room_name": "Sala 303",
+    "date": "2024-12-10",
+    "start_time": "10:00:00",
+    "end_time": "12:00:00",
+    "group_id": 1,
+    "group_name": "Club de Ajedrez",
+    "status": "PENDING",
+    "created_at": "2024-12-03T09:15:00Z"
+  },
+  {
+    "reservation_id": 4,
+    "room_name": "Auditorio Principal",
+    "date": "2024-12-08",
+    "start_time": "15:00:00",
+    "end_time": "18:00:00",
+    "group_id": 2,
+    "group_name": "Sociedad de Debate",
+    "status": "COMPLETED",
+    "created_at": "2024-11-28T14:00:00Z"
+  },
+  {
+    "reservation_id": 5,
+    "room_name": "Sala 404",
+    "date": "2024-12-07",
+    "start_time": "11:00:00",
+    "end_time": "13:00:00",
+    "group_id": 4,
+    "group_name": "Grupo de Estudio Matemáticas",
+    "status": "CANCELLED",
+    "created_at": "2024-11-30T16:00:00Z",
+    "cancelled_at": "2024-12-06T10:00:00Z"
+  }
+]

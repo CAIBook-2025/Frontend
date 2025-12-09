@@ -34,8 +34,13 @@ export const RoomCard = ({ room, scheduleId, userId, disabled = false }: RoomCar
     async function fetchAccessToken() {
       if (user) {
         try {
-          const accessToken = await getAccessToken();
-          setAccessToken(accessToken);
+          // In Cypress test mode, use mock token directly
+          if (typeof window !== 'undefined' && (window as any).Cypress) {
+            setAccessToken('mock-access-token');
+          } else {
+            const accessToken = await getAccessToken();
+            setAccessToken(accessToken ?? null);
+          }
         } catch (error) {
           console.error('Error fetching access token:', error);
         }

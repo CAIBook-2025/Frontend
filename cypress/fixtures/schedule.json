@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "sr_id": 101,
+    "module": "1",
+    "day": "2024-12-09",
+    "available": "OCCUPIED",
+    "attendanceStatus": "PRESENT",
+    "user_id": 101,
+    "user": {
+      "id": 101,
+      "first_name": "Juan",
+      "last_name": "Pérez",
+      "email": "juan.perez@example.com"
+    },
+    "studyRoom": {
+      "id": 101,
+      "name": "Sala A",
+      "location": "Piso 1",
+      "capacity": 6,
+      "equipment": ["Proyector", "Pizarra"]
+    }
+  },
+  {
+    "id": 2,
+    "sr_id": 102,
+    "module": "2",
+    "day": "2024-12-09",
+    "available": "OCCUPIED",
+    "attendanceStatus": "PRESENT",
+    "user_id": 102,
+    "user": {
+      "id": 102,
+      "first_name": "María",
+      "last_name": "González",
+      "email": "maria.gonzalez@example.com"
+    },
+    "studyRoom": {
+      "id": 102,
+      "name": "Sala B",
+      "location": "Piso 2",
+      "capacity": 8,
+      "equipment": ["Computadoras", "Proyector"]
+    }
+  },
+  {
+    "id": 3,
+    "sr_id": 101,
+    "module": "3",
+    "day": "2024-12-08",
+    "available": "OCCUPIED",
+    "attendanceStatus": "ABSENT",
+    "user_id": 103,
+    "user": {
+      "id": 103,
+      "first_name": "Carlos",
+      "last_name": "Rodríguez",
+      "email": "carlos.rodriguez@example.com"
+    },
+    "studyRoom": {
+      "id": 101,
+      "name": "Sala A",
+      "location": "Piso 1",
+      "capacity": 6,
+      "equipment": ["Proyector", "Pizarra"]
+    }
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "student_id": 106,
+    "reason": "No asistió a reserva confirmada",
+    "severity": "MEDIUM",
+    "date": "2024-11-15T10:00:00Z",
+    "expires_at": "2024-12-15T10:00:00Z",
+    "is_active": true,
+    "student": {
+      "first_name": "Pedro",
+      "last_name": "Sánchez",
+      "email": "pedro.sanchez@example.com"
+    }
+  },
+  {
+    "id": 2,
+    "student_id": 103,
+    "reason": "Cancelación tardía de evento",
+    "severity": "LOW",
+    "date": "2024-11-20T14:30:00Z",
+    "expires_at": "2024-12-20T14:30:00Z",
+    "is_active": true,
+    "student": {
+      "first_name": "Carlos",
+      "last_name": "Rodríguez",
+      "email": "carlos.rodriguez@example.com"
+    }
+  },
+  {
+    "id": 3,
+    "student_id": 102,
+    "reason": "Uso inadecuado de instalaciones",
+    "severity": "HIGH",
+    "date": "2024-10-10T09:00:00Z",
+    "expires_at": "2024-11-10T09:00:00Z",
+    "is_active": false,
+    "student": {
+      "first_name": "María",
+      "last_name": "González",
+      "email": "maria.gonzalez@example.com"
+    }
+  },
+  {
+    "id": 4,
+    "student_id": 106,
+    "reason": "Daño a equipo de sala",
+    "severity": "HIGH",
+    "date": "2024-11-25T16:00:00Z",
+    "expires_at": "2024-12-25T16:00:00Z",
+    "is_active": true,
+    "student": {
+      "first_name": "Pedro",
+      "last_name": "Sánchez",
+      "email": "pedro.sanchez@example.com"
+    }
+  },
+  {
+    "id": 5,
+    "student_id": 106,
+    "reason": "Comportamiento inapropiado",
+    "severity": "MEDIUM",
+    "date": "2024-12-01T11:00:00Z",
+    "expires_at": "2025-01-01T11:00:00Z",
+    "is_active": true,
+    "student": {
+      "first_name": "Pedro",
+      "last_name": "Sánchez",
+      "email": "pedro.sanchez@example.com"
+    }
+  }
+]

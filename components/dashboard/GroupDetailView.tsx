@@ -221,7 +221,6 @@ export const GroupDetailView = ({
         }
 
         const data = await response.json();
-        console.log('📋 Group Details:', data);
         setGroupDetails(data);
 
         // Cargar eventos recientes del grupo

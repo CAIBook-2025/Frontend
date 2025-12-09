@@ -1,0 +1,59 @@
+[
+  {
+    "event_id": 1,
+    "event_name": "Conferencia de Tecnología",
+    "description": "Conferencia anual sobre las últimas tendencias en tecnología",
+    "event_date": "2024-12-15",
+    "start_time": "09:00:00",
+    "end_time": "17:00:00",
+    "location": "Auditorio Principal",
+    "status": "CONFIRMED",
+    "group_id": 4,
+    "group_name": "Tech Innovators",
+    "group_reputation": 85,
+    "requested_at": "2024-11-20T10:00:00Z"
+  },
+  {
+    "event_id": 2,
+    "event_name": "Torneo de Ajedrez",
+    "description": "Torneo interuniversitario de ajedrez",
+    "event_date": "2024-12-20",
+    "start_time": "10:00:00",
+    "end_time": "18:00:00",
+    "location": "Sala de Eventos",
+    "status": "PENDING",
+    "group_id": 1,
+    "group_name": "Club de Ajedrez",
+    "group_reputation": 75,
+    "requested_at": "2024-12-01T14:00:00Z"
+  },
+  {
+    "event_id": 3,
+    "event_name": "Debate Académico",
+    "description": "Debate sobre temas de actualidad política y social",
+    "event_date": "2024-12-10",
+    "start_time": "15:00:00",
+    "end_time": "19:00:00",
+    "location": "Sala 301",
+    "status": "CANCELLED",
+    "group_id": 2,
+    "group_name": "Sociedad de Debate",
+    "group_reputation": 90,
+    "requested_at": "2024-11-28T11:00:00Z",
+    "cancelled_at": "2024-12-05T09:00:00Z"
+  },
+  {
+    "event_id": 4,
+    "event_name": "Workshop de Robótica",
+    "description": "Taller práctico de construcción de robots",
+    "event_date": "2024-12-18",
+    "start_time": "13:00:00",
+    "end_time": "16:00:00",
+    "location": "Laboratorio 5",
+    "status": "CONFIRMED",
+    "group_id": 5,
+    "group_name": "Club de Robótica",
+    "group_reputation": 88,
+    "requested_at": "2024-11-25T16:30:00Z"
+  }
+]

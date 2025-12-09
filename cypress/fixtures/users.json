@@ -1,0 +1,58 @@
+[
+  {
+    "id": 101,
+    "name": "Juan Pérez",
+    "email": "juan.perez@example.com",
+    "role": "student",
+    "created_at": "2024-01-15T10:00:00Z",
+    "is_active": true
+  },
+  {
+    "id": 102,
+    "name": "María González",
+    "email": "maria.gonzalez@example.com",
+    "role": "student",
+    "created_at": "2024-02-20T11:30:00Z",
+    "is_active": true
+  },
+  {
+    "id": 103,
+    "name": "Carlos Rodríguez",
+    "email": "carlos.rodriguez@example.com",
+    "role": "student",
+    "created_at": "2024-03-10T09:15:00Z",
+    "is_active": true
+  },
+  {
+    "id": 104,
+    "name": "Ana Martínez",
+    "email": "ana.martinez@example.com",
+    "role": "student",
+    "created_at": "2024-01-25T14:00:00Z",
+    "is_active": true
+  },
+  {
+    "id": 105,
+    "name": "Luis Fernández",
+    "email": "luis.fernandez@example.com",
+    "role": "student",
+    "created_at": "2024-04-05T16:30:00Z",
+    "is_active": true
+  },
+  {
+    "id": 106,
+    "name": "Pedro Sánchez",
+    "email": "pedro.sanchez@example.com",
+    "role": "student",
+    "created_at": "2024-05-12T13:45:00Z",
+    "is_active": false
+  },
+  {
+    "id": 1,
+    "name": "Admin User",
+    "email": "cris.dmaass@gmail.com",
+    "role": "admin",
+    "created_at": "2024-01-01T00:00:00Z",
+    "is_active": true
+  }
+]

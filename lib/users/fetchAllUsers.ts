@@ -22,7 +22,6 @@ export async function fetchAllUsers(token: string, page: number = 1, take: numbe
     }
 
     const data = await response.json();
-    console.log('fetchAllUsers response:', data);
     return data;
   } catch (error) {
     console.error('Error in fetchAllUsers:', error);
