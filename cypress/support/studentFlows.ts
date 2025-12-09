@@ -156,6 +156,10 @@ export const fillGroupStep1 = (name: string, description: string) => {
 
   // Explicitly wait for input to be enabled, then force type if Cypress is flaky
   cy.get('input[name="name"]').should('be.visible').and('not.be.disabled').type(name, { force: true });
+
+  // Wait before next input
+  cy.wait(400);
+
   cy.get('textarea[name="description"]').should('not.be.disabled').type(description, { force: true });
   cy.contains('button', 'Siguiente').click();
 
@@ -165,6 +169,10 @@ export const fillGroupStep1 = (name: string, description: string) => {
 
 export const fillGroupStep2 = (goal: string) => {
   cy.get('textarea[name="goal"]').should('be.visible').and('not.be.disabled').type(goal);
+
+  // Wait before click
+  cy.wait(200);
+
   cy.contains('button', 'Siguiente').click();
 
   // Verify transition to Step 3
