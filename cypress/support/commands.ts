@@ -1,18 +1,5 @@
 /// <reference types="cypress" />
-// ***********************************************
-// This example commands.ts shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
 
-/**
- * Mock authentication for testing without Auth0
- * This command sets up the necessary cookies/storage to simulate an authenticated user
- */
 Cypress.Commands.add('mockAuth', () => {
   // Mock the Auth0 session
   cy.window().then((win) => {
@@ -28,7 +15,7 @@ Cypress.Commands.add('mockAuth', () => {
     );
 
     // Stub Auth0 client-side methods
-    // @ts-ignore - Stubbing Auth0 methods for testing
+    // @ts-expect-error - Stubbing Auth0 methods for testing
     win['@auth0/nextjs-auth0'] = {
       useUser: () => ({
         user: {
@@ -57,6 +44,7 @@ Cypress.Commands.add('mockAuth', () => {
 });
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       /**
@@ -68,4 +56,4 @@ declare global {
   }
 }
 
-export {};
+export { };
