@@ -5,12 +5,13 @@ export const ActivityCard = ({
 }: {
   status: string;
   details: string;
-  variant?: 'green' | 'yellow' | 'blue';
+  variant?: 'green' | 'yellow' | 'blue' | 'red';
 }) => {
   const dotColors = {
     green: 'bg-green-500',
     yellow: 'bg-yellow-500',
     blue: 'bg-blue-500',
+    red: 'bg-red-500',
   };
 
   return (
