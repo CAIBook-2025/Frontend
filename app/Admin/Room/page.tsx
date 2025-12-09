@@ -4,17 +4,23 @@ import { useMemo, useState, useCallback } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { FilterRoom, type RoomFilters } from '@/components/ui/admin/room/filter-search';
 import { StatCard } from '@/components/ui/dashboard/QuickStatCard';
-import { Building2, Wrench, Percent, CalendarCheck2 } from 'lucide-react';
+import { Building2, Wrench, Percent, CalendarCheck2, RefreshCw } from 'lucide-react';
 import { RoomsTable } from '@/components/ui/admin/room/rooms-table';
 import { RoomManagementModal, RoomEditableStatus } from '@/components/ui/admin/room/room-management-modal';
 import type { MaintenanceBlock, Room } from '@/types/room';
 import { LoadingRooms } from './loading-state';
 import { useRoomsData } from './useRoomsData';
+import { refreshSchedules } from '@/lib/schedule/refreshSchedules';
+import { getAccessToken } from '@auth0/nextjs-auth0';
+import { resolveAccessToken } from './room-utils';
+import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 
 export default function RoomPage() {
   const { rooms, setRooms, isLoadingRooms, loadError } = useRoomsData();
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshModalOpen, setIsRefreshModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<RoomFilters>({
     query: '',
@@ -84,6 +90,32 @@ export default function RoomPage() {
     setSelectedRoom(null);
   }, []);
 
+  const handleOpenRefreshModal = () => {
+    setIsRefreshModalOpen(true);
+  };
+
+  const handleConfirmRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const tokenResponse = await getAccessToken();
+      const accessToken = resolveAccessToken(tokenResponse);
+      const success = await refreshSchedules(accessToken);
+
+      if (success) {
+        alert('Reservas actualizadas correctamente.');
+        window.location.reload();
+      } else {
+        alert('Hubo un error al actualizar las reservas.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error al intentar actualizar.');
+    } finally {
+      setIsRefreshing(false);
+      setIsRefreshModalOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -93,6 +125,14 @@ export default function RoomPage() {
           <>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <PageHeader title="Gestión de Salas" subtitle="Habilita, deshabilita o programa mantenimiento de salas" />
+              <button
+                onClick={handleOpenRefreshModal}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Actualizando...' : 'Refrescar Horarios'}
+              </button>
             </div>
 
             <section>
@@ -144,6 +184,22 @@ export default function RoomPage() {
               onClose={handleCloseModal}
               onSave={handleSaveRoom}
             />
+
+            <ConfirmationModal
+              isOpen={isRefreshModalOpen}
+              onClose={() => setIsRefreshModalOpen(false)}
+              onConfirm={handleConfirmRefresh}
+              title="Refrescar Horarios"
+              confirmText="Refrescar"
+              loadingText="Refrescando..."
+              variant="primary"
+              isLoading={isRefreshing}
+            >
+              <p>
+                ¿Estás seguro de que deseas mover todas las reservas 7 días hacia adelante? Esta acción no se puede
+                deshacer.
+              </p>
+            </ConfirmationModal>
           </>
         )}
       </div>
