@@ -44,9 +44,9 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
-      # # 7️⃣ Tests
-      # - name: Run tests
-      #   run: npm run test
+      # 7️⃣ Tests
+      - name: Run tests
+        run: npm run cy:run
 
       # 8️⃣ Build
       - name: Build project

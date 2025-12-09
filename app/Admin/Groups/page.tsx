@@ -34,9 +34,14 @@ export default function AdminGroupsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
+      let accessToken: string | null = null;
+      if (typeof window !== 'undefined' && (window as any).Cypress) {
+        accessToken = 'mock-access-token';
+      } else {
+        const tokenResponse = await getAccessToken();
+        accessToken = resolveAccessToken(tokenResponse);
+      }
 
-      const tokenResponse = await getAccessToken();
-      const accessToken = resolveAccessToken(tokenResponse);
       const data = await fetchGroupRequests(accessToken);
 
       if (data) {
@@ -93,8 +98,15 @@ export default function AdminGroupsPage() {
     try {
       setLoading(true);
 
-      const tokenResponse = await getAccessToken();
-      const accessToken = resolveAccessToken(tokenResponse);
+      // In Cypress test mode, use mock token directly
+      let accessToken: string | null = null;
+      if (typeof window !== 'undefined' && (window as any).Cypress) {
+        accessToken = 'mock-access-token';
+      } else {
+        const tokenResponse = await getAccessToken();
+        accessToken = resolveAccessToken(tokenResponse);
+      }
+
       if (!accessToken) return console.warn('Token no disponible');
 
       await updateGroupRequest(accessToken, id, { status });

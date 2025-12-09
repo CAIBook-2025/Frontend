@@ -1,0 +1,88 @@
+{
+  "pending": [
+    {
+      "id": 1,
+      "groupName": "Club de Ajedrez",
+      "name": "Club de Ajedrez",
+      "goal": "Promover el ajedrez entre estudiantes",
+      "description": "Un grupo dedicado a la práctica y enseñanza del ajedrez",
+      "logo": null,
+      "status": "PENDING",
+      "user_id": 101,
+      "user": {
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "email": "juan.perez@example.com",
+        "role": "student"
+      },
+      "group_created": false,
+      "group_id": null,
+      "createdAt": "2024-11-01T10:00:00Z",
+      "updatedAt": "2024-11-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "groupName": "Grupo de Estudio de Matemáticas",
+      "name": "Grupo de Estudio de Matemáticas",
+      "goal": "Ayuda mutua en matemáticas",
+      "description": "Estudiantes que se ayudan mutuamente con matemáticas",
+      "logo": null,
+      "status": "PENDING",
+      "user_id": 102,
+      "user": {
+        "first_name": "María",
+        "last_name": "González",
+        "email": "maria.gonzalez@example.com",
+        "role": "student"
+      },
+      "group_created": false,
+      "group_id": null,
+      "createdAt": "2024-11-05T14:30:00Z",
+      "updatedAt": "2024-11-05T14:30:00Z"
+    }
+  ],
+  "approved": [
+    {
+      "id": 3,
+      "groupName": "Club de Robótica",
+      "name": "Club de Robótica",
+      "goal": "Desarrollo de proyectos de robótica",
+      "description": "Grupo enfocado en crear robots y participar en competencias",
+      "logo": null,
+      "status": "CONFIRMED",
+      "user_id": 103,
+      "user": {
+        "first_name": "Carlos",
+        "last_name": "Rodríguez",
+        "email": "carlos.rodriguez@example.com",
+        "role": "student"
+      },
+      "group_created": true,
+      "group_id": 201,
+      "createdAt": "2024-10-15T09:00:00Z",
+      "updatedAt": "2024-10-20T11:00:00Z"
+    }
+  ],
+  "denied": [
+    {
+      "id": 4,
+      "groupName": "Grupo Duplicado",
+      "name": "Grupo Duplicado",
+      "goal": "Objetivo no claro",
+      "description": "Este grupo fue rechazado por duplicación",
+      "logo": null,
+      "status": "CANCELLED",
+      "user_id": 104,
+      "user": {
+        "first_name": "Ana",
+        "last_name": "Martínez",
+        "email": "ana.martinez@example.com",
+        "role": "student"
+      },
+      "group_created": false,
+      "group_id": null,
+      "createdAt": "2024-10-01T08:00:00Z",
+      "updatedAt": "2024-10-02T10:00:00Z"
+    }
+  ]
+}

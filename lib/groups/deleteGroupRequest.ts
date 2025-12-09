@@ -56,7 +56,6 @@ export async function deleteGroupRequest(
     }
 
     const data = await response.json();
-    console.log('📋 Delete Group Request Response:', data);
     return {
       success: true,
       data: data.groupRequest,

@@ -52,6 +52,12 @@ export default function MyReservationsPage() {
 
     const fetchToken = async () => {
       try {
+        // In Cypress test mode, use mock token directly
+        if (typeof window !== 'undefined' && (window as any).Cypress) {
+          setAccessToken('mock-access-token');
+          return;
+        }
+
         const token = await getAccessToken();
         setAccessToken(token ?? null);
       } catch (err) {

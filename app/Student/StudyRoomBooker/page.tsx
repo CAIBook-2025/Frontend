@@ -54,6 +54,12 @@ export default function BookRoomPage() {
 
     const loadAccessToken = async () => {
       try {
+        // In Cypress test mode, use mock token directly
+        if (typeof window !== 'undefined' && (window as any).Cypress) {
+          if (isMounted) setAccessToken('mock-access-token');
+          return;
+        }
+
         const token = await getAccessToken();
         if (isMounted) {
           setAccessToken(token ?? null);
