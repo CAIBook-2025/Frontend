@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { fetchEventById } from '@/lib/events/fetchEventById';
 import { deleteEventRequest } from '@/lib/events/deleteEventRequest';
+import { cancelEventRequest } from '@/lib/events/cancelEventRequest';
 import { EventRequestDetail, EventRequestStatus, EVENT_STATUS_CONFIG, getModuleTimeLabel } from '@/types/eventRequest';
 
 interface EventDetailPageProps {
@@ -85,18 +86,22 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     if (accessToken) loadEvent();
   }, [accessToken, eventId]);
 
-  const handleDelete = async () => {
+  const handleDeleteOrCancel = async () => {
     if (!accessToken || !event) return;
 
     setIsDeleting(true);
     setDeleteError(null);
 
-    const result = await deleteEventRequest(accessToken, event.id);
+    // PENDING → eliminar solicitud, CONFIRMED → cancelar evento
+    const result = event.status === 'PENDING'
+      ? await deleteEventRequest(accessToken, event.id)
+      : await cancelEventRequest(accessToken, event.id);
 
     if (result.success) {
-      router.push(`/Student/Groups/Representative/${groupId}/Events?deleted=true`);
+      const queryParam = event.status === 'PENDING' ? 'deleted=true' : 'cancelled=true';
+      router.push(`/Student/Groups/Representative/${groupId}/Events?${queryParam}`);
     } else {
-      setDeleteError(result.error || 'Error al eliminar');
+      setDeleteError(result.error || (event.status === 'PENDING' ? 'Error al eliminar' : 'Error al cancelar'));
       setIsDeleting(false);
     }
   };
@@ -303,6 +308,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             <div className="rounded-xl bg-slate-50 border border-slate-200 p-5 mb-8">
               <h3 className="font-semibold text-gray-800 mb-4">Historial</h3>
               <div className="space-y-4">
+                {/* Paso 1: Solicitud creada */}
                 <div className="flex gap-4">
                   <div className="flex flex-col items-center">
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
@@ -313,23 +319,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                     <p className="text-sm text-slate-500">{formatDateTime(event.createdAt)}</p>
                   </div>
                 </div>
-                {event.status !== 'PENDING' && (
-                  <div className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-3 h-3 rounded-full ${
-                          event.status === 'CONFIRMED' ? 'bg-green-500' : 'bg-red-500'
-                        }`}
-                      ></div>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800">
-                        {event.status === 'CONFIRMED' ? 'Evento confirmado' : 'Evento cancelado'}
-                      </p>
-                      <p className="text-sm text-slate-500">{formatDateTime(event.updatedAt)}</p>
-                    </div>
-                  </div>
-                )}
+
+                {/* Paso 2: Estado según flujo */}
                 {event.status === 'PENDING' && (
                   <div className="flex gap-4">
                     <div className="flex flex-col items-center">
@@ -340,6 +331,43 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                       <p className="text-sm text-slate-500">En proceso</p>
                     </div>
                   </div>
+                )}
+
+                {event.status === 'CONFIRMED' && (
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800">Evento confirmado</p>
+                      <p className="text-sm text-slate-500">{formatDateTime(event.updatedAt)}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* CANCELLED: mostrar que fue confirmado primero, luego cancelado */}
+                {event.status === 'CANCELLED' && (
+                  <>
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <div className="w-0.5 h-full bg-slate-200"></div>
+                      </div>
+                      <div className="pb-4">
+                        <p className="font-medium text-gray-800">Evento confirmado</p>
+                        <p className="text-sm text-slate-500">Aprobado por administrador</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800">Evento cancelado</p>
+                        <p className="text-sm text-slate-500">{formatDateTime(event.updatedAt)}</p>
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -468,7 +496,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 Volver
               </button>
               <button
-                onClick={handleDelete}
+                onClick={handleDeleteOrCancel}
                 disabled={isDeleting}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
               >
