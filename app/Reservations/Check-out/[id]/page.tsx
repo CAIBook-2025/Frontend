@@ -11,8 +11,10 @@ function LoadingSpinner() {
   );
 }
 
-export default function CheckOutPage({ params }: { params: { id: string } }) {
-  const reservationId = parseInt(params.id, 10);
+export default async function CheckOutPage({ params }: { params: Promise<{ id: string }> }) {
+  // En Next.js 15, params es una Promise y debe esperarse
+  const { id } = await params;
+  const reservationId = parseInt(id, 10);
 
   return (
     <Suspense fallback={<LoadingSpinner />}>
