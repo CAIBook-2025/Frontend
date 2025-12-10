@@ -12,9 +12,10 @@ function LoadingSpinner() {
   );
 }
 
-export default function CheckInPage({ params }: { params: { id: string } }) {
-  // Parseamos el ID de la reserva desde los parámetros de la ruta
-  const reservationId = parseInt(params.id, 10);
+export default async function CheckInPage({ params }: { params: Promise<{ id: string }> }) {
+  // En Next.js 15, params es una Promise y debe esperarse
+  const { id } = await params;
+  const reservationId = parseInt(id, 10);
 
   return (
     // Suspense es requerido por Next.js para poder usar useSearchParams en un componente hijo.
